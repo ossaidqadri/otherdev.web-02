@@ -12,7 +12,7 @@ export default function Home() {
             otherdev produces digital platforms for pioneering creatives. Based in New York City, we are a full-service web development and design studio specializing in the fashion and design fields.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {projects.map((project) => (
             <ProjectCard
               key={project.id}
