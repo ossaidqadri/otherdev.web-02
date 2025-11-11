@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-neutral-100">
       <Navigation />
-      <main className="container mx-auto px-3 pt-20 pb-12">
+      <main className="container mx-auto px-3 pt-[60px] pb-12">
         <div className="mb-8">
           <p className="text-[11px] leading-[14px] text-black font-normal max-w-2xl">
             otherdev produces digital platforms for pioneering creatives. Based in New York City, we are a full-service web development and design studio specializing in the fashion and design fields.
