@@ -53,7 +53,7 @@ export function Navigation() {
                 <Link
                   href="/work"
                   className={cn(
-                    "h-[27px] w-[68px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
+                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
                     "text-[11px] font-normal leading-[14px] text-black transition-colors hover:text-black"
                   )}
                 >
@@ -68,7 +68,7 @@ export function Navigation() {
                 <Link
                   href="/audio"
                   className={cn(
-                    "h-[27px] w-[68px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
+                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
                     "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
                   )}
                 >
@@ -83,7 +83,7 @@ export function Navigation() {
                 <Link
                   href="/about"
                   className={cn(
-                    "h-[27px] w-[68px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
+                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
                     "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
                   )}
                 >
@@ -97,7 +97,7 @@ export function Navigation() {
               >
                 <button
                   className={cn(
-                    "h-[27px] w-[68px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
+                    "h-[27px] w-[62px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
                     "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
                   )}
                 >
