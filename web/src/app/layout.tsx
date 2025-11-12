@@ -7,6 +7,24 @@ export const metadata: Metadata = {
   icons: {
     icon: "/TheOtherDevLogo.svg",
   },
+  openGraph: {
+    title: "OtherDev",
+    description: "Digital platforms for pioneering creatives",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OtherDev Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OtherDev",
+    description: "Digital platforms for pioneering creatives",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
