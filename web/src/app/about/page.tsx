@@ -58,7 +58,7 @@ export default function AboutPage() {
               About
             </p>
             <p className="mt-[9px] text-black text-[12px] font-normal leading-[14px] tracking-[-0.24px] whitespace-pre-line">
-              otherdev produces digital platforms for pioneering creatives.
+              Other Dev produces digital platforms for pioneering creatives.
               Based in Karachi City, we are a full-service web development and
               design studio specializing in the fashion and design fields, with
               a focus on bringing ideas to life through thoughtful design. Our
