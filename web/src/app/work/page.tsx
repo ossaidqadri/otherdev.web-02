@@ -4,7 +4,7 @@ import { ProjectCard } from "@/components/project-card";
 
 export default function WorkPage() {
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-white">
       <Navigation />
 
       <main className="container mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">

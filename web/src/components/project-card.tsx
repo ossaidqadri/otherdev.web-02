@@ -7,8 +7,8 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        home: "bg-background hover:shadow-lg",
-        work: "bg-neutral-200",
+        home: "bg-stone-200 hover:shadow-lg",
+        work: "bg-stone-200",
       },
     },
     defaultVariants: {
@@ -17,11 +17,11 @@ const cardVariants = cva(
   },
 );
 
-const imageContainerVariants = cva("relative w-full h-full", {
+const imageContainerVariants = cva("relative w-full h-full bg-stone-200", {
   variants: {
     variant: {
-      home: "p-[24px]",
-      work: "p-[50px]",
+      home: "px-[24px] py-[36px]",
+      work: "px-[50px] py-[60px]",
     },
   },
   defaultVariants: {
