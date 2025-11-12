@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
+import { publicProcedure, router } from "../trpc";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 
@@ -84,21 +85,29 @@ ${data.message}
   });
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const data = await request.json();
+const contactFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  companyName: z.string().min(1, {
+    message: "Company name is required.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  subject: z.string().min(1, {
+    message: "Subject is required.",
+  }),
+  message: z.string().min(10, {
+    message: "Message must be at least 10 characters.",
+  }),
+});
 
-    await Promise.all([appendToSheet(data), sendEmail(data)]);
-
-    return NextResponse.json(
-      { message: "Form submitted successfully" },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error("Error processing form:", error);
-    return NextResponse.json(
-      { message: "Failed to process form submission" },
-      { status: 500 },
-    );
-  }
-}
+export const contactRouter = router({
+  submit: publicProcedure
+    .input(contactFormSchema)
+    .mutation(async ({ input }) => {
+      await Promise.all([appendToSheet(input), sendEmail(input)]);
+      return { message: "Form submitted successfully" };
+    }),
+});

@@ -7,7 +7,7 @@ export default function AboutPage() {
     ["Narkins Builders", "Groovy Pakistan", "Olly Shinder"],
     ["Bin Yousuf Group", "Parcheh81", "Tiny Footprint Coffee"],
     ["Lexa", "Finlit", "Ek Qadam Aur"],
-    ["Wish Apparels","Kiswa Noir", "BLVD"],
+    ["Wish Apparels", "Kiswa Noir", "BLVD"],
     ["CLTRD Legacy"],
   ];
 
