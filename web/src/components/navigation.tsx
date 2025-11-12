@@ -1,24 +1,50 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+
+const navItemVariants = cva(
+  "flex items-center justify-center rounded-md backdrop-blur-sm bg-stone-200/95 text-[11px] font-normal leading-tight transition-colors hover:text-foreground",
+  {
+    variants: {
+      size: {
+        brand: "h-7 w-[75px]",
+        default: "h-7 w-[75px]",
+        mobile: "h-7 w-[52px]",
+        mobileWide: "h-7 w-[62px]",
+        icon: "h-7 w-7",
+      },
+      active: {
+        true: "text-foreground",
+        false: "text-muted-foreground",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+      active: false,
+    },
+  }
+);
+
+type NavItemVariantProps = VariantProps<typeof navItemVariants>;
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem("mobileMenuOpen") === "true"
+      return sessionStorage.getItem("mobileMenuOpen") === "true";
     }
-    return false
-  })
-  const pathname = usePathname()
+    return false;
+  });
+  const pathname = usePathname();
 
   useEffect(() => {
-    sessionStorage.setItem("mobileMenuOpen", isOpen.toString())
-  }, [isOpen])
+    sessionStorage.setItem("mobileMenuOpen", isOpen.toString());
+  }, [isOpen]);
 
   return (
     <nav className="fixed top-[15px] left-0 right-0 z-50 px-3 pointer-events-none">
@@ -35,11 +61,8 @@ export function Navigation() {
             >
               <Link
                 href="/"
-                className={cn(
-                  "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                  "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-                  pathname === "/" ? "text-black" : "text-[#686868]"
-                )}
+                data-slot="nav-item"
+                className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
               >
                 otherdev
               </Link>
@@ -64,11 +87,8 @@ export function Navigation() {
               >
                 <Link
                   href="/work"
-                  className={cn(
-                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-                    pathname?.startsWith("/work") ? "text-black" : "text-[#686868]"
-                  )}
+                  data-slot="nav-item"
+                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/work") }))}
                 >
                   work
                 </Link>
@@ -80,11 +100,8 @@ export function Navigation() {
               >
                 <Link
                   href="/audio"
-                  className={cn(
-                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-                    pathname?.startsWith("/audio") ? "text-black" : "text-[#686868]"
-                  )}
+                  data-slot="nav-item"
+                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/audio") }))}
                 >
                   audio
                 </Link>
@@ -96,11 +113,8 @@ export function Navigation() {
               >
                 <Link
                   href="/about"
-                  className={cn(
-                    "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-                    pathname?.startsWith("/about") ? "text-black" : "text-[#686868]"
-                  )}
+                  data-slot="nav-item"
+                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/about") }))}
                 >
                   about
                 </Link>
@@ -111,10 +125,8 @@ export function Navigation() {
                 transition={{ delay: 0.25, duration: 0.3 }}
               >
                 <button
-                  className={cn(
-                    "h-[27px] w-[62px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
-                  )}
+                  data-slot="nav-item"
+                  className={cn(navItemVariants({ size: "mobileWide", active: false }))}
                 >
                   contact
                 </button>
@@ -126,10 +138,8 @@ export function Navigation() {
         {/* Hamburger/X Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            "h-[27px] w-[27px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center ml-auto",
-            "text-black transition-colors"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "icon" }), "text-foreground ml-auto")}
           aria-label="Toggle menu"
         >
           <AnimatePresence mode="wait">
@@ -159,64 +169,49 @@ export function Navigation() {
       </div>
 
       {/* Tablet/Desktop Navigation */}
-      <div className="hidden sm:flex items-center gap-[6px] pointer-events-auto">
+      <div className="hidden sm:flex items-center gap-1.5 pointer-events-auto">
         <Link
           href="/"
-          className={cn(
-            "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-            pathname === "/" ? "text-black" : "text-[#686868]"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
         >
           otherdev
         </Link>
         <Link
           href="/work"
-          className={cn(
-            "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-            pathname?.startsWith("/work") ? "text-black" : "text-[#686868]"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/work") }))}
         >
           work
         </Link>
         <Link
           href="/audio"
-          className={cn(
-            "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-            pathname?.startsWith("/audio") ? "text-black" : "text-[#686868]"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/audio") }))}
         >
           audio
         </Link>
         <Link
           href="/about"
-          className={cn(
-            "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
-            pathname?.startsWith("/about") ? "text-black" : "text-[#686868]"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/about") }))}
         >
           about
         </Link>
         <button
-          className={cn(
-            "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
-          )}
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "default", active: false }))}
         >
           contact
         </button>
       </div>
 
-
       {/* Backdrop */}
       {isOpen && (
-        <div
-          className="sm:hidden fixed inset-0 z-30 pointer-events-none"
-        />
+        <div className="sm:hidden fixed inset-0 z-30 pointer-events-none" />
       )}
     </nav>
-  )
+  );
 }
+
+export { navItemVariants };

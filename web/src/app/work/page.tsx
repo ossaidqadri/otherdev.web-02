@@ -1,6 +1,6 @@
-import { Navigation } from "@/components/navigation"
-import { projects } from "@/lib/projects"
-import { ProjectCard } from "@/components/project-card"
+import { Navigation } from "@/components/navigation";
+import { projects } from "@/lib/projects";
+import { ProjectCard } from "@/components/project-card";
 
 export default function WorkPage() {
   return (
@@ -10,7 +10,9 @@ export default function WorkPage() {
       <main className="container mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">
         <div className="grid grid-cols-12 mb-8">
           <p className="text-[#686868] text-[11px] leading-[14px] font-normal col-span-7 sm:col-span-8 md:col-span-7 lg:col-span-6">
-            We work closely with our collaborators to engineer premium web and design solutions. Below is a selection showcasing some of our most recent work.
+            We work closely with our collaborators to engineer premium web and
+            design solutions. Below is a selection showcasing some of our most
+            recent work.
           </p>
         </div>
 
@@ -35,5 +37,5 @@ export default function WorkPage() {
         </p>
       </footer>
     </div>
-  )
+  );
 }

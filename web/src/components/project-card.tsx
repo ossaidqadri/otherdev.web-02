@@ -1,6 +1,6 @@
-import Image from "next/image"
-import Link from "next/link"
-import { cva, type VariantProps } from "class-variance-authority"
+import Image from "next/image";
+import Link from "next/link";
+import { cva, type VariantProps } from "class-variance-authority";
 
 const cardVariants = cva(
   "relative aspect-square overflow-hidden rounded-[5px] transition-all flex items-center justify-center",
@@ -14,8 +14,8 @@ const cardVariants = cva(
     defaultVariants: {
       variant: "home",
     },
-  }
-)
+  },
+);
 
 const imageContainerVariants = cva("relative w-full h-full", {
   variants: {
@@ -27,7 +27,7 @@ const imageContainerVariants = cva("relative w-full h-full", {
   defaultVariants: {
     variant: "home",
   },
-})
+});
 
 const imageVariants = cva("object-contain transition-transform duration-300", {
   variants: {
@@ -39,14 +39,14 @@ const imageVariants = cva("object-contain transition-transform duration-300", {
   defaultVariants: {
     variant: "home",
   },
-})
+});
 
 interface ProjectCardProps extends VariantProps<typeof cardVariants> {
-  title: string
-  slug: string
-  image: string
-  description?: string
-  showText?: boolean
+  title: string;
+  slug: string;
+  image: string;
+  description?: string;
+  showText?: boolean;
 }
 
 export function ProjectCard({
@@ -90,5 +90,5 @@ export function ProjectCard({
         </Link>
       )}
     </div>
-  )
+  );
 }
