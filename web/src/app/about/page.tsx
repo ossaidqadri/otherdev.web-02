@@ -28,12 +28,19 @@ export default function AboutPage() {
         {/* Hero Image */}
         <div className="grid grid-cols-12 gap-[12px]">
           <div className="col-span-12 sm:col-span-10">
-            <div className="relative w-full aspect-[3/1] rounded-[5px] overflow-hidden">
+            <div className="relative w-full aspect-[9/4] rounded-[5px] overflow-hidden">
               <Image
-                src="/images/about-page/kabeer-and-ossaid-ai-landscape.png"
+                src="/images/about-page/about-team-combined.webp"
                 alt="The members of otherdev"
                 fill
-                className="object-cover bg-neutral-400 blur-md"
+                className="sm:hidden object-cover object-center bg-stone-200"
+                priority
+              />
+              <Image
+                src="/images/about-page/about-team-combined-desktop.webp"
+                alt="The members of otherdev"
+                fill
+                className="hidden sm:block object-cover object-center bg-stone-200"
                 priority
               />
             </div>
