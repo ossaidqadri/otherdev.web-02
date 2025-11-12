@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Navigation } from "@/components/navigation";
 import { projects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
@@ -49,13 +50,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </p>
         </div>
 
-        <div className="bg-neutral-200 rounded-[5px] p-[12px] mb-[35.37px] md:mr-[15.3%]">
-          <div className="flex flex-col gap-[90px] md:px-[145px] md:max-w-none lg:max-w-[803px] lg:mx-auto lg:px-0 py-[78px]">
-            <div className="bg-neutral-300 w-full aspect-[342/213.75] md:aspect-[565.29/353.3] lg:aspect-[803/501.88] rounded-sm" />
-            <div className="bg-neutral-300 w-full aspect-[342/213.75] md:aspect-[565.29/353.3] lg:aspect-[803/501.88] rounded-sm" />
-            <div className="bg-neutral-300 w-full aspect-[342/213.75] md:aspect-[565.29/353.3] lg:aspect-[803/501.88] rounded-sm" />
+        {project.media && project.media.length > 0 && (
+          <div className="bg-neutral-200 rounded-[5px] p-[12px] mb-[35.37px] md:mr-[15.3%]">
+            <div className="flex flex-col gap-[90px] md:px-[145px] md:max-w-none lg:max-w-[803px] lg:mx-auto lg:px-0 py-[78px]">
+              {project.media.map((mediaUrl, index) => (
+                <div
+                  key={index}
+                  className="relative w-full aspect-[342/213.75] md:aspect-[565.29/353.3] lg:aspect-[803/501.88] rounded-sm overflow-hidden"
+                >
+                  <Image
+                    src={mediaUrl}
+                    alt={`${project.title} - Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="mb-[10.63px]">
           <h2 className="text-[11.4px] leading-[14px] tracking-[-0.24px] font-normal text-[#686868]">

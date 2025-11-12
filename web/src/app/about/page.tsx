@@ -35,74 +35,69 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <Navigation />
-      <main className="container mx-auto px-3 pt-[60px] pb-12 max-w-[1440px]">
+      <main className="container mx-auto px-3 pt-[72px] pb-12 max-w-[1440px]">
         {/* Hero Image */}
-        <div className="relative w-full aspect-[2.13/1] sm:aspect-[2.13/1] rounded-md overflow-hidden mb-[48px] sm:mb-[72px]">
-          <Image
-            src="http://localhost:3845/assets/12da3270cd67fe63eae4c97fe2ca6224ebe275fc.png"
-            alt="The members of otherdev"
-            fill
-            className="object-cover object-center"
-            priority
-          />
+        <div className="grid grid-cols-12 gap-[12px]">
+          <div className="col-span-12 sm:col-span-10">
+            <div className="relative w-full aspect-[3/1] rounded-[5px] overflow-hidden">
+              <Image
+                src="/images/about-page/team-photo.webp"
+                alt="The members of otherdev"
+                fill
+                className="object-cover object-center"
+                priority
+              />
+            </div>
+          </div>
         </div>
 
         {/* About Section */}
-        <section className="mb-[42px] sm:mb-[52px]">
-          <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[18px]">
-            About
-          </h2>
-          <div className="space-y-[14px] max-w-[490px]">
-            <p className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
+        <div className="mt-[30px] grid grid-cols-8 sm:grid-cols-12 gap-[6px] sm:gap-[12px]">
+          <div className="col-span-7 sm:col-span-8 md:col-span-7 lg:col-span-6 xl:col-span-5">
+            <p className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
+              About
+            </p>
+            <p className="mt-[9px] text-black text-[12px] font-normal leading-[14px] tracking-[-0.24px] whitespace-pre-line">
               otherdev produces digital platforms for pioneering creatives.
               Based in Karachi City, we are a full-service web development and
               design studio specializing in the fashion and design fields, with
               a focus on bringing ideas to life through thoughtful design.
-            </p>
-            <p className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
-              Our team consists of Oliver Buckley and Tomás Carlson, who met
-              while studying computer science at Northeastern University.
+
+Our team consists of Oliver Buckley and Tomás Carlson, who met while studying computer science at Northeastern University.
             </p>
           </div>
-        </section>
+        </div>
 
-        {/* Clients Section - Desktop (3 columns) */}
-        <section className="mb-[54px] hidden sm:block">
-          <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[18px]">
-            Clients
-          </h2>
-          <div className="grid grid-cols-3 gap-x-[102px] gap-y-[15px] max-w-[580px]">
-            {clientsDesktop.map((row, rowIndex) =>
-              row.map((client, colIndex) => (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]"
-                >
-                  {client}
-                </div>
-              )),
-            )}
+        {/* Clients Section */}
+        <div className="mt-[30px] grid grid-cols-12 gap-[12px]">
+          <div className="col-span-12 sm:col-span-8 md:col-span-7 lg:col-span-6">
+            <p className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
+              Clients
+            </p>
+            <div className="mt-[9px] grid grid-cols-2 sm:grid-cols-3 gap-[12px] gap-y-[6px]">
+              {clientsDesktop.map((row, rowIndex) =>
+                row.map((client, colIndex) => (
+                  <p
+                    key={`desktop-${rowIndex}-${colIndex}`}
+                    className="hidden sm:block text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]"
+                  >
+                    {client}
+                  </p>
+                )),
+              )}
+              {clientsMobile.map((row, rowIndex) =>
+                row.map((client, colIndex) => (
+                  <p
+                    key={`mobile-${rowIndex}-${colIndex}`}
+                    className="sm:hidden text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]"
+                  >
+                    {client}
+                  </p>
+                )),
+              )}
+            </div>
           </div>
-        </section>
-
-        {/* Clients Section - Mobile (2 columns) */}
-        <section className="mb-[54px] sm:hidden">
-          <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[18px]">
-            Clients
-          </h2>
-          <div className="grid grid-cols-2 gap-x-[108px] gap-y-[15px]">
-            {clientsMobile.map((row, rowIndex) =>
-              row.map((client, colIndex) => (
-                <div
-                  key={`mobile-${rowIndex}-${colIndex}`}
-                  className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]"
-                >
-                  {client}
-                </div>
-              )),
-            )}
-          </div>
-        </section>
+        </div>
 
         {/* Social Section */}
         <section>

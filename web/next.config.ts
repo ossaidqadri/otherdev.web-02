@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
         port: "3845",
         pathname: "/assets/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.jsdelivr.net",
+      },
     ],
   },
 };
