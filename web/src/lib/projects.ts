@@ -19,10 +19,10 @@ export const projects: Project[] = [
       "Comprehensive SEO transformation for Narkins Builders featuring technical optimization, schema markup, and MDX blog migration. Achieved 30% traffic improvement and elevated their rankings to compete with industry giants in Pakistan's real estate market.",
     url: "narkinsbuilders.com/blog",
     media: [
-      "/images/projects/narkins-seo-2025/search-console-performance.webp",
-      "/images/projects/narkins-seo-2025/search-console-insights.webp",
-      "/images/projects/narkins-seo-2025/pagespeed-seo-score.webp",
-      "/images/projects/narkins-seo-2025/schema-markup-code.webp",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.png",
+      "/images/projects/narkins-seo-2025/narkins_graphs_beauty.png",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_2025_10_thar-water-supply-project-october-2025-nabisar-vajihar-completion.png",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_comments.png"
     ],
   },
   {
@@ -51,10 +51,10 @@ export const projects: Project[] = [
       "Intelligent AI legal assistant platform for law firms and SMEs featuring real-time contract analysis and automated document generation. Combines advanced NLP with collaborative editing for legal professionals across Asia and the Middle East.",
     url: "lexa.deployments.otherdev.com",
     media: [
-      "/images/projects/lexa-2025/lexa-platform-homepage.webp",
-      "/images/projects/lexa-2025/lexa-document-editor.webp",
-      "/images/projects/lexa-2025/lexa-collaboration-features.webp",
-      "/images/projects/lexa-2025/lexa-legal-templates.webp",
+      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.png",
+      "/images/projects/lexa-2025/happier-notes-792028.framer.app_.png",
+      "/images/projects/lexa-2025/signing-desktop.png",
+      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_chat.png",
     ],
   },
   {
@@ -125,7 +125,7 @@ export const projects: Project[] = [
     title: "Website Development for Groovy Pakistan",
     slug: "groovy-pakistan-2024",
     image: "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.png",
-    description: 
+    description:
       "Strategic e-commerce website development for Groovy Pakistan mirroring the brand's dynamic spirit. Straightforward and engaging digital space that provides an intuitive pathway for customers to explore and purchase products.",
     url: "groovypakistan.com",
     media: [
@@ -174,5 +174,8 @@ export const projects: Project[] = [
       "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
     description: "Website Design, Website Development & Infrastructure",
     url: "ekqadamaur.kabeers.network",
+    media: [
+      "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
+    ]
   },
 ];
