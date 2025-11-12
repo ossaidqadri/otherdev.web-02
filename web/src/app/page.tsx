@@ -20,6 +20,7 @@ export default function Home() {
               slug={project.slug}
               image={project.image}
               description={project.description}
+              variant="home"
             />
           ))}
         </div>

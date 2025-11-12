@@ -1,7 +1,6 @@
 import { Navigation } from "@/components/navigation"
-import Link from "next/link"
 import { projects } from "@/lib/projects"
-import Image from "next/image"
+import { ProjectCard } from "@/components/project-card"
 
 export default function WorkPage() {
   return (
@@ -17,35 +16,16 @@ export default function WorkPage() {
 
         <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[13px]">
           {projects.map((project) => (
-            <div key={project.id} className="flex flex-col gap-[13px]">
-              <Link href={`/work/${project.slug}`} className="block group">
-                <div className="bg-neutral-200 rounded-[5px] aspect-square flex items-center justify-center overflow-hidden p-[50px] transition-transform duration-300 group-hover:scale-[0.99]">
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </Link>
-
-              <Link href={`/work/${project.slug}`} className="box-border flex flex-col items-start pb-[3px] pt-0 px-0 relative shrink-0">
-                <div className="box-border flex flex-col items-start mb-[-3px] relative shrink-0 w-full">
-                  <div className="flex flex-col font-normal justify-center leading-[0] not-italic relative shrink-0 text-[11.4px] text-black tracking-[-0.24px] w-full">
-                    <p className="leading-[14px] whitespace-pre-wrap">{project.title}</p>
-                  </div>
-                </div>
-                <div className="box-border flex flex-col items-start mb-[-3px] pb-0 pt-[9px] px-0 relative shrink-0 w-full">
-                  <div className="flex flex-col font-normal justify-center leading-[14px] not-italic relative shrink-0 text-[#686868] text-[11.1px] tracking-[-0.24px] w-full whitespace-pre-wrap">
-                    <p className="mb-0">{project.description}</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
+            <ProjectCard
+              key={project.id}
+              title={project.title}
+              slug={project.slug}
+              image={project.image}
+              description={project.description}
+              variant="work"
+              showText={true}
+            />
           ))}
-
         </div>
       </main>
 
