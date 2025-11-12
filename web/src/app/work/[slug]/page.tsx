@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Navigation } from "@/components/navigation";
 import { projects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
+import { cn } from "@/lib/utils";
 
 interface ProjectPageProps {
   params: Promise<{
@@ -30,7 +31,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     .slice(0, 13);
 
   return (
-    <div className="min-h-screen bg-neutral-50 relative">
+    <div className="min-h-screen relative">
       <Navigation />
 
       <main className="px-3">
@@ -56,20 +57,19 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
 
         {project.media && project.media.length > 0 && (
-          <div className="bg-neutral-200 rounded-[5px] p-[12px] mb-[35.37px] md:mr-[15.3%]">
+          <div className="bg-neutral-200 rounded-[5px] mb-[35.37px] md:mr-[15.3%]">
             <div className="flex flex-col gap-[90px] md:px-[145px] md:max-w-none lg:max-w-[803px] lg:mx-auto lg:px-0 py-[78px]">
               {project.media.map((mediaUrl, index) => (
-                <div
-                  key={index}
-                  className="relative w-full aspect-[342/213.75] md:aspect-[565.29/353.3] lg:aspect-[803/501.88] rounded-sm overflow-hidden"
-                >
-                  <Image
-                    src={mediaUrl}
-                    alt={`${project.title} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <Image
+                  key={mediaUrl + index}
+                  src={mediaUrl}
+                  alt={`${project.title} - Image ${index + 1}`}
+                  width={800}
+                  height={800} unoptimized
+                  sizes="100vw"
+                  className={cn("w-full h-auto object-contain rounded-[5px] px-6")}
+                  style={{ width: '100%', height: 'auto' }}
+                />
               ))}
             </div>
           </div>

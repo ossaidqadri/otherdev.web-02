@@ -14,10 +14,10 @@ export const projects: Project[] = [
     title: "SEO Implementation & Technical Optimization for Narkins Builders",
     slug: "narkins-seo-2025",
     image:
-      "/images/projects/narkins-seo-2025/narkins-seo-implementation-cover.webp",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.png",
     description:
       "Comprehensive SEO transformation for Narkins Builders featuring technical optimization, schema markup, and MDX blog migration. Achieved 30% traffic improvement and elevated their rankings to compete with industry giants in Pakistan's real estate market.",
-    url: "narkinsbuilders.com",
+    url: "narkinsbuilders.com/blog",
     media: [
       "/images/projects/narkins-seo-2025/search-console-performance.webp",
       "/images/projects/narkins-seo-2025/search-console-insights.webp",
@@ -29,7 +29,7 @@ export const projects: Project[] = [
     id: "2",
     title: "Real Estate Platform Development for Bin Yousuf Group",
     slug: "bin-yousuf-2025",
-    image: "/images/projects/bin-yousuf-2025/byg-website-homepage-cover.webp",
+    image: "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
     description:
       "Sophisticated real estate platform for Bin Yousuf Group showcasing premium waterfront properties in Karachi. Features interactive galleries, Google Sheets lead integration, and optimized UX for Emaar Oceanfront and HMR Waterfront luxury investments.",
     url: "binyousufgroup.com",
@@ -46,7 +46,7 @@ export const projects: Project[] = [
     id: "3",
     title: "AI Legal Assistant Platform Development for Lexa",
     slug: "lexa-2025",
-    image: "/images/projects/lexa-2025/lexa-platform-homepage.webp",
+    image: "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.png",
     description:
       "Intelligent AI legal assistant platform for law firms and SMEs featuring real-time contract analysis and automated document generation. Combines advanced NLP with collaborative editing for legal professionals across Asia and the Middle East.",
     url: "lexa.deployments.otherdev.com",
@@ -59,18 +59,17 @@ export const projects: Project[] = [
   },
   {
     id: "4",
-    title: "E-commerce Platform Development for Kiswa Noire",
-    slug: "kiswa-noire-2025",
+    title: "E-commerce Platform for Olly Shinder",
+    slug: "olly-shinder-2025",
     image:
-      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2020&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "/images/projects/olly-2025/products-page-desktop.png",
     description:
-      "Sophisticated e-commerce platform for premium Danish children's brand Kiswa Noire featuring Scandinavian minimalism. Custom Shopify solution with multilingual support and geolocation-based personalization for European markets.",
-    url: "kiswanoire.com",
+      "Olly Shinder is a menswear designer from London, part of the Fashion East and Dover Street Market incubators. We designed and developed a minimal, grid-based platform to unify his collections and e-commerce content.",
+    url: "olly-shinder.com",
     media: [
-      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2020&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1515488764276-beab7607c1e6?q=80&w=2026&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1472162072942-cd5147eb3902?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "/images/projects/olly-2025/products-page-desktop.png",
+      "/images/projects/olly-2025/product-page-2.png",
+      "/images/projects/olly-2025/olly-shinder-product-page.png",
     ],
   },
   {
@@ -108,7 +107,7 @@ export const projects: Project[] = [
     id: "7",
     title: "Branding & SaaS Platform Development for Finlit",
     slug: "finlit-2025",
-    image: "/images/projects/finlit-2025/finlit.deployments.otherdev.com_.png",
+    image: "/images/projects/finlit-2025/finlit-desktop-standard-ratio.webp",
     description:
       "Comprehensive SaaS platform development for Finlit including branding, visual identity, and full-stack learning application. Minimalist design that empowers users to confidently navigate the world of finance.",
     url: "finlit.deployments.otherdev.com",
@@ -125,8 +124,8 @@ export const projects: Project[] = [
     id: "8",
     title: "Website Development for Groovy Pakistan",
     slug: "groovy-pakistan-2024",
-    image: "/images/projects/groovy-pakistan-2024/groovy-main.png",
-    description:
+    image: "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.png",
+    description: 
       "Strategic e-commerce website development for Groovy Pakistan mirroring the brand's dynamic spirit. Straightforward and engaging digital space that provides an intuitive pathway for customers to explore and purchase products.",
     url: "groovypakistan.com",
     media: [
@@ -156,7 +155,7 @@ export const projects: Project[] = [
     title: "Payment infrastructure migration for Tiny-Footprint Coffee",
     slug: "tinyfootprintcoffee",
     image:
-      "/images/projects/tinyfootprintcoffee/tinyfootprintcoffeecoverpage.png",
+      "/images/projects/tinyfootprintcoffee/www.tinyfootprintcoffee.com_.png",
     description:
       "Strategic subscription migration from Recharge to Shopify Payments for Tiny Footprint Coffee, the world's first carbon-negative coffee company. Seamless transition with data integrity ensuring uninterrupted service for their mission-supporting subscribers.",
     url: "tinyfootprintcoffee.com",
@@ -170,9 +169,9 @@ export const projects: Project[] = [
   {
     id: "11",
     title: "Enterprise infrastructure development for Ek Qadam Aur",
-    slug: "ekqadamaur-2023",
+    slug: "ekqadamaur-2024",
     image:
-      "https://cdn.jsdelivr.net/gh/kabeer11000/docs-hosted@redirector-content/theotherdev/new-web/ekqadamaur.webp",
+      "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
     description: "Website Design, Website Development & Infrastructure",
     url: "ekqadamaur.kabeers.network",
   },

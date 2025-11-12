@@ -4,7 +4,7 @@ import { ProjectCard } from "@/components/project-card";
 
 export default function WorkPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <Navigation />
 
       <main className="container mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">
@@ -16,7 +16,7 @@ export default function WorkPage() {
           </p>
         </div>
 
-        <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[13px]">
+        <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[13px] gap-y-10">
           {projects.map((project) => (
             <ProjectCard
               key={project.id}

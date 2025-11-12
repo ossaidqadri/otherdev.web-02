@@ -7,8 +7,9 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        home: "bg-stone-200 hover:shadow-lg",
+        home: "bg-stone-200 -hover:shadow-lg",
         work: "bg-stone-200",
+        broll: ""
       },
     },
     defaultVariants: {
@@ -22,6 +23,7 @@ const imageContainerVariants = cva("relative w-full h-full bg-stone-200", {
     variant: {
       home: "px-[24px] py-[36px]",
       work: "px-[50px] py-[60px]",
+      broll: ""
     },
   },
   defaultVariants: {
@@ -29,11 +31,12 @@ const imageContainerVariants = cva("relative w-full h-full bg-stone-200", {
   },
 });
 
-const imageVariants = cva("object-contain transition-transform duration-300", {
+const imageVariants = cva("transition-transform duration-300", {
   variants: {
     variant: {
-      home: "group-hover:scale-[1.02]",
-      work: "group-hover:scale-[0.99]",
+      home: "object-contain group-hover:scale-[1.02] p-6",
+      work: "object-contain group-hover:scale-[0.99] p-6",
+      broll: "object-cover"
     },
   },
   defaultVariants: {
@@ -59,7 +62,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   return (
     <div className="flex flex-col gap-[13px]">
-      <Link href={`/work/${slug}`} className="block group">
+      <Link href={variant === "broll" ? slug ?? "#" : `/work/${slug}`} className="block group">
         <div className={cardVariants({ variant })}>
           <div className={imageContainerVariants({ variant })}>
             <Image

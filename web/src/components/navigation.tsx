@@ -124,7 +124,7 @@ export function Navigation() {
                   audio
                 </Link>
               </motion.div>
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
@@ -141,7 +141,7 @@ export function Navigation() {
                 >
                   about
                 </Link>
-              </motion.div>
+              </motion.div> */}
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -220,7 +220,7 @@ export function Navigation() {
         >
           work
         </Link>
-        <Link
+        {/* <Link
           href="/audio"
           data-slot="nav-item"
           className={cn(
@@ -231,7 +231,7 @@ export function Navigation() {
           )}
         >
           audio
-        </Link>
+        </Link> */}
         <Link
           href="/about"
           data-slot="nav-item"

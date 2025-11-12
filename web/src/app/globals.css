@@ -44,8 +44,10 @@
 }
 
 :root {
+  /* --color-neutral-200: var(--color-stone-600); */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background:  oklch(1 0 0);
+  /*--background: var(--color-stone-100); */
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.25);

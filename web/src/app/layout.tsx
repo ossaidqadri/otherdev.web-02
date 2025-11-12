@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-[Arial,sans-serif] antialiased">{children}</body>
+      <body className="font-[Arial,sans-serif] antialiased bg-background">{children}</body>
     </html>
   );
 }
