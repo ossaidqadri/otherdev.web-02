@@ -4,6 +4,8 @@ export interface Project {
   slug: string;
   image: string;
   description: string;
+  url?: string;
+  media?: string[];
 }
 
 export const projects: Project[] = [
@@ -14,6 +16,7 @@ export const projects: Project[] = [
     image: "/projects/whitney-review.jpg",
     description:
       "The Whitney Review of New Writing is an independent journal of literary criticism based in New York City.",
+    url: "whitneyreview.org",
   },
   {
     id: "2",
