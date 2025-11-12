@@ -106,7 +106,7 @@ export function Navigation() {
                   work
                 </Link>
               </motion.div>
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.15, duration: 0.3 }}
@@ -123,8 +123,8 @@ export function Navigation() {
                 >
                   audio
                 </Link>
-              </motion.div>
-              {/* <motion.div
+              </motion.div> */}
+              <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
@@ -141,7 +141,7 @@ export function Navigation() {
                 >
                   about
                 </Link>
-              </motion.div> */}
+              </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -255,7 +255,7 @@ export function Navigation() {
 
       {/* Backdrop */}
       {isOpen && (
-        <div className="sm:hidden fixed inset-0 z-30 pointer-events-none" />
+        <div className="sm:hidden fixed inset-0 z-30 backdrop-blur-lg pointer-events-none" />
       )}
 
       {/* Contact Dialog */}
