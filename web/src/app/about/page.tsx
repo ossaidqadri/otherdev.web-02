@@ -61,9 +61,9 @@ export default function AboutPage() {
               otherdev produces digital platforms for pioneering creatives.
               Based in Karachi City, we are a full-service web development and
               design studio specializing in the fashion and design fields, with
-              a focus on bringing ideas to life through thoughtful design.
-
-Our team consists of Oliver Buckley and Tomás Carlson, who met while studying computer science at Northeastern University.
+              a focus on bringing ideas to life through thoughtful design. Our
+              team consists of Oliver Buckley and Tomás Carlson, who met while
+              studying computer science at Northeastern University.
             </p>
           </div>
         </div>

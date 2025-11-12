@@ -40,9 +40,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </h1>
 
           {project.url && (
-            <div className="text-[11.1px] leading-[14px] tracking-[-0.24px] font-normal text-black mb-[24px]">
+            <a
+              href={`https://${project.url}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11.1px] leading-[14px] tracking-[-0.24px] font-normal text-black mb-[24px] inline-block hover:underline"
+            >
               {project.url}
-            </div>
+            </a>
           )}
 
           <p className="text-[11.1px] sm:text-[11.3px] leading-[14px] tracking-[-0.24px] font-normal text-black mb-[64px] max-w-[315px] sm:max-w-[532px]">
