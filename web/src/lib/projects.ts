@@ -14,15 +14,15 @@ export const projects: Project[] = [
     title: "SEO Implementation & Technical Optimization for Narkins Builders",
     slug: "narkins-seo-2025",
     image:
-      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.png",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.webp",
     description:
       "Comprehensive SEO transformation for Narkins Builders featuring technical optimization, schema markup, and MDX blog migration. Achieved 30% traffic improvement and elevated their rankings to compete with industry giants in Pakistan's real estate market.",
     url: "narkinsbuilders.com/blog",
     media: [
-      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.png",
-      "/images/projects/narkins-seo-2025/narkins_graphs_beauty.png",
-      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_2025_10_thar-water-supply-project-october-2025-nabisar-vajihar-completion.png",
-      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_comments.png",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.webp",
+      "/images/projects/narkins-seo-2025/narkins_graphs_beauty.webp",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_2025_10_thar-water-supply-project-october-2025-nabisar-vajihar-completion.webp",
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_comments.webp",
     ],
   },
   {
@@ -30,12 +30,12 @@ export const projects: Project[] = [
     title: "Real Estate Platform Development for Bin Yousuf Group",
     slug: "bin-yousuf-2025",
     image:
-      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
+      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.webp",
     description:
       "Sophisticated real estate platform for Bin Yousuf Group showcasing premium waterfront properties in Karachi. Features interactive galleries, Google Sheets lead integration, and optimized UX for Emaar Oceanfront and HMR Waterfront luxury investments.",
     url: "binyousufgroup.com",
     media: [
-      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
+      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.webp",
       "/images/projects/bin-yousuf-2025/byg-property-showcase.webp",
       "/images/projects/bin-yousuf-2025/luxury-apartments-karachi.webp",
       "/images/projects/bin-yousuf-2025/byg-logo-brand.webp",
@@ -45,29 +45,29 @@ export const projects: Project[] = [
     id: "3",
     title: "AI Legal Assistant Platform Development for Lexa",
     slug: "lexa-2025",
-    image: "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.png",
+    image: "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.webp",
     description:
       "Intelligent AI legal assistant platform for law firms and SMEs featuring real-time contract analysis and automated document generation. Combines advanced NLP with collaborative editing for legal professionals across Asia and the Middle East.",
     url: "lexa.deployments.otherdev.com",
     media: [
-      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.png",
-      "/images/projects/lexa-2025/happier-notes-792028.framer.app_.png",
-      "/images/projects/lexa-2025/signing-desktop.png",
-      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_chat.png",
+      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_home.webp",
+      "/images/projects/lexa-2025/happier-notes-792028.framer.app_.webp",
+      "/images/projects/lexa-2025/signing-desktop.webp",
+      "/images/projects/lexa-2025/lexa.deployments.otherdev.com_chat.webp",
     ],
   },
   {
     id: "4",
     title: "E-commerce Platform for Olly Shinder",
     slug: "olly-shinder-2025",
-    image: "/images/projects/olly-2025/products-page-desktop.png",
+    image: "/images/projects/olly-2025/products-page-desktop.webp",
     description:
       "Olly Shinder is a menswear designer from London, part of the Fashion East and Dover Street Market incubators. We designed and developed a minimal, grid-based platform to unify his collections and e-commerce content.",
     url: "olly-shinder.com",
     media: [
-      "/images/projects/olly-2025/products-page-desktop.png",
-      "/images/projects/olly-2025/product-page-2.png",
-      "/images/projects/olly-2025/olly-shinder-product-page.png",
+      "/images/projects/olly-2025/products-page-desktop.webp",
+      "/images/projects/olly-2025/product-page-2.webp",
+      "/images/projects/olly-2025/olly-shinder-product-page.webp",
     ],
   },
   {
@@ -110,12 +110,12 @@ export const projects: Project[] = [
       "Comprehensive SaaS platform development for Finlit including branding, visual identity, and full-stack learning application. Minimalist design that empowers users to confidently navigate the world of finance.",
     url: "finlit.deployments.otherdev.com",
     media: [
-      "/images/projects/finlit-2025/finlit-group.png",
-      "/images/projects/finlit-2025/finlit-home-mobile.png",
-      "/images/projects/finlit-2025/team-groupchat.png",
-      "/images/projects/finlit-2025/finlit-courses-macbook.png",
-      "/images/projects/finlit-2025/finlit-logo.png",
-      "/images/projects/finlit-2025/finlit.deployments.otherdev.com_trading_1x1.png",
+      "/images/projects/finlit-2025/finlit-group.webp",
+      "/images/projects/finlit-2025/finlit-home-mobile.webp",
+      "/images/projects/finlit-2025/team-groupchat.webp",
+      "/images/projects/finlit-2025/finlit-courses-macbook.webp",
+      "/images/projects/finlit-2025/finlit-logo.webp",
+      "/images/projects/finlit-2025/finlit.deployments.otherdev.com_trading_1x1.webp",
     ],
   },
   {
@@ -123,15 +123,15 @@ export const projects: Project[] = [
     title: "Website Development for Groovy Pakistan",
     slug: "groovy-pakistan-2024",
     image:
-      "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.png",
+      "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.webp",
     description:
       "Strategic e-commerce website development for Groovy Pakistan mirroring the brand's dynamic spirit. Straightforward and engaging digital space that provides an intuitive pathway for customers to explore and purchase products.",
     url: "groovypakistan.com",
     media: [
-      "/images/projects/groovy-pakistan-2024/groovy-group.png",
-      "/images/projects/groovy-pakistan-2024/groovy-home-mobile.png",
-      "/images/projects/groovy-pakistan-2024/pants.jpg",
-      "/images/projects/groovy-pakistan-2024/shirts-cropped.png",
+      "/images/projects/groovy-pakistan-2024/groovy-group.webp",
+      "/images/projects/groovy-pakistan-2024/groovy-home-mobile.webp",
+      "/images/projects/groovy-pakistan-2024/pants.webp",
+      "/images/projects/groovy-pakistan-2024/shirts-cropped.webp",
     ],
   },
   {
@@ -143,10 +143,10 @@ export const projects: Project[] = [
       "Tailored e-commerce platform for Parcheh translating the texture and artistry of their textiles into digital experience. Elegant and intuitive design offering an immersive journey into the brand's world of premium fabrics.",
     url: "parcheh81.com",
     media: [
-      "/images/projects/parcheh81-2024/parcheh-home-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-menu-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-logo-gridded.png",
-      "/images/projects/parcheh81-2024/girl-standing-square.png",
+      "/images/projects/parcheh81-2024/parcheh-home-mobile.webp",
+      "/images/projects/parcheh81-2024/parcheh-menu-mobile.webp",
+      "/images/projects/parcheh81-2024/parcheh-logo-gridded.webp",
+      "/images/projects/parcheh81-2024/girl-standing-square.webp",
     ],
   },
   {
@@ -154,24 +154,24 @@ export const projects: Project[] = [
     title: "Payment infrastructure migration for Tiny-Footprint Coffee",
     slug: "tinyfootprintcoffee",
     image:
-      "/images/projects/tinyfootprintcoffee/www.tinyfootprintcoffee.com_.png",
+      "/images/projects/tinyfootprintcoffee/www.tinyfootprintcoffee.com_.webp",
     description:
       "Strategic subscription migration from Recharge to Shopify Payments for Tiny Footprint Coffee, the world's first carbon-negative coffee company. Seamless transition with data integrity ensuring uninterrupted service for their mission-supporting subscribers.",
     url: "tinyfootprintcoffee.com",
     media: [
-      "/images/projects/parcheh81-2024/parcheh-home-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-menu-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-logo-gridded.png",
-      "/images/projects/parcheh81-2024/girl-standing-square.png",
+      "/images/projects/parcheh81-2024/parcheh-home-mobile.webp",
+      "/images/projects/parcheh81-2024/parcheh-menu-mobile.webp",
+      "/images/projects/parcheh81-2024/parcheh-logo-gridded.webp",
+      "/images/projects/parcheh81-2024/girl-standing-square.webp",
     ],
   },
   {
     id: "11",
     title: "Enterprise infrastructure development for Ek Qadam Aur",
     slug: "ekqadamaur-2024",
-    image: "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
+    image: "/images/projects/eqa-2024/www.ekqadamaur.org_.webp",
     description: "Website Design, Website Development & Infrastructure",
     url: "ekqadamaur.kabeers.network",
-    media: ["/images/projects/eqa-2024/www.ekqadamaur.org_.png"],
+    media: ["/images/projects/eqa-2024/www.ekqadamaur.org_.webp"],
   },
 ];
