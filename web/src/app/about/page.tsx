@@ -4,32 +4,21 @@ import Link from "next/link";
 
 export default function AboutPage() {
   const clientsDesktop = [
-    ["Basketcase Gallery", "J.L-A.L", "Olly Shinder"],
-    ["Bryan Jimenèz", "Juliet Johnstone", "ROA Hiking"],
-    ["Constant Practice", "Koss, Inc", "Ranxelle Soria"],
-    ["David Casavant", "Kunai Online", "Regrets Only"],
-    ["Dover Street Market", "Lil Uzi Vert", "SALEM"],
-    ["Fey Fey Worldwide", "Magic Molecule", "SPECIAL OFFER, Inc."],
-    ["Genius", "Margot Magazine", "Surf Gang Records"],
-    ["Geoffrey B. Small", "New Balance", "World Health Organization"],
-    ["Iessi", "Oddli Inc", "Worldwide Staffing"],
+    ["Narkins Builders", "Groovy Pakistan", "Olly Shinder"],
+    ["Bin Yousuf Group", "Parcheh81", "Tiny Footprint Coffee"],
+    ["Lexa", "Finlit", "Ek Qadam Aur"],
+    ["Wish Apparels","Kiswa Noir", "BLVD"],
+    ["CLTRD Legacy"],
   ];
 
   const clientsMobile = [
-    ["Basketcase Gallery", "Magic Molecule"],
-    ["Bryan Jimenèz", "Margot Magazine"],
-    ["Constant Practice", "New Balance"],
-    ["David Casavant", "Oddli Inc"],
-    ["Dover Street Market", "Olly Shinder"],
-    ["Fey Fey Worldwide", "ROA Hiking"],
-    ["Genius", "Ranxelle Soria"],
-    ["Geoffrey B. Small", "Regrets Only"],
-    ["Iessi", "SALEM"],
-    ["J.L-A.L", "SPECIAL OFFER, Inc."],
-    ["Juliet Johnstone", "Surf Gang Records"],
-    ["Koss, Inc", "World Health Organization"],
-    ["Kunai Online", "Worldwide Staffing"],
-    ["Lil Uzi Vert"],
+    ["Narkins Builders", "Parcheh81"],
+    ["Bin Yousuf Group", "Tiny Footprint Coffee"],
+    ["Lexa", "Ek Qadam Aur"],
+    ["Olly Shinder", "Groovy Pakistan"],
+    ["Wish Apparels", "Finlit"],
+    ["Kiswa Noir", "BLVD"],
+    ["CLTRD Legacy"],
   ];
 
   return (
@@ -100,7 +89,7 @@ export default function AboutPage() {
         </div>
 
         {/* Social Section */}
-        <section>
+        <section className="mt-[30px]">
           <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[13px]">
             Social
           </h2>
