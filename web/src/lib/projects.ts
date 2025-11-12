@@ -159,10 +159,8 @@ export const projects: Project[] = [
       "Strategic subscription migration from Recharge to Shopify Payments for Tiny Footprint Coffee, the world's first carbon-negative coffee company. Seamless transition with data integrity ensuring uninterrupted service for their mission-supporting subscribers.",
     url: "tinyfootprintcoffee.com",
     media: [
-      "/images/projects/parcheh81-2024/parcheh-home-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-menu-mobile.png",
-      "/images/projects/parcheh81-2024/parcheh-logo-gridded.png",
-      "/images/projects/parcheh81-2024/girl-standing-square.png",
+      "/images/projects/tinyfootprintcoffee/www.tinyfootprintcoffee.com_.png",
+      "/images/projects/tinyfootprintcoffee/Mexico_808b95c1-9643-49c2-a054-eaf2bc2cf8f9.webp",
     ],
   },
   {
