@@ -54,13 +54,14 @@ export default function AboutPage() {
           </h2>
           <div className="space-y-[14px] max-w-[490px]">
             <p className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
-              otherdev produces digital platforms for pioneering creatives. Based in Karachi City, we are a
-              full-service web development and design studio specializing in the fashion and design fields, with
+              otherdev produces digital platforms for pioneering creatives.
+              Based in Karachi City, we are a full-service web development and
+              design studio specializing in the fashion and design fields, with
               a focus on bringing ideas to life through thoughtful design.
             </p>
             <p className="text-black text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
-              Our team consists of Oliver Buckley and Tomás Carlson, who met while studying computer
-              science at Northeastern University.
+              Our team consists of Oliver Buckley and Tomás Carlson, who met
+              while studying computer science at Northeastern University.
             </p>
           </div>
         </section>
@@ -79,7 +80,7 @@ export default function AboutPage() {
                 >
                   {client}
                 </div>
-              ))
+              )),
             )}
           </div>
         </section>
@@ -98,7 +99,7 @@ export default function AboutPage() {
                 >
                   {client}
                 </div>
-              ))
+              )),
             )}
           </div>
         </section>
@@ -131,7 +132,7 @@ export default function AboutPage() {
 
           {/* Footer */}
           <p className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
-            © otherdev llc
+            © other dev
           </p>
         </section>
       </main>

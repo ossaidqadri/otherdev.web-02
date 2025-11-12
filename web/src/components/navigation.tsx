@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { ContactDialog } from "@/components/contact-dialog";
 
 const navItemVariants = cva(
   "flex items-center justify-center rounded-md backdrop-blur-sm bg-stone-200/95 text-[11px] font-normal leading-tight transition-colors hover:text-foreground",
@@ -28,7 +29,7 @@ const navItemVariants = cva(
       size: "default",
       active: false,
     },
-  }
+  },
 );
 
 type NavItemVariantProps = VariantProps<typeof navItemVariants>;
@@ -40,14 +41,19 @@ export function Navigation() {
     }
     return false;
   });
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     sessionStorage.setItem("mobileMenuOpen", isOpen.toString());
   }, [isOpen]);
 
+  const handleContactClick = () => {
+    setContactDialogOpen(true);
+  };
+
   return (
-    <nav className="fixed top-[15px] left-0 right-0 z-50 px-3 pointer-events-none">
+    <nav className="fixed top-[15px] left-0 right-0 z-[60] px-3 pointer-events-none">
       {/* Mobile Navigation */}
       <div className="sm:hidden flex items-center gap-[6px] w-full pointer-events-auto relative z-50">
         <AnimatePresence mode="wait">
@@ -62,7 +68,9 @@ export function Navigation() {
               <Link
                 href="/"
                 data-slot="nav-item"
-                className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
+                className={cn(
+                  navItemVariants({ size: "brand", active: pathname === "/" }),
+                )}
               >
                 other dev
               </Link>
@@ -88,7 +96,12 @@ export function Navigation() {
                 <Link
                   href="/work"
                   data-slot="nav-item"
-                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/work") }))}
+                  className={cn(
+                    navItemVariants({
+                      size: "mobile",
+                      active: pathname?.startsWith("/work"),
+                    }),
+                  )}
                 >
                   work
                 </Link>
@@ -101,7 +114,12 @@ export function Navigation() {
                 <Link
                   href="/audio"
                   data-slot="nav-item"
-                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/audio") }))}
+                  className={cn(
+                    navItemVariants({
+                      size: "mobile",
+                      active: pathname?.startsWith("/audio"),
+                    }),
+                  )}
                 >
                   audio
                 </Link>
@@ -114,7 +132,12 @@ export function Navigation() {
                 <Link
                   href="/about"
                   data-slot="nav-item"
-                  className={cn(navItemVariants({ size: "mobile", active: pathname?.startsWith("/about") }))}
+                  className={cn(
+                    navItemVariants({
+                      size: "mobile",
+                      active: pathname?.startsWith("/about"),
+                    }),
+                  )}
                 >
                   about
                 </Link>
@@ -125,8 +148,11 @@ export function Navigation() {
                 transition={{ delay: 0.25, duration: 0.3 }}
               >
                 <button
+                  onClick={handleContactClick}
                   data-slot="nav-item"
-                  className={cn(navItemVariants({ size: "mobileWide", active: false }))}
+                  className={cn(
+                    navItemVariants({ size: "mobileWide", active: false }),
+                  )}
                 >
                   contact
                 </button>
@@ -139,7 +165,10 @@ export function Navigation() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           data-slot="nav-item"
-          className={cn(navItemVariants({ size: "icon" }), "text-foreground ml-auto")}
+          className={cn(
+            navItemVariants({ size: "icon" }),
+            "text-foreground ml-auto",
+          )}
           aria-label="Toggle menu"
         >
           <AnimatePresence mode="wait">
@@ -173,32 +202,50 @@ export function Navigation() {
         <Link
           href="/"
           data-slot="nav-item"
-          className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
+          className={cn(
+            navItemVariants({ size: "brand", active: pathname === "/" }),
+          )}
         >
           other dev
         </Link>
         <Link
           href="/work"
           data-slot="nav-item"
-          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/work") }))}
+          className={cn(
+            navItemVariants({
+              size: "default",
+              active: pathname?.startsWith("/work"),
+            }),
+          )}
         >
           work
         </Link>
         <Link
           href="/audio"
           data-slot="nav-item"
-          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/audio") }))}
+          className={cn(
+            navItemVariants({
+              size: "default",
+              active: pathname?.startsWith("/audio"),
+            }),
+          )}
         >
           audio
         </Link>
         <Link
           href="/about"
           data-slot="nav-item"
-          className={cn(navItemVariants({ size: "default", active: pathname?.startsWith("/about") }))}
+          className={cn(
+            navItemVariants({
+              size: "default",
+              active: pathname?.startsWith("/about"),
+            }),
+          )}
         >
           about
         </Link>
         <button
+          onClick={handleContactClick}
           data-slot="nav-item"
           className={cn(navItemVariants({ size: "default", active: false }))}
         >
@@ -210,6 +257,12 @@ export function Navigation() {
       {isOpen && (
         <div className="sm:hidden fixed inset-0 z-30 pointer-events-none" />
       )}
+
+      {/* Contact Dialog */}
+      <ContactDialog
+        open={contactDialogOpen}
+        onOpenChange={setContactDialogOpen}
+      />
     </nav>
   );
 }

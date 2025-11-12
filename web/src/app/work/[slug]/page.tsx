@@ -66,7 +66,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <div className="overflow-x-auto overflow-y-clip pb-[6px] mb-[57px] -mx-3 scrollbar-hide">
           <div className="flex gap-[12px] px-3">
             {relatedProjects.map((relatedProject) => (
-              <div key={relatedProject.id} className="flex-shrink-0 w-[320px] sm:w-[600px]">
+              <div
+                key={relatedProject.id}
+                className="flex-shrink-0 w-[320px] sm:w-[600px]"
+              >
                 <ProjectCard
                   title={relatedProject.title}
                   slug={relatedProject.slug}
