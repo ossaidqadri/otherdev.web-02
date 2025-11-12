@@ -6,6 +6,7 @@ interface ProjectCardProps {
   title: string
   slug: string
   image: string
+  description?: string
 }
 
 export function ProjectCard({

@@ -1,18 +1,29 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("mobileMenuOpen") === "true"
+    }
+    return false
+  })
+  const pathname = usePathname()
+
+  useEffect(() => {
+    sessionStorage.setItem("mobileMenuOpen", isOpen.toString())
+  }, [isOpen])
 
   return (
     <nav className="fixed top-[15px] left-0 right-0 z-50 px-3 pointer-events-none">
       {/* Mobile Navigation */}
-      <div className="sm:hidden flex items-center gap-[6px] w-full pointer-events-auto">
+      <div className="sm:hidden flex items-center gap-[6px] w-full pointer-events-auto relative z-50">
         <AnimatePresence mode="wait">
           {!isOpen && (
             <motion.div
@@ -26,7 +37,8 @@ export function Navigation() {
                 href="/"
                 className={cn(
                   "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                  "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+                  "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+                  pathname === "/" ? "text-black" : "text-[#686868]"
                 )}
               >
                 otherdev
@@ -54,7 +66,8 @@ export function Navigation() {
                   href="/work"
                   className={cn(
                     "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] text-black transition-colors hover:text-black"
+                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+                    pathname?.startsWith("/work") ? "text-black" : "text-[#686868]"
                   )}
                 >
                   work
@@ -69,7 +82,8 @@ export function Navigation() {
                   href="/audio"
                   className={cn(
                     "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+                    pathname?.startsWith("/audio") ? "text-black" : "text-[#686868]"
                   )}
                 >
                   audio
@@ -84,7 +98,8 @@ export function Navigation() {
                   href="/about"
                   className={cn(
                     "h-[27px] w-[52px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-                    "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+                    "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+                    pathname?.startsWith("/about") ? "text-black" : "text-[#686868]"
                   )}
                 >
                   about
@@ -149,7 +164,8 @@ export function Navigation() {
           href="/"
           className={cn(
             "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+            pathname === "/" ? "text-black" : "text-[#686868]"
           )}
         >
           otherdev
@@ -158,7 +174,8 @@ export function Navigation() {
           href="/work"
           className={cn(
             "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] text-black transition-colors hover:text-black"
+            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+            pathname?.startsWith("/work") ? "text-black" : "text-[#686868]"
           )}
         >
           work
@@ -167,7 +184,8 @@ export function Navigation() {
           href="/audio"
           className={cn(
             "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+            pathname?.startsWith("/audio") ? "text-black" : "text-[#686868]"
           )}
         >
           audio
@@ -176,7 +194,8 @@ export function Navigation() {
           href="/about"
           className={cn(
             "h-[27px] w-[75px] rounded-[5px] backdrop-blur-[1px] bg-[rgba(227,227,227,0.93)] flex items-center justify-center",
-            "text-[11px] font-normal leading-[14px] text-[#686868] transition-colors hover:text-black"
+            "text-[11px] font-normal leading-[14px] transition-colors hover:text-black",
+            pathname?.startsWith("/about") ? "text-black" : "text-[#686868]"
           )}
         >
           about
@@ -192,11 +211,10 @@ export function Navigation() {
       </div>
 
 
-      {/* Backdrop to close menu when clicking outside */}
+      {/* Backdrop */}
       {isOpen && (
         <div
-          className="sm:hidden fixed inset-0 z-40 pointer-events-auto"
-          onClick={() => setIsOpen(false)}
+          className="sm:hidden fixed inset-0 z-30 pointer-events-none"
         />
       )}
     </nav>

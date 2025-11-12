@@ -19,6 +19,7 @@ export default function Home() {
               title={project.title}
               slug={project.slug}
               image={project.image}
+              description={project.description}
             />
           ))}
         </div>
