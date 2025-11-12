@@ -255,7 +255,7 @@ export function Navigation() {
 
       {/* Backdrop */}
       {isOpen && (
-        <div className="sm:hidden fixed inset-0 z-30 backdrop-blur-lg pointer-events-none" />
+        <div className="sm:hidden fixed inset-0 z-30 -backdrop-blur-lg pointer-events-none" />
       )}
 
       {/* Contact Dialog */}
