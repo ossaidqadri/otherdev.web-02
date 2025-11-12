@@ -45,8 +45,8 @@ export default function AboutPage() {
                 alt="The members of otherdev"
                 fill
                 className="object-cover bg-neutral-400 blur-md"
-                priority  
-              /> 
+                priority
+              />
             </div>
           </div>
         </div>

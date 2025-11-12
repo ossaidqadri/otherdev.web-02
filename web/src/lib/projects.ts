@@ -22,14 +22,15 @@ export const projects: Project[] = [
       "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_standard_size.png",
       "/images/projects/narkins-seo-2025/narkins_graphs_beauty.png",
       "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_2025_10_thar-water-supply-project-october-2025-nabisar-vajihar-completion.png",
-      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_comments.png"
+      "/images/projects/narkins-seo-2025/www.narkinsbuilders.com_blog_comments.png",
     ],
   },
   {
     id: "2",
     title: "Real Estate Platform Development for Bin Yousuf Group",
     slug: "bin-yousuf-2025",
-    image: "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
+    image:
+      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
     description:
       "Sophisticated real estate platform for Bin Yousuf Group showcasing premium waterfront properties in Karachi. Features interactive galleries, Google Sheets lead integration, and optimized UX for Emaar Oceanfront and HMR Waterfront luxury investments.",
     url: "binyousufgroup.com",
@@ -59,8 +60,7 @@ export const projects: Project[] = [
     id: "4",
     title: "E-commerce Platform for Olly Shinder",
     slug: "olly-shinder-2025",
-    image:
-      "/images/projects/olly-2025/products-page-desktop.png",
+    image: "/images/projects/olly-2025/products-page-desktop.png",
     description:
       "Olly Shinder is a menswear designer from London, part of the Fashion East and Dover Street Market incubators. We designed and developed a minimal, grid-based platform to unify his collections and e-commerce content.",
     url: "olly-shinder.com",
@@ -122,7 +122,8 @@ export const projects: Project[] = [
     id: "8",
     title: "Website Development for Groovy Pakistan",
     slug: "groovy-pakistan-2024",
-    image: "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.png",
+    image:
+      "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.png",
     description:
       "Strategic e-commerce website development for Groovy Pakistan mirroring the brand's dynamic spirit. Straightforward and engaging digital space that provides an intuitive pathway for customers to explore and purchase products.",
     url: "groovypakistan.com",
@@ -168,12 +169,9 @@ export const projects: Project[] = [
     id: "11",
     title: "Enterprise infrastructure development for Ek Qadam Aur",
     slug: "ekqadamaur-2024",
-    image:
-      "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
+    image: "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
     description: "Website Design, Website Development & Infrastructure",
     url: "ekqadamaur.kabeers.network",
-    media: [
-      "/images/projects/eqa-2024/www.ekqadamaur.org_.png",
-    ]
+    media: ["/images/projects/eqa-2024/www.ekqadamaur.org_.png"],
   },
 ];

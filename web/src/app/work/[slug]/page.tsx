@@ -134,10 +134,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   src={mediaUrl}
                   alt={`${project.title} - Image ${index + 1}`}
                   width={800}
-                  height={800} unoptimized
+                  height={800}
+                  unoptimized
                   sizes="100vw"
-                  className={cn("w-full h-auto object-contain rounded-[5px] px-6")}
-                  style={{ width: '100%', height: 'auto' }}
+                  className={cn(
+                    "w-full h-auto object-contain rounded-[5px] px-6",
+                  )}
+                  style={{ width: "100%", height: "auto" }}
                 />
               ))}
             </div>
