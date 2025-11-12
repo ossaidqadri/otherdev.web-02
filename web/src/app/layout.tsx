@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "OtherDev",
   description: "Digital platforms for pioneering creatives",
+  icons: {
+    icon: "/TheOtherDevLogo.svg",
+  },
 };
 
 export default function RootLayout({
