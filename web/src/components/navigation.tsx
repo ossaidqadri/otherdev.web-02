@@ -64,7 +64,7 @@ export function Navigation() {
                 data-slot="nav-item"
                 className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
               >
-                otherdev
+                other dev
               </Link>
             </motion.div>
           )}
@@ -175,7 +175,7 @@ export function Navigation() {
           data-slot="nav-item"
           className={cn(navItemVariants({ size: "brand", active: pathname === "/" }))}
         >
-          otherdev
+          other dev
         </Link>
         <Link
           href="/work"

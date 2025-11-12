@@ -33,7 +33,7 @@ export default function WorkPage() {
 
       <footer className="container mx-auto px-3 pb-12">
         <p className="text-[#686868] text-[10.9px] leading-[14px] tracking-[-0.24px] font-normal">
-          © taw vision llc
+          © other dev 
         </p>
       </footer>
     </div>
