@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: "Creative projects and digital experiments",
     images: ["/og-image.png"],
   },
-  canonical: "https://otherdev.com/stuff",
+  // canonical: "https://otherdev.com/stuff",
 };
 
 export default function StuffPage() {

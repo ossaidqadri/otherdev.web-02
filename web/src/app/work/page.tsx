@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     description: "Premium web design and development portfolio",
     images: ["/og-image.png"],
   },
-  canonical: "https://otherdev.com/work",
+  // canonical: "https://otherdev.com/work",
 };
 
 export default function WorkPage() {
@@ -45,7 +45,7 @@ export default function WorkPage() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "OtherDev",
+    name: "Other Dev",
     url: "https://otherdev.com",
     logo: "https://otherdev.com/TheOtherDevLogo.svg",
     description: "Digital platforms for pioneering creatives",

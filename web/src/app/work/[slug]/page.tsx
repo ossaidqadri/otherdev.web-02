@@ -15,7 +15,7 @@ interface ProjectPageProps {
 }
 
 // Enable static generation for all project pages
-export const dynamic = "error";
+// export const dynamic = "error";
 
 export async function generateStaticParams() {
   return projects.map((project) => ({
@@ -68,7 +68,7 @@ export async function generateMetadata({
       description: project.description,
       images: [imageUrl],
     },
-    canonical: projectUrl,
+    // canonical: projectUrl,
   };
 }
 
