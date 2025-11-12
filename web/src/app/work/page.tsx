@@ -1,8 +1,71 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { Navigation } from "@/components/navigation";
 import { projects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
 
+export const metadata: Metadata = {
+  title: "Our Work | OtherDev - Web & Design Solutions",
+  description:
+    "Explore our premium web design and development projects. We engineer digital solutions for pioneering brands across real estate, e-commerce, SaaS, and more.",
+  keywords: [
+    "web design",
+    "web development",
+    "portfolio",
+    "project showcase",
+    "digital solutions",
+    "OtherDev",
+  ],
+  openGraph: {
+    title: "Our Work | OtherDev",
+    description:
+      "Explore our premium web design and development projects. We engineer digital solutions for pioneering brands.",
+    type: "website",
+    url: "https://otherdev.com/work",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OtherDev Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Our Work | OtherDev",
+    description: "Premium web design and development portfolio",
+    images: ["/og-image.png"],
+  },
+  canonical: "https://otherdev.com/work",
+};
+
 export default function WorkPage() {
+  // JSON-LD Structured Data for the portfolio page
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "OtherDev",
+    url: "https://otherdev.com",
+    logo: "https://otherdev.com/TheOtherDevLogo.svg",
+    description: "Digital platforms for pioneering creatives",
+    sameAs: ["https://otherdev.com"],
+  };
+
+  const portfolioSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Our Work",
+    url: "https://otherdev.com/work",
+    description:
+      "Explore our premium web design and development projects. We engineer digital solutions for pioneering brands.",
+    creator: {
+      "@type": "Organization",
+      name: "OtherDev",
+      url: "https://otherdev.com",
+    },
+  };
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -36,6 +99,18 @@ export default function WorkPage() {
           © other dev
         </p>
       </footer>
+
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="organization-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <Script
+        id="portfolio-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioSchema) }}
+      />
     </div>
   );
 }

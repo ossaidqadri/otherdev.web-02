@@ -34,10 +34,8 @@ export const projects: Project[] = [
       "Sophisticated real estate platform for Bin Yousuf Group showcasing premium waterfront properties in Karachi. Features interactive galleries, Google Sheets lead integration, and optimized UX for Emaar Oceanfront and HMR Waterfront luxury investments.",
     url: "binyousufgroup.com",
     media: [
+      "/images/projects/bin-yousuf-2025/www.binyousufgroup.com_projects_panorama_standard_size.png",
       "/images/projects/bin-yousuf-2025/byg-property-showcase.webp",
-      "/images/projects/bin-yousuf-2025/emaar-properties-mobile.webp",
-      "/images/projects/bin-yousuf-2025/hmr-waterfront-gallery.webp",
-      "/images/projects/bin-yousuf-2025/lead-management-system.webp",
       "/images/projects/bin-yousuf-2025/luxury-apartments-karachi.webp",
       "/images/projects/bin-yousuf-2025/byg-logo-brand.webp",
     ],

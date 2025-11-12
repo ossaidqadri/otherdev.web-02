@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
+import type { Metadata } from "next";
 import { Navigation } from "@/components/navigation";
 import { projects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
@@ -12,10 +14,62 @@ interface ProjectPageProps {
   }>;
 }
 
+// Enable static generation for all project pages
+export const dynamic = "error";
+
 export async function generateStaticParams() {
   return projects.map((project) => ({
     slug: project.slug,
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: ProjectPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const project = projects.find((p) => p.slug === slug);
+
+  if (!project) {
+    return {
+      title: "Project Not Found | OtherDev",
+    };
+  }
+
+  const projectUrl = `https://otherdev.com/work/${slug}`;
+  const imageUrl = project.image;
+
+  return {
+    title: `${project.title} | OtherDev Portfolio`,
+    description: project.description,
+    keywords: [
+      "web design",
+      "web development",
+      "project",
+      project.title,
+      "OtherDev",
+    ],
+    openGraph: {
+      title: project.title,
+      description: project.description,
+      type: "article",
+      url: projectUrl,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: project.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.description,
+      images: [imageUrl],
+    },
+    canonical: projectUrl,
+  };
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
@@ -29,6 +83,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const relatedProjects = projects
     .filter((p) => p.id !== project.id)
     .slice(0, 13);
+
+  // JSON-LD Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description,
+    image: project.image,
+    url: `https://otherdev.com/work/${slug}`,
+    creator: {
+      "@type": "Organization",
+      name: "OtherDev",
+      url: "https://otherdev.com",
+    },
+  };
 
   return (
     <div className="min-h-screen relative">
@@ -116,6 +185,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           © other dev
         </p>
       </footer>
+
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="project-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </div>
   );
 }

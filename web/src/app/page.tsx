@@ -1,9 +1,10 @@
+
 import { Navigation } from "@/components/navigation";
 import { ProjectCard } from "@/components/project-card";
 import { playlistsAndImages, type PlaylistOrImage } from "@/lib/playlists-and-images";
 import { projects } from "@/lib/projects";
 import { shuffle } from "@/lib/utils";
-
+const data = shuffle([...playlistsAndImages, ...projects]);
 export default function Home() {
   return (
     <div className="min-h-screen">
@@ -17,7 +18,7 @@ export default function Home() {
           </p>
         </div>
         <div className="mt-[30px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[12px] gap-y-[15px]">
-          {shuffle([...playlistsAndImages, ...projects]).map((project) => (
+          {data.map((project) => (
             <ProjectCard
               key={project.id}
               title={project.title} 

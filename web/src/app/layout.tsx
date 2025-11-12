@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "OtherDev",
     description: "Digital platforms for pioneering creatives",
+    type: "website",
+    url: "https://otherdev.com",
     images: [
       {
         url: "/og-image.png",
@@ -25,6 +27,22 @@ export const metadata: Metadata = {
     description: "Digital platforms for pioneering creatives",
     images: ["/og-image.png"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({
@@ -33,8 +51,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-[Arial,sans-serif] antialiased bg-background">{children}</body>
+    <html lang="en" style={{ colorScheme: "light dark" }}>
+      <head>
+        {/* View Transitions API Support */}
+        <meta name="view-transition" content="same-origin" />
+      </head>
+      <body className="font-[Arial,sans-serif] antialiased bg-background">
+        {children}
+      </body>
     </html>
   );
 }
