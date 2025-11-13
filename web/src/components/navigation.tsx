@@ -159,6 +159,23 @@ export function Navigation() {
                   contact
                 </button>
               </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                <Link
+                  href="https://wa.me/923156893331?text=Hi!%20I%20found%20you%20through%20otherdev.com%20and%20would%20love%20to%20discuss%20a%20project."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-slot="nav-item"
+                  className={cn(
+                    navItemVariants({ size: "mobileWide", active: false }),
+                  )}
+                >
+                  whatsapp
+                </Link>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -253,6 +270,15 @@ export function Navigation() {
         >
           contact
         </button>
+        <Link
+          href="https://wa.me/923156893331?text=Hi!%20I%20found%20you%20through%20otherdev.com%20and%20would%20love%20to%20discuss%20a%20project."
+          target="_blank"
+          rel="noopener noreferrer"
+          data-slot="nav-item"
+          className={cn(navItemVariants({ size: "default", active: false }))}
+        >
+          whatsapp
+        </Link>
       </div>
 
       {/* Backdrop */}

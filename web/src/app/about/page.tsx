@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -163,37 +164,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Social Section */}
-        <section className="mt-[30px]">
-          <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[13px]">
-            Social
-          </h2>
-          <div className="flex items-center gap-[6px] mb-[56px]">
-            <Link
-              href="https://instagram.com/other.dev"
-              className="h-[21px] px-1.5 bg-neutral-200 rounded-md flex items-center justify-center text-[#686868] text-[10px] font-normal leading-[14px] tracking-[-0.24px] hover:bg-neutral-300 transition-colors"
-            >
-              Instagram
-            </Link>
-            <Link
-              href="http://linkedin.com/company/theotherdev/"
-              className="h-[21px] px-1.5 bg-neutral-200 rounded-md flex items-center justify-center text-[#686868] text-[10px] font-normal leading-[14px] tracking-[-0.24px] hover:bg-neutral-300 transition-colors"
-            >
-              LinkedIn
-            </Link>
-            {/* <Link
-              href="https://silk.co"
-              className="h-[21px] px-1.5 bg-neutral-200 rounded-md flex items-center justify-center text-[#686868] text-[10px] font-normal leading-[14px] tracking-[-0.24px] hover:bg-neutral-300 transition-colors"
-            >
-              Silk
-            </Link> */}
-          </div>
-
-          {/* Footer */}
-          <p className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px]">
-            © other dev
-          </p>
-        </section>
+        <Footer />
       </main>
 
       {/* JSON-LD Structured Data */}

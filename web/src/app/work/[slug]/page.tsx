@@ -4,6 +4,7 @@ import Image from "next/image";
 import Script from "next/script";
 import type { Metadata } from "next";
 import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 import { projects } from "@/lib/projects";
 import { ProjectCard } from "@/components/project-card";
 import { cn } from "@/lib/utils";
@@ -181,13 +182,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             Back to Work
           </span>
         </Link>
+        <Footer />
       </main>
-
-      <footer className="px-3 pb-[37.37px]">
-        <p className="text-[#686868] text-[10.9px] leading-[14px] tracking-[-0.24px] font-normal">
-          © other dev
-        </p>
-      </footer>
 
       {/* JSON-LD Structured Data */}
       <Script
