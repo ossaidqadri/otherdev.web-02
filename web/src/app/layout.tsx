@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { TRPCProvider } from "@/components/providers";
+import { TenantProvider } from "@/lib/tenant-context";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://otherdev.com"),
@@ -60,7 +62,11 @@ export default function RootLayout({
         <meta name="view-transition" content="same-origin" />
       </head>
       <body className="font-[Arial,sans-serif] antialiased bg-background">
-        <TRPCProvider>{children}</TRPCProvider>
+        <TenantProvider>
+          <TRPCProvider>
+            <Suspense fallback={null}>{children}</Suspense>
+          </TRPCProvider>
+        </TenantProvider>
       </body>
     </html>
   );
