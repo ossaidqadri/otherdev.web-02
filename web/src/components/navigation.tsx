@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ContactDialog } from "@/components/contact-dialog";
 
 const navItemVariants = cva(
-  "flex items-center justify-center rounded-md backdrop-blur-sm bg-stone-200/95 text-[11px] font-normal leading-tight transition-colors hover:text-foreground",
+  "flex items-center justify-center rounded-md backdrop-blur-sm bg-stone-200/70 text-[11px] font-normal leading-tight transition-colors hover:text-foreground",
   {
     variants: {
       size: {
@@ -35,14 +35,16 @@ const navItemVariants = cva(
 type NavItemVariantProps = VariantProps<typeof navItemVariants>;
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("mobileMenuOpen") === "true";
-    }
-    return false;
-  });
+  const [isOpen, setIsOpen] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("mobileMenuOpen");
+    if (saved === "true") {
+      setIsOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     sessionStorage.setItem("mobileMenuOpen", isOpen.toString());

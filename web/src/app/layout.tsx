@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { TRPCProvider } from "@/components/providers";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://otherdev.com"),
   title: "OtherDev",
   description: "Digital platforms for pioneering creatives",
   icons: {
@@ -38,11 +40,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -57,7 +60,7 @@ export default function RootLayout({
         <meta name="view-transition" content="same-origin" />
       </head>
       <body className="font-[Arial,sans-serif] antialiased bg-background">
-        {children}
+        <TRPCProvider>{children}</TRPCProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { trpc } from "@/lib/trpc";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +50,6 @@ interface ContactDialogProps {
 
 export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
   const [step, setStep] = useState<"intro" | "form">("intro");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -62,29 +62,19 @@ export function ContactDialog({ open, onOpenChange }: ContactDialogProps) {
     },
   });
 
-  const onSubmit = async (data: ContactFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit form");
-      }
-
+  const submitMutation = trpc.contact.submit.useMutation({
+    onSuccess: () => {
       form.reset();
       setStep("intro");
       onOpenChange(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Error submitting form:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: ContactFormValues) => {
+    submitMutation.mutate(data);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -204,9 +194,9 @@ We will reach out to you with the next steps as soon as possible.`}
                 <button
                   type="submit"
                   className="w-full mt-[12px] sm:mt-[15px] h-8 sm:h-9 flex items-center justify-center rounded-md backdrop-blur-sm bg-stone-200/95 text-[11px] font-normal text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSubmitting}
+                  disabled={submitMutation.isPending}
                 >
-                  <p>{isSubmitting ? "Submitting..." : "Submit"}</p>
+                  <p>{submitMutation.isPending ? "Submitting..." : "Submit"}</p>
                 </button>
               </form>
             </Form>

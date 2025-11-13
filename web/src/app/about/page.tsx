@@ -4,32 +4,21 @@ import Link from "next/link";
 
 export default function AboutPage() {
   const clientsDesktop = [
-    ["Basketcase Gallery", "J.L-A.L", "Olly Shinder"],
-    ["Bryan Jimenèz", "Juliet Johnstone", "ROA Hiking"],
-    ["Constant Practice", "Koss, Inc", "Ranxelle Soria"],
-    ["David Casavant", "Kunai Online", "Regrets Only"],
-    ["Dover Street Market", "Lil Uzi Vert", "SALEM"],
-    ["Fey Fey Worldwide", "Magic Molecule", "SPECIAL OFFER, Inc."],
-    ["Genius", "Margot Magazine", "Surf Gang Records"],
-    ["Geoffrey B. Small", "New Balance", "World Health Organization"],
-    ["Iessi", "Oddli Inc", "Worldwide Staffing"],
+    ["Narkins Builders", "Groovy Pakistan", "Olly Shinder"],
+    ["Bin Yousuf Group", "Parcheh81", "Tiny Footprint Coffee"],
+    ["Lexa", "Finlit", "Ek Qadam Aur"],
+    ["Wish Apparels", "Kiswa Noir", "BLVD"],
+    ["CLTRD Legacy"],
   ];
 
   const clientsMobile = [
-    ["Basketcase Gallery", "Magic Molecule"],
-    ["Bryan Jimenèz", "Margot Magazine"],
-    ["Constant Practice", "New Balance"],
-    ["David Casavant", "Oddli Inc"],
-    ["Dover Street Market", "Olly Shinder"],
-    ["Fey Fey Worldwide", "ROA Hiking"],
-    ["Genius", "Ranxelle Soria"],
-    ["Geoffrey B. Small", "Regrets Only"],
-    ["Iessi", "SALEM"],
-    ["J.L-A.L", "SPECIAL OFFER, Inc."],
-    ["Juliet Johnstone", "Surf Gang Records"],
-    ["Koss, Inc", "World Health Organization"],
-    ["Kunai Online", "Worldwide Staffing"],
-    ["Lil Uzi Vert"],
+    ["Narkins Builders", "Parcheh81"],
+    ["Bin Yousuf Group", "Tiny Footprint Coffee"],
+    ["Lexa", "Ek Qadam Aur"],
+    ["Olly Shinder", "Groovy Pakistan"],
+    ["Wish Apparels", "Finlit"],
+    ["Kiswa Noir", "BLVD"],
+    ["CLTRD Legacy"],
   ];
 
   return (
@@ -39,12 +28,19 @@ export default function AboutPage() {
         {/* Hero Image */}
         <div className="grid grid-cols-12 gap-[12px]">
           <div className="col-span-12 sm:col-span-10">
-            <div className="relative w-full aspect-[3/1] rounded-[5px] overflow-hidden">
+            <div className="relative w-full aspect-[9/4] rounded-[5px] overflow-hidden">
               <Image
-                src="/images/about-page/kabeer-and-ossaid-ai-landscape.png"
+                src="/images/about-page/about-team-combined.webp"
                 alt="The members of otherdev"
                 fill
-                className="object-cover bg-neutral-400 blur-md"
+                className="sm:hidden object-cover object-center bg-stone-200"
+                priority
+              />
+              <Image
+                src="/images/about-page/about-team-combined-desktop.webp"
+                alt="The members of otherdev"
+                fill
+                className="hidden sm:block object-cover object-center bg-stone-200"
                 priority
               />
             </div>
@@ -100,7 +96,7 @@ export default function AboutPage() {
         </div>
 
         {/* Social Section */}
-        <section>
+        <section className="mt-[30px]">
           <h2 className="text-[#686868] text-[11px] font-normal leading-[14px] tracking-[-0.24px] mb-[13px]">
             Social
           </h2>
