@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Stuff | OtherDev - Creative Projects & Experiments",
@@ -76,13 +77,8 @@ export default function StuffPage() {
             </p>
           </div>
         </div>
+        <Footer />
       </main>
-
-      <footer className="container mx-auto px-3 pb-12">
-        <p className="text-[#686868] text-[10.9px] leading-[14px] tracking-[-0.24px] font-normal">
-          © other dev
-        </p>
-      </footer>
 
       {/* JSON-LD Structured Data */}
       <Script

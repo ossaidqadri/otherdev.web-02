@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 import { ProjectCard } from "@/components/project-card";
 import {
   playlistsAndImages,
@@ -32,12 +33,8 @@ export default function Home() {
             />
           ))}
         </div>
+        <Footer />
       </main>
-      <footer className="px-3 pb-[37.37px]">
-        <p className="text-[#686868] text-[10.9px] leading-[14px] tracking-[-0.24px] font-normal">
-          © other dev
-        </p>
-      </footer>
     </div>
   );
 }
