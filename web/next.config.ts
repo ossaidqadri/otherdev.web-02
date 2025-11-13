@@ -22,6 +22,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/expertise",
+        destination: "/work",
+        permanent: true,
+      },
+      {
+        source: "/ur/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
+      {
+        source: "/de/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
