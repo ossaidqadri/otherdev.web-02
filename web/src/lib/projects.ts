@@ -126,11 +126,10 @@ export const projects: Project[] = [
       "/images/projects/groovy-pakistan-2024/groovypakistan.com-standard-size.webp",
     description:
       "Strategic e-commerce website development for Groovy Pakistan mirroring the brand's dynamic spirit. Straightforward and engaging digital space that provides an intuitive pathway for customers to explore and purchase products.",
-    url: "groovypakistan.com",
     media: [
       "/images/projects/groovy-pakistan-2024/groovy-group.webp",
       "/images/projects/groovy-pakistan-2024/groovy-home-mobile.webp",
-      "/images/projects/groovy-pakistan-2024/pants.webp",
+      "/images/projects/groovy-pakistan-2024/groovy-layers.webp",
       "/images/projects/groovy-pakistan-2024/shirts-cropped.webp",
     ],
   },
@@ -159,19 +158,38 @@ export const projects: Project[] = [
       "Strategic subscription migration from Recharge to Shopify Payments for Tiny Footprint Coffee, the world's first carbon-negative coffee company. Seamless transition with data integrity ensuring uninterrupted service for their mission-supporting subscribers.",
     url: "tinyfootprintcoffee.com",
     media: [
-      "/images/projects/parcheh81-2024/parcheh-home-mobile.webp",
-      "/images/projects/parcheh81-2024/parcheh-menu-mobile.webp",
-      "/images/projects/parcheh81-2024/parcheh-logo-gridded.webp",
-      "/images/projects/parcheh81-2024/girl-standing-square.webp",
+      "/images/projects/tinyfootprintcoffee/www.tinyfootprintcoffee.com_.webp",
+      "/images/projects/tinyfootprintcoffee/Mexico_808b95c1-9643-49c2-a054-eaf2bc2cf8f9.webp",
     ],
   },
   {
     id: "11",
+    title: "Website Development for Cultured Legacy",
+    slug: "cultured-legacy-2025",
+    image: "/images/projects/cultured-legacy-2025/culturedlegacy.shop_.png",
+    description: "Strategic e-commerce website development for Cultured Legacy that honors the brand's refined heritage. A sophisticated yet accessible digital space that guides customers through a curated journey of exploration and discovery.",
+    url: "culturedlegacy.shop",
+    media: [
+      "/images/projects/cultured-legacy-2025/culturedlegacy.shop_.png",
+      "/images/projects/cultured-legacy-2025/other.dev-13-11-2025-0004.webp"
+    ],
+  },
+  {
+    id: "12",
     title: "Enterprise infrastructure development for Ek Qadam Aur",
     slug: "ekqadamaur-2024",
     image: "/images/projects/eqa-2024/www.ekqadamaur.org_.webp",
-    description: "Website Design, Website Development & Infrastructure",
-    url: "ekqadamaur.kabeers.network",
-    media: ["/images/projects/eqa-2024/www.ekqadamaur.org_.webp"],
+    description: "Long-term technical partnership serving as the core technology team for Ek Qadam Aur NGO. Comprehensive end-to-end management including website design, development, hosting infrastructure, and ongoing technical support. From inception to present day, we've been their dedicated technology partner, ensuring seamless digital operations for their social impact initiatives.",
+    url: "ekqadamaur.org",
+    media: ["/images/projects/eqa-2024/www.ekqadamaur.org_.webp", "/images/projects/eqa-2024/ekqadamaur.webp"],
+  },
+  {
+    id: "13",
+    title: "Enterprise infrastructure development for NTL Exchange",
+    slug: "ntl-2024",
+    image: "/images/projects/ntl-trading-2024/1743818053315_100.png",
+    description: "Comprehensive digital transformation for NTL Exchange, encompassing complete brand identity creation, custom mobile application development for seamless on-the-go trading, responsive website design and development, and robust enterprise infrastructure solutions. A unified ecosystem that delivers secure, efficient, and user-friendly exchange services across all platforms.",
+    url: "www.ntlex.com",
+    media: ["/images/projects/ntl-trading-2024/1743818053315_100.png", "/images/projects/ntl-trading-2024/IMG_20250405_065546_880.webp"],
   },
 ];
