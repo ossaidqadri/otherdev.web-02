@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { ProjectCard } from "@/components/project-card";
@@ -7,7 +9,66 @@ import {
 } from "@/lib/playlists-and-images";
 import { projects } from "@/lib/projects";
 import { shuffle } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "OtherDev - Digital Platforms for Pioneering Creatives",
+  description:
+    "OtherDev produces digital platforms for pioneering creatives. Full-service web development and design studio based in Karachi, specializing in fashion and design fields.",
+  keywords: [
+    "web development",
+    "web design",
+    "digital platforms", 
+    "fashion design",
+    "creative studio",
+    "Karachi",
+    "OtherDev",
+  ],
+  openGraph: {
+    title: "OtherDev - Digital Platforms for Pioneering Creatives",
+    description:
+      "OtherDev produces digital platforms for pioneering creatives. Full-service web development and design studio based in Karachi.",
+    type: "website",
+    url: "https://otherdev.com",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OtherDev - Digital Platforms for Pioneering Creatives",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OtherDev - Digital Platforms for Pioneering Creatives",
+    description:
+      "Full-service web development and design studio for pioneering creatives",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 const data = shuffle([...playlistsAndImages, ...projects]);
+
+// JSON-LD Structured Data
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "OtherDev",
+  url: "https://otherdev.com",
+  logo: "https://otherdev.com/TheOtherDevLogo.svg",
+  description: "Digital platforms for pioneering creatives",
+  sameAs: ["https://otherdev.com"],
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Karachi",
+    addressCountry: "Pakistan",
+  },
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen">

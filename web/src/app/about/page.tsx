@@ -1,7 +1,75 @@
+import type { Metadata } from "next";
+import Script from "next/script";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "About OtherDev - Digital Platforms for Pioneering Creatives",
+  description:
+    "Learn about OtherDev, a full-service web development and design studio based in Karachi. Discover our team, mission, and the clients we've worked with.",
+  keywords: [
+    "about OtherDev",
+    "web design studio",
+    "Karachi web development",
+    "creative studio team",
+    "digital agency",
+    "design studio",
+  ],
+  openGraph: {
+    title: "About OtherDev - Digital Platforms for Pioneering Creatives",
+    description:
+      "Learn about OtherDev, a full-service web development and design studio based in Karachi.",
+    type: "website",
+    url: "https://otherdev.com/about",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "About OtherDev - Digital Platforms for Pioneering Creatives",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About OtherDev - Digital Platforms for Pioneering Creatives",
+    description: "Learn about our team and mission",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+// JSON-LD Structured Data
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "OtherDev",
+  url: "https://otherdev.com",
+  logo: "https://otherdev.com/TheOtherDevLogo.svg",
+  description: "Digital platforms for pioneering creatives",
+  sameAs: ["https://otherdev.com"],
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Karachi",
+    addressCountry: "Pakistan",
+  },
+  foundingDate: "2021",
+  founders: [
+    {
+      "@type": "Person",
+      name: "Kabeer Jaffri",
+    },
+    {
+      "@type": "Person",
+      name: "Ossaid Qadri",
+    },
+  ],
+};
 
 export default function AboutPage() {
   const clientsDesktop = [
@@ -98,6 +166,13 @@ export default function AboutPage() {
 
         <Footer />
       </main>
+
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="about-organization-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
     </div>
   );
 }
