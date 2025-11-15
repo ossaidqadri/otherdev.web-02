@@ -1,7 +1,7 @@
 
 import Link from 'next/link'
 import { CanvasClient } from '@od-canvas/sdk';
-
+// @ts-ignore
 export default async function BlogPostPage({params}) {
   const slug = (await params).slug as string;
   const canvas = new CanvasClient({
