@@ -46,7 +46,7 @@ export function ChatWidget() {
         >
           <Image
             src="/otherdev-chat-logo-32.webp"
-            alt="Other Dev AI"
+            alt="Other Dev Loom"
             width={32}
             height={32}
             loading="eager"
@@ -77,13 +77,13 @@ export function ChatWidget() {
             <div className="flex items-center gap-2">
               <Image
                 src="/otherdev-chat-logo-32.webp"
-                alt="Other Dev AI"
+                alt="Other Dev Loom"
                 width={24}
                 height={24}
                 className="h-6 w-6 object-contain"
                 style={{ width: 'auto', height: 'auto' }}
               />
-              <h3 className="text-sm font-medium text-foreground">Other Dev AI</h3>
+              <h3 className="text-sm font-medium text-foreground">Other Dev Loom</h3>
             </div>
             <button
               type="button"
