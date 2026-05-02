@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description:
       "Learn about Other Dev, a full-service web development and design studio based in Karachi. Discover our team, mission, and the clients we've worked with.",
     path: '/about',
-    imagePath: '/images/about-page/about-team-combined-desktop.webp',
+    imagePath: '/images/about-page/about-team-new.png',
     imageAlt: 'About Other Dev',
   }),
 }
@@ -82,19 +82,11 @@ export default function AboutPage() {
           <div className="col-span-12 sm:col-span-10">
             <div className="relative w-full aspect-[9/4] rounded-[5px] overflow-hidden animate-in fade-in zoom-in-95 duration-500">
               <Image
-                src="/images/about-page/about-team-combined.webp"
+                src="/images/about-page/about-team-new.png"
                 alt="The members of otherdev"
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 83vw, 69vw"
-                className="sm:hidden object-cover object-center bg-stone-200"
-                priority
-              />
-              <Image
-                src="/images/about-page/about-team-combined-desktop.webp"
-                alt="The members of otherdev"
-                fill
-                sizes="(max-width: 640px) 0vw, (max-width: 1024px) 0vw, 69vw"
-                className="hidden sm:block object-cover object-center bg-stone-200"
+                className="object-cover object-center bg-stone-200"
                 priority
               />
             </div>
