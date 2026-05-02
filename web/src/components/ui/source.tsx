@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext } from 'react'
+import Image from 'next/image'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { cn } from '@/lib/utils'
 
@@ -61,12 +62,13 @@ export function SourceTrigger({ label, showFavicon = false, className }: SourceT
       )}
     >
       {showFavicon && (
-        <img
+        <Image
           src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(href)}`}
           alt="favicon"
           width={14}
           height={14}
           className="size-3.5 rounded-full"
+          unoptimized
         />
       )}
       <span className="truncate tabular-nums text-center font-normal">{labelToShow}</span>
@@ -87,12 +89,13 @@ export function SourceContent({ title, description, className }: SourceContentPr
     <HoverCardContent className={cn('w-80 p-0 shadow-xs', className)}>
       <a href={href} target="_blank" rel="noopener noreferrer" className="flex flex-col gap-2 p-3">
         <div className="flex items-center gap-1.5">
-          <img
+          <Image
             src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(href)}`}
             alt="favicon"
-            className="size-4 rounded-full"
             width={16}
             height={16}
+            className="size-4 rounded-full"
+            unoptimized
           />
           <div className="text-primary truncate text-sm">{domain.replace('www.', '')}</div>
         </div>

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function NotFound() {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -18,11 +20,12 @@ export default function NotFound() {
 
       <div className="relative flex h-[400px] max-h-screen w-full p-2 lg:h-full">
         <div className="h-full w-full rounded-2xl bg-black" />
-        {/* biome-ignore lint/performance/noImgElement: External CDN image for 404 illustration */}
-        <img
+        <Image
           src="https://cdn.shadcnstudio.com/ss-assets/blocks/marketing/error/image-1.png"
           alt="404 illustration"
-          className="absolute top-1/2 left-1/2 h-[clamp(200px,40vw,406px)] -translate-x-1/2 -translate-y-1/2 lg:h-[clamp(260px,25vw,406px)]"
+          fill
+          className="object-cover absolute top-1/2 left-1/2 h-[clamp(200px,40vw,406px)] -translate-x-1/2 -translate-y-1/2 lg:h-[clamp(260px,25vw,406px)]"
+          unoptimized
         />
       </div>
     </div>

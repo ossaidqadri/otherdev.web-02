@@ -271,12 +271,14 @@ function UserMessage({ message }: { message: UIMessage }) {
           {imageParts.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-end">
               {imageParts.map((img, i) => (
-                // biome-ignore lint/performance/noImgElement: User-uploaded image preview in chat
-                <img
+                <Image
                   key={`img-${i}-${img.url}`}
                   src={img.url}
                   alt={img.filename || 'Attachment'}
+                  width={192}
+                  height={192}
                   className="max-h-48 max-w-48 rounded-xl object-cover"
+                  unoptimized
                 />
               ))}
             </div>
@@ -487,8 +489,7 @@ function AttachmentChip({ file, onRemove }: { file: File; onRemove: () => void }
     <div className="relative flex group items-center gap-1.5 border rounded-t-xl pb-4 mb-[-10px] bg-accent px-2 py-1.5 text-xs text-accent-foreground">
       {isImage && previewUrl ? (
         <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-background">
-          {/* biome-ignore lint/performance/noImgElement: User file preview thumbnail */}
-          <img src={previewUrl} alt={file.name} className="h-full w-full object-contain" />
+          <Image src={previewUrl} alt={file.name} fill className="object-contain" unoptimized />
         </div>
       ) : (
         <FileText className="h-6 w-6 shrink-0 opacity-70" />
