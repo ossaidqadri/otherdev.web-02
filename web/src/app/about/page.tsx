@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description:
       "Learn about Other Dev, a full-service web development and design studio based in Karachi. Discover our team, mission, and the clients we've worked with.",
     path: '/about',
-    imagePath: '/images/about-page/about-team-new.png',
+    imagePath: '/images/about-page/about-team-og.png',
     imageAlt: 'About Other Dev',
   }),
 }
