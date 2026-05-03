@@ -1,33 +1,9 @@
-import { cert, getApps, initializeApp } from 'firebase-admin/app'
-import type { DocumentData, QuerySnapshot } from 'firebase-admin/firestore'
-import { FieldValue, getFirestore } from 'firebase-admin/firestore'
-import { cache } from 'react'
+import { QdrantClient } from '@qdrant/js-client-rest'
 
-function getDb() {
-  if (!getApps().length) {
-    const projectId = process.env.FIREBASE_PROJECT_ID
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
-
-    if (!projectId || !privateKey || !clientEmail) {
-      if (process.env.NODE_ENV === 'production') {
-        console.warn('Firebase environment variables are missing. Firestore will not be available.')
-      }
-      return null
-    }
-
-    initializeApp({
-      credential: cert({
-        projectId,
-        privateKey: privateKey.replace(/\\n/g, '\n'),
-        clientEmail,
-      }),
-    })
-  }
-  return getFirestore()
-}
-
-const DOCUMENTS_COLLECTION = 'documents'
+const qdrant = new QdrantClient({
+  url: process.env.QDRANT_URL ?? '',
+  apiKey: process.env.QDRANT_API_KEY ?? '',
+})
 
 export interface MatchedDocument {
   id: string
@@ -44,82 +20,41 @@ export interface MatchedDocument {
   similarity: number
 }
 
-// Cache document search per-request to avoid duplicate Firestore queries
+// Cache document search per-request to avoid duplicate Qdrant queries
 // for the same embedding within a single request
-export const searchSimilarDocuments = cache(async function searchSimilarDocuments(
+export const searchSimilarDocuments = async function searchSimilarDocuments(
   queryEmbedding: number[],
   matchThreshold: number = 0.1,
   matchCount: number = 5
 ): Promise<MatchedDocument[]> {
-  const db = getDb()
-  if (!db) {
-    console.error('Firestore database is not initialized.')
-    return []
-  }
-  const collection = db.collection(DOCUMENTS_COLLECTION)
-
-  const vectorQuery = collection.findNearest({
-    vectorField: 'embedding',
-    queryVector: FieldValue.vector(queryEmbedding),
+  const results = await qdrant.search('otherdev_documents', {
+    vector: queryEmbedding,
     limit: matchCount,
-    distanceMeasure: 'COSINE',
-    distanceResultField: 'distance',
-    distanceThreshold: 1 - matchThreshold,
+    score_threshold: 1 - matchThreshold,
   })
 
-  // Apply timeout to prevent hanging on Firebase latency spikes
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Firestore vector search timed out after 10s')), 10000)
-  })
-
-  let snapshot: Awaited<ReturnType<typeof vectorQuery.get>>
-  try {
-    snapshot = await Promise.race([vectorQuery.get(), timeoutPromise])
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('timed out')) {
-      console.error('[VectorSearch] Query timed out:', error.message)
-      return []
-    }
-    throw error
-  }
-
-  if (snapshot.empty) {
-    return []
-  }
-
-  return snapshot.docs.map(doc => {
-    const data = doc.data()
-    const distance = data.distance as number
-    return {
-      id: doc.id,
-      content: data.content as string,
-      metadata: data.metadata as MatchedDocument['metadata'],
-      similarity: 1 - distance,
-    }
-  })
-})
+  return results
+    .map(r => {
+      if (!r.payload) return null
+      return {
+        id: r.id as string,
+        content: r.payload.content as string,
+        metadata: r.payload.metadata as MatchedDocument['metadata'],
+        similarity: r.score,
+      }
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null)
+}
 
 export async function deleteAllDocuments(): Promise<void> {
-  const db = getDb()
-  if (!db) {
-    console.error('Firestore database is not initialized.')
-    return
+  try {
+    await qdrant.deleteCollection('otherdev_documents')
+  } catch {
+    /* collection may not exist */
   }
-  const collection = db.collection(DOCUMENTS_COLLECTION)
-  const snapshot = await collection.get()
-
-  if (snapshot.empty) return
-
-  const batchSize = 500
-  const docs = snapshot.docs
-
-  for (let i = 0; i < docs.length; i += batchSize) {
-    const batch = db.batch()
-    for (const doc of docs.slice(i, i + batchSize)) {
-      batch.delete(doc.ref)
-    }
-    await batch.commit()
-  }
+  await qdrant.createCollection('otherdev_documents', {
+    vectors: { size: 1536, distance: 'Cosine' },
+  })
 }
 
 export async function insertDocument(
@@ -135,18 +70,15 @@ export async function insertDocument(
   },
   embedding: number[]
 ): Promise<string> {
-  const db = getDb()
-  if (!db) {
-    throw new Error('Firestore database is not initialized.')
-  }
-  const collection = db.collection(DOCUMENTS_COLLECTION)
-
-  const docRef = await collection.add({
-    content,
-    metadata,
-    embedding: FieldValue.vector(embedding),
-    createdAt: FieldValue.serverTimestamp(),
+  const id = crypto.randomUUID()
+  await qdrant.upsert('otherdev_documents', {
+    points: [
+      {
+        id,
+        vector: embedding,
+        payload: { content, metadata },
+      },
+    ],
   })
-
-  return docRef.id
+  return id
 }
