@@ -1,40 +1,40 @@
 import { gateway } from 'ai'
 
-// Provider model identifiers
+// Primary model identifiers
+const CEREBRAS_MODEL = 'cerebras/qwen-3-235b-a22b-instruct-2507'
 const GROQ_SCOUT = 'groq/llama-4-scout-17b-16e-instruct'
-const GROQ_LLAMA = 'groq/llama-3.3-70b-versatile'
-const CEREBRAS_QWEN = 'cerebras/qwen-3-235b-a22b-instruct-2507'
-const MISTRAL_CODESTRAL = 'mistral/codestral'
-const MINIMAX_M2_7 = 'minimax/minimax-m2.7'
+const GROQ_VISION_MODEL = 'groq/llama-4-scout-17b-16e-instruct'
 
-// Fallback chain for fast model (Cerebras primary → Mistral → MiniMax)
-export const FAST_MODEL_FALLBACKS = [MISTRAL_CODESTRAL, MINIMAX_M2_7]
-
-// Fallback chain for capable model (Groq primary → Mistral → MiniMax)
-export const CAPABLE_MODEL_FALLBACKS = [MISTRAL_CODESTRAL, MINIMAX_M2_7]
+// Fallback chains — AI Gateway retries left-to-right on error/timeout
+// Fast: Cerebras → Groq Qwen → Mistral Large
+export const FAST_MODEL_FALLBACKS = ['groq/qwen-3-235b-a22b-instruct-2507', 'mistral/mistral-large-latest']
+// Vision: Groq Scout → Mistral (multimodal)
+export const VISION_MODEL_FALLBACKS = ['mistral/pixtral-12b-2409']
+// Capable uses same fallbacks as fast
+export const CAPABLE_MODEL_FALLBACKS = FAST_MODEL_FALLBACKS
 
 /**
- * Fast general-purpose model — Cerebras Qwen-3-235B primary (fastest).
- * Falls back to Mistral → MiniMax.
+ * Fast general-purpose model — Cerebras primary.
+ * Falls back to Groq GPT-OSS → Cohere Command-R.
  */
 export function getFastModel() {
-  return gateway(CEREBRAS_QWEN)
+  return gateway(CEREBRAS_MODEL)
 }
 
 /**
  * Capable model for complex tasks — Groq Scout primary.
- * Best for reasoning, tool calling, code generation, artifacts, vision.
+ * Best for reasoning, tool calling, code generation, artifacts.
  */
 export function getCapableModel() {
   return gateway(GROQ_SCOUT)
 }
 
 /**
- * Vision-capable model — Groq Llama-4-Scout (multimodal).
- * MiniMax M-series blocks image input, so Groq is required.
+ * Vision-capable model — Groq Scout (multimodal).
+ * Falls back to Cohere Command-A-Vision.
  */
 export function getVisionModel() {
-  return gateway(GROQ_SCOUT)
+  return gateway(GROQ_VISION_MODEL)
 }
 
 /**

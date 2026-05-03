@@ -27,6 +27,7 @@ import {
 import {
   CAPABLE_MODEL_FALLBACKS,
   FAST_MODEL_FALLBACKS,
+  VISION_MODEL_FALLBACKS,
   getCapableModel,
   getFastModel,
   getVisionModel,
@@ -393,6 +394,12 @@ export async function handleStreamChat({
   const systemPrompt =
     routeDecision.route === 'general_chat' ? getGeneralSystemPrompt() : getSystemPromptDomain()
 
+  const getFallbackChain = () => {
+    if (hasImageContent) return VISION_MODEL_FALLBACKS
+    if (enableArtifacts || enableWebSearch) return CAPABLE_MODEL_FALLBACKS
+    return FAST_MODEL_FALLBACKS
+  }
+
   const result = streamText({
     model: selectedModel,
     system: systemPrompt,
@@ -404,7 +411,7 @@ export async function handleStreamChat({
     tools,
     providerOptions: {
       gateway: {
-        models: enableArtifacts || enableWebSearch ? CAPABLE_MODEL_FALLBACKS : FAST_MODEL_FALLBACKS,
+        models: getFallbackChain(),
       },
     },
   })
