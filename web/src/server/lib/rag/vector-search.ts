@@ -30,7 +30,7 @@ export const searchSimilarDocuments = async function searchSimilarDocuments(
   const results = await qdrant.search('otherdev_documents', {
     vector: queryEmbedding,
     limit: matchCount,
-    score_threshold: 1 - matchThreshold,
+    score_threshold: matchThreshold,
   })
 
   return results
