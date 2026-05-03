@@ -3,10 +3,7 @@ import { knowledgeBase } from '../src/lib/knowledge-base'
 import { generateEmbeddingBatch } from '../src/server/lib/rag/embeddings'
 import { deleteAllDocuments, insertDocument } from '../src/server/lib/rag/vector-search'
 
-// Cohere embed-english-v4.0 rate limits: check documentation for current limits
-// Batch size of 10 docs (~200-400 tokens each ≈ 2-4K tokens/call) stays reasonable
 const BATCH_SIZE = 10
-// Delay between batches to respect rate limits
 const BATCH_DELAY_MS = 500
 
 function computeKbVersion(): string {
