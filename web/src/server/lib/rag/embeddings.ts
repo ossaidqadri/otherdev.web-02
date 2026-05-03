@@ -17,7 +17,7 @@ export async function generateEmbedding(
   text: string,
   _inputType: 'query' | 'document' = 'query'
 ): Promise<number[]> {
-  const key = cacheKey(text, 'query')
+  const key = cacheKey(text, _inputType)
 
   const cached = embeddingCache.get(key)
   if (cached) return cached
