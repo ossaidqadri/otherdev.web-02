@@ -18,6 +18,7 @@
     "clear": "bun run scripts/clear-documents.ts"
   },
   "dependencies": {
+    "@ai-sdk/cohere": "^3.0.33",
     "@ai-sdk/groq": "^3.0.4",
     "@ai-sdk/mistral": "^3.0.27",
     "@ai-sdk/react": "^3.0.140",
@@ -26,6 +27,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@next/third-parties": "^16.2.1",
     "@od-canvas/sdk": "^1.0.0",
+    "@qdrant/js-client-rest": "^1.17.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-query": "^5.90.16",
     "@tavily/core": "^0.7.2",
@@ -35,6 +37,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "cohere": "^1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "firebase-admin": "^13.0.0",

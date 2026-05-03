@@ -217,7 +217,22 @@
       "mcp__plugin_figma_figma__get_metadata",
       "mcp__plugin_figma_figma__use_figma",
       "mcp__plugin_figma_figma__get_screenshot",
-      "mcp__plugin_figma_figma__get_design_context"
+      "mcp__plugin_figma_figma__get_design_context",
+      "Skill(shadcn)",
+      "Bash(node_modules/.bin/next build *)",
+      "Bash(jq -r \"[.data[] | select\\(.id | startswith\\(\\\\\"groq/\\\\\"\\)\\) | .id] | reverse | .[0:10]\")",
+      "Bash(jq -r \"[.data[] | select\\(.id | startswith\\(\\\\\"minimax/\\\\\"\\)\\) | .id] | reverse | .[0:10]\")",
+      "Bash(jq -r \"[.data[] | select\\(.id | startswith\\(\\\\\"openai/\\\\\"\\)\\) | .id] | reverse | .[0:15]\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\work\\\\otherdev-web-v2\\\\web\\\\src\\\\server\\\\lib\" -Recurse -Filter \"*.ts\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Path \"D:\\\\work\\\\otherdev-web-v2\\\\web\\\\src\\\\server\" -Directory -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "WebFetch(domain:inference.cerebras.ai)",
+      "WebFetch(domain:inference-docs.cerebras.ai)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('reasoning_tokens:', d.get\\('usage',{}\\).get\\('completion_tokens_details',{}\\).get\\('reasoning_tokens','N/A'\\)\\); print\\('content preview:', d['choices'][0]['message'].get\\('content',''\\)[:200] if d['choices'][0]['message'].get\\('content'\\) else 'no content'\\); print\\('finish_reason:', d['choices'][0]['finish_reason']\\)\")",
+      "Skill(qdrant:qdrant-clients-sdk)",
+      "Bash(npm info *)",
+      "Bash(echo \"Exit: $?\")"
     ],
     "deny": [],
     "ask": []
