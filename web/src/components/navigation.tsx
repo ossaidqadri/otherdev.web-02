@@ -138,7 +138,7 @@ export function Navigation({
                 size="nav-mobile"
                 className={pathname?.startsWith('/work') ? 'text-foreground' : ''}
               >
-                <Link href="/work" data-slot="nav-item">
+                <Link href="/work" data-slot="nav-item" onClick={() => setIsOpen(false)}>
                   work
                 </Link>
               </Button>
@@ -154,7 +154,7 @@ export function Navigation({
                 size="nav-mobile"
                 className={pathname?.startsWith('/about') ? 'text-foreground' : ''}
               >
-                <Link href="/about" data-slot="nav-item">
+                <Link href="/about" data-slot="nav-item" onClick={() => setIsOpen(false)}>
                   about
                 </Link>
               </Button>
@@ -169,7 +169,7 @@ export function Navigation({
                 size="nav-mobile"
                 className={pathname?.startsWith('/loom') ? 'text-foreground' : ''}
               >
-                <Link href="/loom" data-slot="nav-item">
+                <Link href="/loom" data-slot="nav-item" onClick={() => setIsOpen(false)}>
                   ai
                 </Link>
               </Button>
@@ -184,7 +184,7 @@ export function Navigation({
                 size="nav-mobile"
                 className={pathname === '/work/ads-portfolio' ? 'text-foreground' : ''}
               >
-                <Link href="/work/ads-portfolio" data-slot="nav-item">
+                <Link href="/work/ads-portfolio" data-slot="nav-item" onClick={() => setIsOpen(false)}>
                   ads
                 </Link>
               </Button>
@@ -199,6 +199,7 @@ export function Navigation({
                   target="_blank"
                   rel="noopener noreferrer"
                   data-slot="nav-item"
+                  onClick={() => setIsOpen(false)}
                 >
                   whatsapp
                 </Link>
