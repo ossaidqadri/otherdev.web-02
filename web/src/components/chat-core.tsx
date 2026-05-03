@@ -602,7 +602,7 @@ export function ChatCore({
         addToolOutput({
           tool: 'createArtifact',
           toolCallId: toolCall.toolCallId,
-          output: { success: true },
+          output: toolCall.input,
         })
       }
     },
