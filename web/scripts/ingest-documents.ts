@@ -3,11 +3,10 @@ import { knowledgeBase } from '../src/lib/knowledge-base'
 import { generateEmbeddingBatch } from '../src/server/lib/rag/embeddings'
 import { deleteAllDocuments, insertDocument } from '../src/server/lib/rag/vector-search'
 
-// voyage-4-lite rate limits: 10K TPM, 3 RPM
-// Batch size of 10 docs (~200-400 tokens each ≈ 2-4K tokens/call) stays well under 10K TPM
-// 8 batches total → 8 API calls → at 3 RPM, ~160s (2min 40sec) total with spacing
+// Cohere embed-english-v3.0 rate limits: check documentation for current limits
+// Batch size of 10 docs (~200-400 tokens each ≈ 2-4K tokens/call) stays reasonable
 const BATCH_SIZE = 10
-// 3 RPM = 1 request per 20 seconds minimum
+// Delay between batches to respect rate limits
 const BATCH_DELAY_MS = 21_000
 
 function computeKbVersion(): string {
@@ -55,8 +54,8 @@ async function main() {
         const embedding = embeddings[i]
         const doc = batch[i]
 
-        if (!embedding || embedding.length !== 1024) {
-          throw new Error(`Invalid embedding dim: ${embedding?.length ?? 0} (expected 1024)`)
+        if (!embedding || embedding.length !== 1536) {
+          throw new Error(`Invalid embedding dim: ${embedding?.length ?? 0} (expected 1536)`)
         }
         await insertDocument(doc.content, doc.metadata, embedding)
         successCount++
