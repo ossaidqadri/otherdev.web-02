@@ -1234,7 +1234,7 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
 
   // Ossaid Qadri Profile
   {
-    content: `Ossaid Qadri serves as Co-Founder, Frontend Architect, and Growth Lead at Other Dev, occupying a dual role that bridges technical engineering and commercial strategy. As a frontend-focused developer, he specializes in building high-performance interfaces using Next.js, React, and Headless CMS architectures. As of March 2026, he is pursuing a BS in Accounting and Finance to strengthen the company's financial and business acumen. Ossaid leads the agency's digital marketing division and handles end-to-end project execution from client acquisition and budgeting to DevOps workflows on Vercel and GitHub. His proven track record includes delivering 40 percent sales increases and scaling revenue by over Rs 5 million for clients through strategic growth campaigns.`,
+    content: `Ossaid Qadri is the Co-Founder, Frontend Architect, and Growth Lead at Other Dev — a Karachi-based full-stack development studio founded in 2021 alongside Kabeer Jaffri. He occupies a dual role bridging technical engineering and commercial strategy. As a frontend-focused developer he specializes in high-performance interfaces using Next.js, React, and Headless CMS architectures. As of May 2026, he is pursuing a BS in Accounting and Finance at the Institute of Business Management (IoBM), with coursework in Corporate & Commercial Banking, Retail & Consumer Banking, Financial Derivatives, and International Finance. He leads Other Dev's digital marketing division — managing Meta Ads campaigns with 1M+ cumulative reach and an average cost-per-purchase of Rs 190.61 — and handles end-to-end project execution from client acquisition and budgeting to DevOps on Vercel and GitHub. His track record includes scaling Wish Apparels to Rs 5M+ annual revenue and delivering 3x revenue increases for seasonal e-commerce clients. Beyond the studio, he contributed 6 production-grade commits to the astro/astro repository (48k+ stars) fixing CSS scoped style persistence in ClientRouter View Transitions, and built a Pakistani legal RAG system for Lexa ingesting 280+ constitutional articles using Qdrant, Isaacus Kanon 2 embeddings (1792-dim), and LlamaParse. His open-source work also includes a WebSocket remote-control server for QwenLM/qwen-code (1167 lines, 64-char token auth, rate limiting, 416 unit tests). Outside work, he volunteers as a mentor at PVA UJALA Centre for students with disabilities and previously as an Oxford University Press event moderator. Contact: ossaid@otherdev.com, LinkedIn: linkedin.com/in/ossaidqadri, GitHub: github.com/ossaidqadri.`,
     metadata: {
       source: 'about',
       title: 'Ossaid Qadri - Founder Profile',
@@ -1251,13 +1251,21 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
 MET AT: Habib Public School, Karachi
 KABEER ROLE: Founder and Technical Lead
 KABEER EDUCATION: Computer Science, Institute of Business Administration (IBA)
-KABEER EXPERIENCE (AS OF MARCH 2026): 8 years in full-stack development
-KABEER OTHER ROLE: Technical Director at Ek Qadam Aur non-profit
+KABEER EXPERIENCE (AS OF MAY 2026): 8+ years in full-stack development
+KABEER OTHER ROLE: Technical Director at Ek Qadam Aur non-profit, services handling 3,000 daily requests
+KABEER PUBLICATIONS: Research on cloud IDEs and messaging solutions on ResearchGate
 KABEER EXPERTISE: AI/ML, cloud deployment, backend architecture, scalable infrastructure
+KABEER CONTACT: kabeer@otherdev.com, linkedin.com/in/kabeerjaffri, github.com/kabeer11000
 OSSAID ROLE: Co-Founder, Frontend Architect, and Growth Lead
-OSSAID EDUCATION: BS Accounting and Finance (in progress)
-OSSAID EXPERTISE: Next.js, React, Headless CMS, digital marketing, growth strategy
-TEAM APPROACH: Combined technical excellence with data-driven growth strategy`,
+OSSAID EDUCATION: BS Accounting and Finance at IoBM (in progress, May 2027 expected graduation); coursework includes Corporate & Commercial Banking, Retail & Consumer Banking, Financial Derivatives, International Finance
+OSSAID PREVIOUS EDUCATION: A-Levels at Cedar College (Business, Accounts, Mathematics), O-Levels at Habib Public School
+OSSAID EXPERIENCE: 4+ years running Other Dev; Frontend Engineer at Lexa (Jul 2025–Jan 2026); Corporate Banking Intern at Faysal Bank (Jun–Jul 2023)
+OSSAID TECH STACK: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Astro, Go, tRPC, Shopify Liquid, Qdrant, YJS, Anthropic Claude SDK, RAG pipelines
+OSSAID MARKETING METRICS: 1M+ Meta Ads reach, Rs 190.61 avg cost-per-purchase, 3x revenue uplift for seasonal clients
+OSSAID OPEN SOURCE: 6 commits to astro/astro (CSS View Transitions fix, co-authored Cloudflare merge); payloadcms/payload (Lexical editor fix, RelationshipBatcher); QwenLM/qwen-code (1167-line WebSocket server, security review)
+OSSAID CONTACT: ossaid@otherdev.com, linkedin.com/in/ossaidqadri, github.com/ossaidqadri
+OSSAID VOLUNTEERING: PVA UJALA Centre mentor for students with disabilities; Karachi Down Syndrome Program; Oxford University Press event moderator
+PHILOSOPHY: Zero unnecessary fluff, no drag-and-drop builders or WordPress plugins, clean code and systems that work`,
     metadata: {
       source: 'about',
       title: 'Other Dev - Team Facts',
@@ -1286,7 +1294,7 @@ TEAM APPROACH: Combined technical excellence with data-driven growth strategy`,
 
   // FAQ: Tell me about Ossaid
   {
-    content: `Who is Ossaid Qadri? Ossaid Qadri is the Co-Founder, Frontend Architect, and Growth Lead at Other Dev. He specializes in building high-performance frontend interfaces using Next.js, React, and Headless CMS architectures. As of March 2026, he is pursuing a BS in Accounting and Finance. He leads the agency's digital marketing division and handles end-to-end project execution from client acquisition to DevOps. His proven track record includes delivering 40% sales increases and scaling revenue by over Rs 5 million for clients. You can reach him at ossaid@otherdev.com, LinkedIn: https://www.linkedin.com/in/imossaidqadri/, Instagram: @ossaidqadri.`,
+    content: `Who is Ossaid Qadri? Ossaid Qadri is the Co-Founder, Frontend Architect, and Growth Lead at Other Dev — a Karachi-based full-stack studio founded in 2021 alongside Kabeer Jaffri. He specializes in high-performance frontend engineering (Next.js, React, TypeScript, Tailwind, Astro) and leads the agency's digital marketing division, managing Meta Ads campaigns with over 1M reach and an average cost-per-purchase of Rs 190.61. He is currently pursuing a BS in Accounting and Finance at IoBM (graduation May 2027), with coursework in Corporate & Commercial Banking, Retail & Consumer Banking, Financial Derivatives, and International Finance. His client work includes scaling Wish Apparels to Rs 5M+ annual revenue and building the Lexa legal AI platform (real-time collaboration, WebSocket chat, RAG over Pakistani law). He is an active open-source contributor — 6 commits to astro/astro including a CSS scoped style persistence fix co-authored with a Cloudflare engineer, and contributions to payloadcms/payload and QwenLM/qwen-code. He volunteers at PVA UJALA Centre mentoring students with disabilities. Contact: ossaid@otherdev.com, LinkedIn: linkedin.com/in/ossaidqadri, GitHub: github.com/ossaidqadri.`,
     metadata: {
       source: 'about',
       title: 'FAQ - About Ossaid Qadri',
@@ -1475,6 +1483,58 @@ PROVEN RESULTS: 40% sales increases, 3x revenue growth, Rs 5M+ revenue scaling`,
     },
   },
 
+  // Ossaid Qadri - Technical Skills
+  {
+    content: `Ossaid Qadri's technical skill set spans frontend engineering, Shopify development, AI/ML integration, and digital marketing. Frontend: Next.js 15/16, React 18/19, TypeScript 5.x, Tailwind CSS 4, Astro, Eleventy, Framer Motion, GSAP, Radix UI, shadcn/ui, TipTap. Shopify: Liquid, Theme Development, Hydrogen (React Router 7), Shopify CLI, GraphQL Storefront API. Backend: Go, Node.js, FastAPI (Python), tRPC, REST APIs, WebSocket, SSE, Hocuspocus, YJS. Databases: MySQL, PostgreSQL, MongoDB, Qdrant (vector DB). AI/ML: Anthropic Claude SDK (extended thinking, tool use, prompt caching, streaming), RAG pipelines, Isaacus Kanon 2 embeddings (1792-dim), Voyage AI (1024-dim), LlamaParse, UUID v5 idempotent ingestion, SHA-256 cache versioning. State Management: Nanostores, Zustand, TanStack Query. CMS: TinaCMS (headless, Git-backed), WordPress (headless), Payload CMS. DevOps: Bun, Vercel, Azure App Service, Vite, Turbopack, GitHub, Biome, PostCSS. Payment: PayFast gateway integration. Marketing: Meta Ads, Google Analytics 4, Google Sheets API.`,
+    metadata: {
+      source: 'about',
+      title: 'Ossaid Qadri - Technical Skills',
+      type: 'about',
+      category: 'team',
+      subtype: 'facts',
+      year: '2025',
+    },
+  },
+
+  // Ossaid Qadri - Marketing Metrics
+  {
+    content: `Ossaid Qadri leads digital marketing at Other Dev with a track record of measurable revenue growth across e-commerce clients. Key metrics: cumulative Meta Ads reach exceeding 1,020,155 accounts; average cost per purchase of Rs 190.61 across campaign portfolio; 3x revenue increase during peak seasonal campaigns for Blinget Gifts and similar clients; Wish Apparels scaled from Instagram DMs to a structured Shopify + PayFast store generating Rs 5M+ annual revenue; over Rs 217,000 in ad spend managed and optimized for ROI; client acquisition and revenue scaling of Rs 5 million+ through strategic growth campaigns. Marketing toolkit includes Meta Business Suite, Facebook Pixel with Conversion API tracking (Add to Cart, Initiate Checkout, Purchase events), Custom Audiences and Lookalike Audiences, dynamic budget reallocation, and A/B testing of creatives and CTAs.`,
+    metadata: {
+      source: 'about',
+      title: 'Ossaid Qadri - Marketing Metrics',
+      type: 'about',
+      category: 'team',
+      subtype: 'facts',
+      year: '2025',
+    },
+  },
+
+  // Ossaid Qadri - Open Source Contributions
+  {
+    content: `Ossaid Qadri is an active open-source contributor across multiple high-profile repositories. astro/astro (48k+ stars): 6 production commits including a CSS scoped style persistence fix for ClientRouter View Transitions (extracted cssCachePlugin, renamed vueScopedStyleId to devStyleId), co-authored a Cloudflare merge. payloadcms/payload: fixed invalid h0 heading in Lexical editor when heading sizes are disabled; built RelationshipBatcher utility solving an N+1 relationship query problem. QwenLM/qwen-code: built a 1167-line WebSocket remote-control server with 64-character token authentication, rate limiting (5 attempts per minute per IP), maximum 5 concurrent connections, 30-minute idle timeout, and 416 lines of unit tests; addressed PR #2330 security review. These contributions demonstrate expertise in real-time web technologies, security-conscious API design, and large-scale open-source collaboration.`,
+    metadata: {
+      source: 'about',
+      title: 'Ossaid Qadri - Open Source Contributions',
+      type: 'about',
+      category: 'team',
+      subtype: 'facts',
+      year: '2025',
+    },
+  },
+
+  // Ossaid Qadri - Notable Projects
+  {
+    content: `Ossaid Qadri's notable projects at Other Dev span e-commerce, real estate, legal tech, and AI. Wish Apparels: Shopify + PayFast store scaled to Rs 5M+ annual revenue, migrated from Instagram DMs. TinyFootprint: subscription migration from Recharge to Shopify Payments for a US coffee brand. Narkins Builders: Next.js 15 + TinaCMS + MySQL PWA with CRM and real estate listing management. Bin Yousuf Group: Astro + React + GSAP premium real estate platform with Google Sheets lead management and WhatsApp integration. Carwala: Next.js 16 + tRPC + Cal.com car detailing booking platform. Lexa (Jul 2025–Jan 2026): Frontend Engineer on a legal document intelligence platform — Next.js 15, TipTap editor, YJS real-time collaboration, Hocuspocus/WebSocket chat, e-signature, UUID v5 idempotent RAG ingestion over Pakistani law (Constitution 1973, Anti-Rape Act 2021, Anti-Terrorism Act 1997) using Qdrant, Isaacus Kanon 2 embeddings, and LlamaParse. AI Policy Simulation: submitted to Anthropic Hackathon April 2026, live at policysim.tech — Claude Opus 4.7 + FastAPI + React 19 + Vite + Azure + Vercel, SSE streaming, edge-tts voices, 4 demographically-grounded fiscal policy archetypes compressing weeks of policy analysis into minutes.`,
+    metadata: {
+      source: 'about',
+      title: 'Ossaid Qadri - Notable Projects',
+      type: 'about',
+      category: 'team',
+      subtype: 'overview',
+      year: '2025',
+    },
+  },
+
   // ===== CONTACT AND GENERAL DOCUMENTS (type: 'general') =====
 
   // Contact Information
@@ -1487,7 +1547,7 @@ PHONE: +92 315 689 3331
 KABEER JAFFRI EMAIL: kabeer@otherdev.com
 KABEER LINKEDIN: https://www.linkedin.com/in/kabeerjaffri/
 OSSAID QADRI EMAIL: ossaid@otherdev.com
-OSSAID LINKEDIN: https://www.linkedin.com/in/imossaidqadri/
+OSSAID LINKEDIN: https://www.linkedin.com/in/ossaidqadri/
 INSTAGRAM: @ossaidqadri
 FOUNDED: 2021
 INDUSTRIES SERVED: Fashion, Real Estate, Legal Tech, SaaS, E-commerce, EdTech`,
