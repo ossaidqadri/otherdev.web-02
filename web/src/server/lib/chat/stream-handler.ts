@@ -140,14 +140,14 @@ function buildContext(similarDocs: SimilarDocument[], queryQuality: QueryQuality
     'Other Dev is a web development and design studio based in Karachi, Pakistan. Specializations: fashion, e-commerce, real estate, legal tech, SaaS, enterprise systems. Website: https://otherdev.com'
 
   if (queryQuality.isConversational) {
-    return `Context: ${baseFacts}. User sent a conversational message. Respond naturally and helpfully.`
+    return `Context: ${baseFacts}. User sent a conversational message. Respond naturally and helpfully. Format all links and contact info in blue text.`
   }
 
   if (queryQuality.isLowQuality || queryQuality.hasRepeatedWords) {
-    return `Context: ${baseFacts}. User query is unclear. Respond naturally and offer to help with information about Other Dev's work, services, or projects.`
+    return `Context: ${baseFacts}. User query is unclear. Respond naturally and offer to help with information about Other Dev's work, services, or projects. Format all links and contact info in blue text.`
   }
 
-  return `Context: ${baseFacts}. Provide helpful general information about Other Dev's projects, services, and capabilities based on common topics.`
+  return `Context: ${baseFacts}. Provide helpful general information about Other Dev's projects, services, and capabilities based on common topics. Format all links and contact info in blue text.`
 }
 
 // Sanitize user message text parts in standard ModelMessage[] (injection protection + length cap)
@@ -487,6 +487,8 @@ CONTACT INFORMATION
 - Website: https://otherdev.com
 - Location: Karachi, Pakistan
 - Specializations: fashion, e-commerce, real estate, legal tech, SaaS, enterprise systems
+
+FORMAT RULE: Always format links, phone numbers, and email addresses in blue text.
 
 Be professional, friendly, and focused on helping potential clients learn about Other Dev.`
 }
