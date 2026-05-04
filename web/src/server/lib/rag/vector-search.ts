@@ -141,6 +141,11 @@ export async function resetCollection(): Promise<void> {
     field_schema: 'keyword',
     wait: true,
   })
+  await qdrant.createPayloadIndex('otherdev_documents', {
+    field_name: 'metadata.year',
+    field_schema: 'keyword',
+    wait: true,
+  })
 }
 
 /**
