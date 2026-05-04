@@ -1,11 +1,9 @@
-import { cohere } from '@ai-sdk/cohere'
 import { gateway } from '@ai-sdk/gateway'
 import { embed, embedMany, rerank } from 'ai'
 import type { MatchedDocument } from './vector-search'
 
-// Embedding via direct Cohere provider — embed-v4.0 with 1536 dims
-const embeddingModel = cohere.embedding('embed-v4.0')
-// Reranking via Vercel AI Gateway — rerank-v4-fast is only available through gateway
+// Both embedding and reranking go through Vercel AI Gateway for unified observability
+const embeddingModel = gateway.textEmbeddingModel('cohere/embed-v4.0')
 const rerankingModel = gateway.rerankingModel('cohere/rerank-v4-fast')
 
 // Simple memo cache for embeddings — works in all JS environments
