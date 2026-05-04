@@ -1,85 +1,61 @@
-import { createHash } from 'node:crypto'
 import { knowledgeBase } from '../src/lib/knowledge-base'
+import {
+  collectionExists,
+  resetCollection,
+  deletePointsByFilter,
+  upsertDocumentBatch,
+  type MatchedDocument,
+} from '../src/server/lib/rag/vector-search'
 import { generateEmbeddingBatch } from '../src/server/lib/rag/embeddings'
-import { deleteAllDocuments, insertDocument } from '../src/server/lib/rag/vector-search'
-
-const BATCH_SIZE = 10
-const BATCH_DELAY_MS = 500
-
-function computeKbVersion(): string {
-  const payload = JSON.stringify(
-    knowledgeBase.map(doc => ({
-      content: doc.content,
-      metadata: doc.metadata,
-    }))
-  )
-  const hash = createHash('sha256').update(payload).digest('hex').slice(0, 12)
-  return `kb-${hash}`
-}
 
 async function main() {
-  try {
-    await deleteAllDocuments()
-  } catch (error) {
-    console.error('  Failed to clear old documents:', error)
-    console.error('  Aborting ingestion to prevent pollution\n')
-    process.exit(1)
+  // Step A: Ensure collection exists with payload indexes (run once to set up)
+  if (!(await collectionExists())) {
+    console.log('  Collection does not exist — creating with payload indexes...')
+    await resetCollection()
   }
 
-  let successCount = 0
-  let errorCount = 0
+  // Step B: Clear existing points (preserves collection + indexes)
+  console.log('  Clearing existing documents...')
+  await deletePointsByFilter()
+
   const totalDocs = knowledgeBase.length
-  const totalBatches = Math.ceil(totalDocs / BATCH_SIZE)
+  console.log(`  Ingesting ${totalDocs} documents\n`)
 
-  console.log(
-    `  Ingesting ${totalDocs} documents in ${totalBatches} batches (${BATCH_SIZE} docs/batch, ${BATCH_DELAY_MS / 1000}s between batches)\n`
-  )
+  try {
+    // Step C: Generate all embeddings concurrently
+    const texts = knowledgeBase.map(doc => doc.content)
+    const allEmbeddings = await generateEmbeddingBatch(texts, 'document')
 
-  for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
-    const start = batchIdx * BATCH_SIZE
-    const end = Math.min(start + BATCH_SIZE, totalDocs)
-    const batch = knowledgeBase.slice(start, end)
-    const batchNum = batchIdx + 1
+    // Step D: Build doc objects and batch upsert
+    const docsWithEmbeddings: Array<{
+      content: string
+      metadata: MatchedDocument['metadata']
+      embedding: number[]
+    }> = knowledgeBase.map((doc, i) => ({
+      content: doc.content,
+      metadata: doc.metadata,
+      embedding: allEmbeddings[i],
+    }))
 
-    process.stdout.write(`  Batch ${batchNum}/${totalBatches}: [${start + 1}–${end}] `)
-
-    try {
-      const texts = batch.map(doc => doc.content)
-      const embeddings = await generateEmbeddingBatch(texts, 'document')
-
-      for (let i = 0; i < batch.length; i++) {
-        const embedding = embeddings[i]
-        const doc = batch[i]
-
-        if (!embedding || embedding.length !== 1536) {
-          throw new Error(`Invalid embedding dim: ${embedding?.length ?? 0} (expected 1536)`)
-        }
-        await insertDocument(doc.content, doc.metadata, embedding)
-        successCount++
+    // Validate all embeddings before any upsert
+    for (let i = 0; i < allEmbeddings.length; i++) {
+      const embedding = allEmbeddings[i]
+      if (!embedding || embedding.length !== 1536) {
+        throw new Error(
+          `Invalid embedding dim at index ${i}: ${embedding?.length ?? 0} (expected 1536)`
+        )
       }
-
-      console.log(`OK (${batch.length} docs)`)
-    } catch (error) {
-      console.error(`FAILED: ${error instanceof Error ? error.message : error}`)
-      for (const doc of batch) {
-        console.error(`  - ${doc.metadata.title}`)
-      }
-      errorCount += batch.length
     }
 
-    // Rate limit delay between batches (not after last batch)
-    if (batchIdx < totalBatches - 1) {
-      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS))
-    }
-  }
+    // Upsert in parallel batches — no sequential sleeps
+    await upsertDocumentBatch(docsWithEmbeddings)
 
-  console.log(`\n  Done: ${successCount} succeeded, ${errorCount} failed`)
-
-  if (errorCount > 0) {
+    console.log(`\n  Done: ${totalDocs} documents ingested`)
+  } catch (error) {
+    console.error(`\n  Fatal error: ${error instanceof Error ? error.message : error}`)
     process.exit(1)
   }
-
-  const _kbVersion = computeKbVersion()
 }
 
 main().catch(error => {
