@@ -1,5 +1,6 @@
 import { QdrantClient } from '@qdrant/js-client-rest'
 import { createHash } from 'node:crypto'
+import { rerankDocuments } from './embeddings'
 
 const qdrant = new QdrantClient({
   url: process.env.QDRANT_URL ?? '',
@@ -24,6 +25,7 @@ export interface MatchedDocument {
 export interface SearchFilter {
   type?: string
   category?: string
+  subtype?: string
   project?: string
   year?: string
 }
@@ -56,6 +58,7 @@ export async function collectionExists(): Promise<boolean> {
 // Cache document search per-request to avoid duplicate Qdrant queries
 // for the same embedding within a single request
 export async function searchSimilarDocuments(
+  queryText: string,
   queryEmbedding: number[],
   matchThreshold: number = 0.1,
   matchCount: number = 5,
@@ -66,6 +69,7 @@ export async function searchSimilarDocuments(
         should: [
           filter.type ? { key: 'metadata.type', match: { value: filter.type } } : null,
           filter.category ? { key: 'metadata.category', match: { value: filter.category } } : null,
+          filter.subtype ? { key: 'metadata.subtype', match: { value: filter.subtype } } : null,
           filter.project ? { key: 'metadata.project', match: { value: filter.project } } : null,
           filter.year ? { key: 'metadata.year', match: { value: filter.year } } : null,
         ].filter(Boolean),
@@ -74,12 +78,13 @@ export async function searchSimilarDocuments(
 
   const results = await qdrant.search('otherdev_documents', {
     vector: queryEmbedding,
-    limit: matchCount,
+    limit: matchCount * 3,
     score_threshold: matchThreshold,
     filter: qdrantFilter,
+    with_vector: false,
   })
 
-  return results
+  const mapped = results
     .map(r => {
       if (!r.payload) return null
       return {
@@ -90,6 +95,15 @@ export async function searchSimilarDocuments(
       }
     })
     .filter((r): r is NonNullable<typeof r> => r !== null)
+
+  if (mapped.length === 0) return mapped
+
+  // Always-on reranking — re-scores top results using cross-encoder attention
+  return rerankDocuments({
+    query: queryText,
+    documents: mapped,
+    topN: matchCount,
+  })
 }
 
 /**
