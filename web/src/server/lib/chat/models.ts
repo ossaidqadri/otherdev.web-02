@@ -1,24 +1,24 @@
 import { gateway } from 'ai'
 
 // Primary model identifiers
-const CEREBRAS_MODEL = 'cerebras/qwen-3-235b-a22b-instruct-2507'
+const GROQ_GPT_OSS = 'openai/gpt-oss-120b'
 const GROQ_SCOUT = 'groq/llama-4-scout-17b-16e-instruct'
 const GROQ_VISION_MODEL = 'groq/llama-4-scout-17b-16e-instruct'
 
 // Fallback chains — AI Gateway retries left-to-right on error/timeout
-// Fast: Cerebras → Groq Qwen → Mistral Large
-export const FAST_MODEL_FALLBACKS = ['groq/qwen-3-235b-a22b-instruct-2507', 'mistral/mistral-large-3']
+// Fast: Groq GPT-OSS → Groq Qwen → Mistral Large
+export const FAST_MODEL_FALLBACKS = ['openai/gpt-oss-120b', 'groq/qwen-3-235b-a22b-instruct-2507', 'mistral/mistral-large-3']
 // Vision: Groq Scout → Mistral (multimodal)
 export const VISION_MODEL_FALLBACKS = ['mistral/pixtral-12b-2409']
 // Capable uses same fallbacks as fast
 export const CAPABLE_MODEL_FALLBACKS = FAST_MODEL_FALLBACKS
 
 /**
- * Fast general-purpose model — Cerebras primary.
- * Falls back to Groq GPT-OSS → Cohere Command-R.
+ * Fast general-purpose model — Groq GPT-OSS primary.
+ * Falls back to Groq Qwen → Mistral Large.
  */
 export function getFastModel() {
-  return gateway(CEREBRAS_MODEL)
+  return gateway(GROQ_GPT_OSS)
 }
 
 /**
