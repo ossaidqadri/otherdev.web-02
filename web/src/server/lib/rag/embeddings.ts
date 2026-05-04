@@ -2,12 +2,10 @@ import { cohere } from '@ai-sdk/cohere'
 import { embed, embedMany, rerank } from 'ai'
 import type { MatchedDocument } from './vector-search'
 
-// Cohere embed-v4.0 — 1536 dimensions (supports 256/512/1024/1536 output dims)
-// cohere.embedding() is a direct provider factory, not AI Gateway — use raw model ID
+// Embedding via direct Cohere provider — embed-v4.0 with 1536 dims
 const embeddingModel = cohere.embedding('embed-v4.0')
-// Cohere rerank-v4-fast — fast reranking model for post-search result ordering
-// cohere.reranking() is a direct provider factory — use raw model ID
-const rerankingModel = cohere.reranking('rerank-v4-fast')
+// Reranking via direct Cohere provider — rerank-v3.5 is the supported model in AI SDK
+const rerankingModel = cohere.reranking('rerank-v3.5')
 
 // Simple memo cache for embeddings — works in all JS environments
 const embeddingCache = new Map<string, Promise<number[]>>()
