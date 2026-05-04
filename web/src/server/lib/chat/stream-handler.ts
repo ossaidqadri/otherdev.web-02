@@ -338,7 +338,7 @@ export async function handleStreamChat({
   let ragContext: string | null = null
   if (ragEnabled) {
     try {
-      const { generateEmbedding, rerankDocuments } = await import('@/server/lib/rag/embeddings')
+      const { generateEmbedding } = await import('@/server/lib/rag/embeddings')
       const { searchSimilarDocuments } = await import('@/server/lib/rag/vector-search')
 
       const cachedContext = await getCachedRetrievalContext(normalizedQuery)
@@ -348,16 +348,12 @@ export async function handleStreamChat({
         const queryEmbedding = await generateEmbedding(normalizedQuery)
         const adaptiveThreshold = getAdaptiveThreshold(queryQuality)
         const similarDocs = await searchSimilarDocuments(
+          normalizedQuery,
           queryEmbedding,
           adaptiveThreshold,
           RAG_MATCH_COUNT
         )
-        const rerankedDocs = await rerankDocuments({
-          query: normalizedQuery,
-          documents: similarDocs,
-          topN: RAG_MATCH_COUNT,
-        })
-        ragContext = buildContext(rerankedDocs, queryQuality)
+        ragContext = buildContext(similarDocs, queryQuality)
         after(() => setCachedRetrievalContext(normalizedQuery, ragContext as string))
       }
     } catch (error) {

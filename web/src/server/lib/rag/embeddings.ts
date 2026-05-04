@@ -6,8 +6,29 @@ import type { MatchedDocument } from './vector-search'
 const embeddingModel = gateway.textEmbeddingModel('cohere/embed-v4.0')
 const rerankingModel = gateway.rerankingModel('cohere/rerank-v4-fast')
 
-// Simple memo cache for embeddings — works in all JS environments
-const embeddingCache = new Map<string, Promise<number[]>>()
+// LRU cache for embeddings — bounded size prevents memory growth in serverless
+class SimpleLRU<K, V> {
+  private cache = new Map<K, V>()
+  constructor(private max: number) {}
+  get(key: K): V | undefined {
+    const value = this.cache.get(key)
+    if (value !== undefined) {
+      this.cache.delete(key)
+      this.cache.set(key, value)
+    }
+    return value
+  }
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) this.cache.delete(key)
+    else if (this.cache.size >= this.max) {
+      const firstKey = this.cache.keys().next().value
+      if (firstKey !== undefined) this.cache.delete(firstKey)
+    }
+    this.cache.set(key, value)
+  }
+}
+
+const embeddingCache = new SimpleLRU<string, Promise<number[]>>(100)
 
 function cacheKey(text: string, inputType: string): string {
   return `${inputType}:${text}`
