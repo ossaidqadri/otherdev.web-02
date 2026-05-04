@@ -7,7 +7,7 @@ const GROQ_VISION_MODEL = 'groq/llama-4-scout-17b-16e-instruct'
 
 // Fallback chains — AI Gateway retries left-to-right on error/timeout
 // Fast: Cerebras → Groq Qwen → Mistral Large
-export const FAST_MODEL_FALLBACKS = ['groq/qwen-3-235b-a22b-instruct-2507', 'mistral/mistral-large-latest']
+export const FAST_MODEL_FALLBACKS = ['groq/qwen-3-235b-a22b-instruct-2507', 'mistral/mistral-large-3']
 // Vision: Groq Scout → Mistral (multimodal)
 export const VISION_MODEL_FALLBACKS = ['mistral/pixtral-12b-2409']
 // Capable uses same fallbacks as fast

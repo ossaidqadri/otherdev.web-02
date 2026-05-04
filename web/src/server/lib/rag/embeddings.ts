@@ -3,9 +3,9 @@ import { embed, embedMany, rerank } from 'ai'
 import type { MatchedDocument } from './vector-search'
 
 // Cohere embed-v4.0 — 1536 dimensions (supports 256/512/1024/1536 output dims)
-const embeddingModel = cohere.embedding('embed-v4.0')
+const embeddingModel = cohere.embedding('cohere/embed-v4.0')
 // Cohere rerank-v4-fast — fast reranking model for post-search result ordering
-const rerankingModel = cohere.reranking('rerank-v4-fast')
+const rerankingModel = cohere.reranking('cohere/rerank-v4-fast')
 
 // Simple memo cache for embeddings — works in all JS environments
 const embeddingCache = new Map<string, Promise<number[]>>()
