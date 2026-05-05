@@ -43,27 +43,43 @@ bun install
 Create `.env.local` in the `web/` directory:
 
 ```bash
-# Contact Form (Required for contact form functionality)
+# Site
+NEXT_PUBLIC_SITE_URL=https://otherdev.com
+
+# Canvas CMS
+CANVAS_API_URL=https://client5.otherdev.com/canvas/v1/api/
+CANVAS_API_KEY=your-api-key
+CANVAS_PROJECT_ID=your-project-id
+
+# Contact Form
 GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-GOOGLE_SHEET_ID=your-sheet-id
+GOOGLE_SHEET_ID=your-google-sheet-id
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=your-app-password
 GMAIL_RECIPIENTS=recipient1@example.com,recipient2@example.com
 
-# RAG Chat System (Required for AI chat widget)
+# AI Services
 GROQ_API_KEY=your-groq-api-key
-FIREBASE_PROJECT_ID=your-firebase-project-id
-FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# Payload CMS Integration (Optional - for blog features)
-PAYLOAD_API_URL=http://localhost:3000
+# Vector Search (Qdrant)
+QDRANT_URL=https://your-qdrant.cloud
+QDRANT_API_KEY=your-qdrant-key
 
-# Optional configuration
+# Web Search (Tavily)
+TAVILY_API_KEY=your-tavily-key
+
+# Rate Limiting & Chat Cache (Upstash Redis)
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+
+# RAG Configuration
 RAG_SIMILARITY_THRESHOLD=0.1
 RAG_MATCH_COUNT=5
 RAG_MAX_MESSAGE_LENGTH=500
+CHAT_HISTORY_TTL_SECONDS=1209600
+RAG_RETRIEVAL_CACHE_TTL_SECONDS=21600
+CHAT_RESPONSE_CACHE_TTL_SECONDS=86400
 ```
 
 4. **Start the development server:**
@@ -89,7 +105,9 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 | `bun start` | Start production server |
 | `bun lint` | Run Biome linter checks |
 | `bun format` | Auto-format code with Biome |
-| `bun ingest` | Ingest knowledge base into vector DB |
+| `bun ingest` | Ingest knowledge base into Qdrant |
+| `bun clear` | Clear all documents from Qdrant |
+| `bun test-search` | Test vector search (runs test-search.ts) |
 
 ### Git Workflow
 
@@ -144,33 +162,35 @@ web/
 │   │   │   ├── page.tsx              # Work listing
 │   │   │   └── [slug]/page.tsx       # Individual project
 │   │   ├── blog/                     # Blog pages (optional)
-│   │   └── api/                      # API routes
-│   │       ├── api/                      # API routes
-│   │       │   ├── contact/route.ts     # Contact form handler
-│   │       │   └── chat/stream/route.ts  # RAG chat endpoint
+│   │   └── api/                          # API routes
+│   │       ├── contact/route.ts          # Contact form handler
+│   │       ├── transcribe/route.ts       # Audio transcription
+│   │       └── process-document/route.ts # PDF/image OCR
 │   ├── components/
-│   │   ├── ui/                       # Radix UI primitives (56 components)
-│   │   ├── navigation.tsx            # Main navigation
-│   │   ├── footer.tsx                # Footer
-│   │   ├── project-card.tsx          # Project card
-│   │   ├── contact-dialog.tsx        # Contact form
-│   │   ├── chat-widget.tsx           # AI chat widget
-│   │   └── providers.tsx             # React Query provider
+│   │   ├── ui/                           # Radix UI primitives (56 components)
+│   │   ├── navigation.tsx                # Main navigation
+│   │   ├── footer.tsx                    # Footer
+│   │   ├── project-card.tsx              # Project card
+│   │   ├── contact-dialog.tsx            # Contact form
+│   │   ├── chat-widget.tsx               # AI chat widget
+│   │   ├── chat-core.tsx                 # Chat core logic
+│   │   ├── artifact-renderer.tsx         # Artifact display
+│   │   └── providers.tsx                 # React Query provider
 │   ├── lib/
-│   │   ├── utils.ts                  # Utility functions
-│   │   ├── projects.ts               # Project data
-│   │   ├── knowledge-base.ts         # RAG knowledge base
-│   │   └── constants.ts              # App constants
+│   │   ├── utils.ts                     # Utility functions
+│   │   ├── projects.ts                  # Project data (~17 projects)
+│   │   ├── knowledge-base.ts            # RAG knowledge base
+│   │   └── constants.ts                 # App constants
 │   ├── server/
-│   │   └── api/                      # API route handlers
-│   │       ├── contact.ts            # Contact form handler
-│   │       └── content.ts            # Blog content fetcher
 │   │   └── lib/
-│   │       ├── rate-limit.ts         # Rate limiting
+│   │       ├── rate-limit.ts            # Upstash rate limiting
+│   │       ├── chat-cache-store.ts      # Upstash chat cache
+│   │       ├── chat-routing.ts          # 4-category chat classifier
 │   │       └── rag/
-│   │           ├── embeddings.ts     # Embedding generation
-│   │           └── vector-search.ts   # Vector search
-│   └── hooks/                        # Custom React hooks
+│   │           ├── embeddings.ts        # Cohere via AI Gateway
+│   │           ├── vector-search.ts    # Qdrant vector search
+│   │           └── rerank.ts           # Cohere reranking
+│   └── hooks/                           # Custom React hooks
 ├── public/
 │   └── images/                       # Static images
 ├── scripts/
@@ -445,9 +465,45 @@ bun ingest
 ```
 
 This will:
-- Generate embeddings for new documents
-- Insert into Firebase Firestore
-- Make them available for RAG chat
+- Generate embeddings via Cohere embed-v4.0 through AI Gateway
+- Insert into Qdrant collection `otherdev_documents` (idempotent upserts)
+- Make them available for RAG chat with automatic reranking
+
+---
+
+### Knowledge Base Ingestion Workflow
+
+The knowledge base ingestion pipeline (`scripts/ingest-documents.ts`) performs the following steps:
+
+```mermaid
+flowchart TD
+    KB[Knowledge Base<br/>src/lib/knowledge-base.ts] --> Parse[Parse documents]
+    Parse --> Embed[Generate embeddings<br/>Cohere embed-v4.0]
+    Embed --> Batch[Batch upserts<br/>64 points/batch]
+    Batch --> Qdrant[Qdrant collection<br/>otherdev_documents]
+    Qdrant --> Done[Searchable via RAG]
+```
+
+**Ingest command:**
+```bash
+bun ingest
+```
+
+**Clear command (wipe collection):**
+```bash
+bun clear
+```
+
+**Test search:**
+```bash
+bun test-search
+```
+
+**Key features:**
+- Idempotent upserts via SHA-256 point IDs (re-ingest is safe)
+- Parallel batch processing (64 points per batch)
+- Payload indexes on: `source`, `title`, `type`, `category`
+- Context caching (6-hour TTL) to avoid redundant vector lookups
 
 ---
 
@@ -797,9 +853,9 @@ Error: No documents found
 **Solution:**
 
 1. Ensure knowledge base is ingested: `bun ingest`
-2. Check Firebase credentials in `.env.local`
-3. Verify Firebase Firestore is initialized and has documents
-4. Check similarity threshold (lower = more results)
+2. Check Qdrant credentials in `.env.local`
+3. Verify Qdrant collection `otherdev_documents` exists with payload indexes
+4. Check similarity threshold (lower = more results, `RAG_SIMILARITY_THRESHOLD`)
 
 ---
 

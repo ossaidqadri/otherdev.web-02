@@ -71,9 +71,13 @@ This directory contains comprehensive documentation for developers working on th
 ### RAG Chat System
 
 - **Vercel AI SDK** - Unified AI SDK for LLM integration
-- **Groq** - LLM API (llama-3.3-70b)
+- **Vercel AI Gateway** - Unified API with model fallback chains
+- **Groq** - LLM API (llama-3.3-70b, scout)
 - **Mistral** - OCR and additional AI features
-- **Firebase Firestore** - Vector search with native similarity matching
+- **Cohere** - Embeddings (embed-v4.0) and reranking (rerank-v4-fast)
+- **Qdrant** - Vector search database (1536-dim, cosine similarity)
+- **Upstash Redis** - Rate limiting and chat message caching
+- **Tavily** - Web search for general chat queries
 - **Shiki** - Code syntax highlighting
 
 ### Development Tools
@@ -100,8 +104,12 @@ This directory contains comprehensive documentation for developers working on th
 │  ┌──────────────────────────────────┐   │
 │  │       API Routes              │   │
 │  │  ┌──────────┐  ┌──────────┐     │   │
-│  │  │ Contact  │  │ Content  │     │   │
-│  │  │  Route   │  │  Route   │     │   │
+│  │  │ Contact  │  │  Chat    │     │   │
+│  │  │  Route   │  │  Stream  │     │   │
+│  │  └──────────┘  └──────────┘     │   │
+│  │  ┌──────────┐  ┌──────────┐     │   │
+│  │  │Transcribe│  │ Process  │     │   │
+│  │  │  Route   │  │ Document │     │   │
 │  │  └──────────┘  └──────────┘     │   │
 │  └──────────────────────────────────┘   │
 └─────────────────────────────────────────┘
@@ -110,8 +118,12 @@ This directory contains comprehensive documentation for developers working on th
 ┌─────────────────────────────────────────┐
 │          External Services              │
 │  ┌──────────┐  ┌──────────┐            │
-│  │ Payload  │  │ Firebase │            │
-│  │   CMS    │  │   DB     │            │
+│  │  Qdrant  │  │ Upstash  │            │
+│  │ (vector) │  │ (Redis)  │            │
+│  └──────────┘  └──────────┘            │
+│  ┌──────────┐  ┌──────────┐            │
+│  │ AI      │  │ Google   │            │
+│  │ Gateway │  │ Sheets   │            │
 │  └──────────┘  └──────────┘            │
 └─────────────────────────────────────────┘
 ```
@@ -184,38 +196,45 @@ GMAIL_APP_PASSWORD=your-app-password
 
 ```bash
 GROQ_API_KEY=your-groq-api-key
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+QDRANT_URL=https://your-qdrant.cloud
+QDRANT_API_KEY=your-qdrant-key
+TAVILY_API_KEY=your-tavily-key
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
 ```
 
-### Optional
+### RAG Configuration
 
 ```bash
-PAYLOAD_API_URL=http://localhost:3000           # For blog features
 RAG_SIMILARITY_THRESHOLD=0.1                    # Vector search threshold
 RAG_MATCH_COUNT=5                               # Documents to retrieve
 RAG_MAX_MESSAGE_LENGTH=500                      # Max message length
+CHAT_HISTORY_TTL_SECONDS=1209600                # 14-day chat history cache
+RAG_RETRIEVAL_CACHE_TTL_SECONDS=21600           # 6-hour retrieval cache
+CHAT_RESPONSE_CACHE_TTL_SECONDS=86400           # 24-hour response cache
 ```
 
 See [Developer Guide - Getting Started](./DEVELOPER_GUIDE.md#getting-started) for detailed setup.
 
 ## API Overview
 
-### Available Routers
+### Available API Routes
 
-| Router | Endpoint | Description |
+| Method | Endpoint | Description |
 |--------|----------|-------------|
-| `contact` | `/api/contact` | Submit contact form (Google Sheets + Gmail) |
-| `content` | `/api/content/posts` | Fetch paginated blog posts |
-| `content` | `/api/content/posts/[slug]` | Fetch single blog post by slug |
-| `content` | `/api/content/categories` | Fetch all blog categories |
+| POST | `/api/chat/stream` | RAG-powered AI chat with streaming |
+| POST | `/api/contact` | Submit contact form (Google Sheets + Gmail) |
+| POST | `/api/transcribe` | Audio transcription via Groq Whisper |
+| POST | `/api/process-document` | PDF/image OCR via Mistral |
 
-### Chat API
+### Rate Limits
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chat/stream` | POST | RAG-powered AI chat with streaming |
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| `/api/chat/stream` | 10 requests | 1 minute |
+| `/api/contact` | 5 requests | 1 minute |
+| `/api/transcribe` | No limit | — |
+| `/api/process-document` | No limit | — |
 
 See [API Reference](./API_REFERENCE.md) for complete documentation.
 

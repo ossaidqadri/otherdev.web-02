@@ -40,19 +40,24 @@ The Other Dev component library follows the **shadcn/ui** pattern, wrapping Radi
 
 ```
 src/components/
-├── ui/                         # Radix UI wrapper components (56 components)
+├── ui/                         # Radix UI wrapper components (~50 components)
 │   ├── button.tsx
 │   ├── card.tsx
 │   ├── dialog.tsx
 │   ├── input.tsx
 │   ├── form.tsx
 │   └── ...
-├── navigation.tsx              # Main navigation
-├── footer.tsx                  # Footer component
-├── project-card.tsx            # Project display card
-├── contact-dialog.tsx          # Contact form modal
-├── chat-widget.tsx             # RAG-powered chat interface
-└── providers.tsx               # React Query + tRPC providers
+├── navigation.tsx             # Main navigation
+├── footer.tsx                 # Footer component
+├── project-card.tsx          # Project display card (with hover variant)
+├── project-card-hover.tsx     # Interactive hover state handler
+├── contact-dialog.tsx         # Contact form modal
+├── chat-widget.tsx            # Floating chat button + panel
+├── chat-core.tsx              # Shared chat logic (used by widget + Loom page)
+├── artifact-renderer.tsx      # Renders HTML/CSS/JS artifacts from AI
+├── otherdev-loom-thread.tsx   # Loom page wrapper with artifact panel
+├── providers.tsx              # React Query provider (TRPCProvider legacy naming)
+└── voice-waveform.tsx         # Audio recording waveform display
 ```
 
 ---
@@ -695,13 +700,13 @@ function ProjectGrid({ projects }) {
 
 **Location:** `src/components/contact-dialog.tsx`
 
-Two-step contact form modal with tRPC integration.
+Two-step contact form modal with React Hook Form + Zod validation, submitted via `/api/contact`.
 
 #### Features
 
-- Two-step form flow (info → message)
+- Two-step form flow (intro screen + full form)
 - Real-time validation with Zod
-- tRPC mutation for submission
+- API fetch mutation for submission
 - Loading states and error handling
 - Toast notifications
 
@@ -734,20 +739,64 @@ function Page() {
 
 ### Chat Widget
 
-**Location:** `src/components/chat-widget.tsx`
+**Location:** `src/components/chat-widget.tsx` + `src/components/chat-core.tsx`
 
-RAG-powered AI chat interface with streaming responses.
+Floating chat button (bottom-right) that opens a full chat panel. Uses AI SDK `useChat` with custom streaming transport.
 
 #### Features
 
-- Floating chat button
+- Floating chat button (bottom-right, hidden on `/loom` route)
 - Full-screen responsive modal
-- Message history
-- Streaming responses (SSE)
-- Markdown rendering
-- Code syntax highlighting (Shiki)
+- Message history with chat ID persistence
+- Streaming responses via `/api/chat/stream`
+- Voice recording (microphone button)
+- File attachments (up to 50MB)
+- Artifact rendering (HTML/CSS/JS)
+- Markdown rendering with code syntax highlighting (Shiki)
+- Suggested prompts
 - Auto-scroll behavior
-- Rate limit handling
+- Upstash Redis rate limiting (10 req/min)
+
+#### ChatCore (`src/components/chat-core.tsx`)
+
+Core chat logic shared between ChatWidget and Loom page. Handles AI SDK `useChat`, voice recording, file attachments, artifact generation, streaming, suggested prompts, and auto-scrolling. Used internally by ChatWidget — not used directly on pages.
+
+#### Artifact Renderer
+
+**Location:** `src/components/artifact-renderer.tsx`
+
+Renders AI-generated HTML/CSS/JS artifacts in `inline` or `panel` mode.
+
+##### Modes
+
+- **`panel`:** Full-width artifact panel (used on `/loom` page with split view)
+- **`inline`:** Inline chat message with preview iframe
+
+##### Features
+
+- Shiki syntax highlighting for code blocks
+- Tabbed view: Preview / Code
+- Copy code button
+- Iframe sandbox for safe HTML execution
+- Close button in panel mode
+
+##### Tool Call Format
+
+Artifacts are generated via the `createArtifact` tool when the AI detects intent (build/create/make/design requests). The `ArtifactRenderer` receives `ArtifactToolCall` objects and renders them as standalone HTML.
+
+```typescript
+interface ArtifactToolCall {
+  toolCallId: string;
+  toolName: 'createArtifact';
+  state: 'output-available';
+  result: {
+    title: string;
+    code: string;      // Contains HTML/CSS/JS combined
+    description: string;
+    success: boolean;
+  };
+}
+```
 
 #### Usage
 
@@ -772,8 +821,11 @@ export default function RootLayout({ children }) {
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
+  parts: Array<
+    | { type: 'text'; text: string }
+    | { type: 'file'; data: string; mediaType?: string }
+  >;
+  createdAt?: string;
 }
 ```
 

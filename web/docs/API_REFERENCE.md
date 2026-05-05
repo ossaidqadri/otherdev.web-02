@@ -1,15 +1,14 @@
 # API Reference
 
-> Comprehensive API documentation for Other Dev Next.js application
+> Complete API documentation for Other Dev Next.js application
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [tRPC Configuration](#trpc-configuration)
-- [API Routers](#api-routers)
-  - [Contact Router](#contact-router)
-  - [Content Router](#content-router)
-- [Chat API](#chat-api)
+- [Chat API (`/api/chat/stream`)](#chat-api-apichatstream)
+- [Contact API (`/api/contact`)](#contact-api-apicontact)
+- [Transcribe API (`/api/transcribe`)](#transcribe-api-apitranscribe)
+- [Process Document API (`/api/process-document`)](#process-document-api-apiprocess-document)
 - [Rate Limiting](#rate-limiting)
 - [Error Handling](#error-handling)
 
@@ -17,360 +16,59 @@
 
 ## Overview
 
-The Other Dev application uses **tRPC** for type-safe API communication between client and server. All API endpoints are automatically type-checked and provide full TypeScript IntelliSense support.
+The application exposes four API routes, all under `/api/`:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/chat/stream` | Streaming RAG chat with AI Gateway |
+| POST | `/api/contact` | Contact form submission |
+| POST | `/api/transcribe` | Audio transcription via Groq Whisper |
+| POST | `/api/process-document` | PDF/image OCR via Mistral |
 
 ### Tech Stack
 
-- **tRPC v11** - End-to-end type safety
-- **Zod** - Runtime schema validation
-- **SuperJSON** - Enhanced serialization (handles Date, Map, Set)
-- **React Query** - Data fetching and caching
-
-### Base Configuration
-
-```typescript
-// src/server/trpc.ts
-import { initTRPC } from "@trpc/server";
-import superjson from "superjson";
-
-export const createTRPCContext = async (opts: { req: Request }) => {
-  const domain = opts.req.headers.get("x-tenant-domain") || "otherdev.com";
-  return { domain };
-};
-
-const t = initTRPC.context<Context>().create({
-  transformer: superjson,
-});
-
-export const router = t.router;
-export const publicProcedure = t.procedure;
-```
+- **Vercel AI SDK** — LLM integration, streaming, tool calling
+- **Zod** — Runtime schema validation
+- **Upstash Redis** — Rate limiting and chat message caching
 
 ---
 
-## tRPC Configuration
-
-### Client Setup
-
-```typescript
-// src/components/providers.tsx
-import { createTRPCReact } from "@trpc/react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import superjson from "superjson";
-
-export const trpc = createTRPCReact<AppRouter>();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-    },
-  },
-});
-
-const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: "/api/trpc",
-      transformer: superjson,
-    }),
-  ],
-});
-```
-
-### API Endpoint
-
-All tRPC procedures are accessible via:
-
-```
-POST /api/trpc/[procedure]
-```
-
-The HTTP handler is located at:
-- `src/app/api/trpc/[trpc]/route.ts`
-
----
-
-## API Routers
-
-### Contact Router
-
-**Location:** `src/server/routers/contact.ts`
-
-Handles contact form submissions with dual integration (Google Sheets + Gmail).
-
-#### Procedures
-
-##### `contact.submit`
-
-Submit a contact form request.
-
-**Type:** `mutation`
-
-**Input Schema:**
-
-```typescript
-{
-  name: string;        // Min 2 characters
-  companyName: string; // Required
-  email: string;       // Valid email format
-  subject: string;     // Required
-  message: string;     // Min 10 characters
-}
-```
-
-**Returns:**
-
-```typescript
-{
-  message: string;     // "Form submitted successfully"
-}
-```
-
-**Example Usage:**
-
-```typescript
-// Client-side
-import { trpc } from "@/lib/trpc";
-
-function ContactForm() {
-  const submitMutation = trpc.contact.submit.useMutation();
-
-  const handleSubmit = async (data) => {
-    try {
-      await submitMutation.mutateAsync({
-        name: "John Doe",
-        companyName: "Acme Inc",
-        email: "john@example.com",
-        subject: "Project Inquiry",
-        message: "I'd like to discuss a new project...",
-      });
-      // Success!
-    } catch (error) {
-      // Handle error
-    }
-  };
-}
-```
-
-**Backend Operations:**
-
-1. Validates input with Zod schema
-2. Appends data to Google Sheet (timestamp + all fields)
-3. Sends email via Gmail SMTP
-4. Both operations run in parallel via `Promise.all()`
-
-**Required Environment Variables:**
-
-```bash
-GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
-GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-GOOGLE_SHEET_ID=your-sheet-id
-GMAIL_USER=your-email@gmail.com
-GMAIL_APP_PASSWORD=your-app-password
-GMAIL_RECIPIENTS=recipient1@example.com,recipient2@example.com  # Optional, defaults to GMAIL_USER
-```
-
-**Error Scenarios:**
-
-| Error | Status | Description |
-|-------|--------|-------------|
-| Invalid email | 400 | Email format validation failed |
-| Missing field | 400 | Required field not provided |
-| Google Sheets API error | 500 | Failed to append to sheet |
-| Gmail SMTP error | 500 | Failed to send email |
-
----
-
-### Content Router
-
-**Location:** `src/server/routers/content.ts`
-
-Fetches blog posts and categories from Payload CMS via Canvas SDK. Domain context is automatically injected via tRPC context.
-
-#### Procedures
-
-##### `content.getBlogPosts`
-
-Fetch paginated blog posts for the current domain.
-
-**Type:** `query`
-
-**Input Schema:**
-
-```typescript
-{
-  limit?: number;  // Default: 10
-  page?: number;   // Default: 1
-}
-```
-
-**Returns:**
-
-```typescript
-{
-  docs: Array<{
-    id: string;
-    title: string;
-    slug: string;
-    content: string;
-    excerpt?: string;
-    publishedAt: Date;
-    author?: {
-      name: string;
-      avatar?: string;
-    };
-    categories?: Array<{ name: string; slug: string }>;
-  }>;
-  totalDocs: number;
-  totalPages: number;
-  page: number;
-  limit: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-```
-
-**Example Usage:**
-
-```typescript
-function BlogList() {
-  const { data, isLoading } = trpc.content.getBlogPosts.useQuery({
-    limit: 12,
-    page: 1,
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-
-  return (
-    <div>
-      {data?.docs.map((post) => (
-        <article key={post.id}>
-          <h2>{post.title}</h2>
-          <p>{post.excerpt}</p>
-        </article>
-      ))}
-    </div>
-  );
-}
-```
-
----
-
-##### `content.getBlogPost`
-
-Fetch a single blog post by slug.
-
-**Type:** `query`
-
-**Input Schema:**
-
-```typescript
-{
-  slug: string;
-}
-```
-
-**Returns:**
-
-```typescript
-{
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt?: string;
-  publishedAt: Date;
-  author?: {
-    name: string;
-    avatar?: string;
-  };
-  categories?: Array<{ name: string; slug: string }>;
-  seo?: {
-    title: string;
-    description: string;
-    image?: string;
-  };
-}
-```
-
-**Example Usage:**
-
-```typescript
-function BlogPost({ slug }: { slug: string }) {
-  const { data, isLoading } = trpc.content.getBlogPost.useQuery({ slug });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (!data) return <div>Post not found</div>;
-
-  return (
-    <article>
-      <h1>{data.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: data.content }} />
-    </article>
-  );
-}
-```
-
----
-
-##### `content.getCategories`
-
-Fetch all blog categories for the current domain.
-
-**Type:** `query`
-
-**Input:** None (uses domain from context)
-
-**Returns:**
-
-```typescript
-Array<{
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  postCount?: number;
-}>
-```
-
-**Example Usage:**
-
-```typescript
-function CategoryList() {
-  const { data } = trpc.content.getCategories.useQuery();
-
-  return (
-    <ul>
-      {data?.map((category) => (
-        <li key={category.id}>
-          {category.name} ({category.postCount})
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
----
-
-## Chat API
-
-**Endpoint:** `POST /api/chat/stream`
+## Chat API (`/api/chat/stream`)
 
 **Location:** `src/app/api/chat/stream/route.ts`
 
-RAG-powered AI chat endpoint using Groq LLM with vector search.
+Streaming RAG-powered AI chat endpoint using Vercel AI Gateway with automatic model fallbacks.
 
 ### Request Format
 
+```
+POST /api/chat/stream
+```
+
+**Headers:**
+- `Content-Type: application/json`
+
+**Body:**
+
 ```typescript
 {
-  messages: Array<{
-    role: "user" | "assistant";
-    content: string;
-  }>;
+  id?: string;                    // Chat ID (auto-generated if omitted)
+  message?: UIMessage;            // Single new message to append
+  messages?: UIMessage[];         // Full message history (mutually exclusive with message)
+  supportsArtifacts?: boolean;   // Enable artifact generation tool
+}
+```
+
+**`UIMessage` type:**
+
+```typescript
+interface UIMessage {
+  role: 'user' | 'assistant' | 'system';
+  parts: Array<
+    | { type: 'text'; text: string }
+    | { type: 'file'; data: string; mediaType?: string }
+  >;
+  createdAt?: string;
 }
 ```
 
@@ -381,77 +79,381 @@ Server-Sent Events (SSE) stream:
 ```
 data: {"content":"Hello"}
 data: {"content":" there!"}
+data: {"content":"."}
 data: [DONE]
 ```
 
-### Features
-
-- **Vector Search:** Semantic search in Firebase Firestore
-- **RAG Context:** Retrieves relevant knowledge base documents
-- **Streaming:** Real-time response streaming
-- **Rate Limiting:** 10 requests/minute per IP
-- **Input Sanitization:** Prevents prompt injection attacks
-
-### Example Usage
+**Chunk format:**
 
 ```typescript
-async function chat(messages: Message[]) {
-  const response = await fetch("/api/chat/stream", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
-  });
+// Text chunk
+{ "content": "token string" }
 
-  const reader = response.body?.getReader();
-  const decoder = new TextDecoder();
+// Suggestion chunk (AI SDK suggestion tool)
+{ "type": "suggestion", "suggestion": "..." }
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+// Tool call chunk
+{ "type": "tool-call", "tool": "tavilySearch", "input": {...} }
+{ "type": "tool-call", "tool": "createArtifact", "input": {...} }
 
-    const chunk = decoder.decode(value);
-    const lines = chunk.split("\n");
+// Done signal
+[DONE]
+```
 
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        const data = line.slice(6);
-        if (data === "[DONE]") return;
+### Response Headers
 
-        const parsed = JSON.parse(data);
-        console.log(parsed.content);
-      }
+```
+Content-Type: text/event-stream
+Cache-Control: no-cache
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 9
+X-RateLimit-Reset: 1740000000000
+```
+
+### Chat Routing
+
+Queries are classified into 4 routes (`src/server/lib/chat-routing.ts`):
+
+| Route | Trigger | Behavior |
+|-------|---------|----------|
+| `otherdev_rag` | 2+ domain keywords, no non-domain keywords | Full RAG context from knowledge base |
+| `otherdev_no_rag` | 1 domain keyword, no non-domain keywords | Base facts only, no vector search |
+| `general_chat` | Non-domain keywords or conversational | Tavily web search enabled |
+| `clarify` | Mixed signals (domain + non-domain + "otherdev" brand) | Request clarification |
+
+**Domain keywords:** `other dev`, `otherdev`, `founders`, `ossaid`, `kabeer`, `karachi`, `services`, `case studies`, `portfolio`, `projects`, `agency`, `studio`, `e-commerce`, `saas`, `legal tech`, `real estate`, etc.
+
+**Non-domain keywords:** `war`, `news`, `politics`, `crypto`, `weather`, `sports`, `iran`, `usa`, `israel`, `ukraine`, `russia`, `gaza`, etc.
+
+### Query Quality Detection
+
+```typescript
+interface QueryQuality {
+  isLowQuality: boolean;      // < 3 tokens, repeated words, or purely conversational
+  isConversational: boolean;   // "ok", "thanks", "hi", "sure", etc.
+  tokenCount: number;
+  hasRepeatedWords: boolean;
+  needsArtifact: boolean;     // "build", "create", "make", "design", etc.
+}
+```
+
+### RAG Context Injection
+
+1. Query is classified → if `otherdev_rag` or `otherdev_no_rag`, RAG is enabled
+2. Generate embedding via **Cohere `embed-v4.0`** via AI Gateway (1536-dim)
+3. Search **Qdrant** collection `otherdev_documents` (3x results, cosine similarity)
+4. Re-rank results via **Cohere `rerank-v4-fast`** cross-encoder (always-on)
+5. Build context prompt with top results
+6. Response cached in Upstash Redis (24-hour TTL)
+
+### Tools
+
+#### tavilySearch
+
+Used for `general_chat` queries. Returns web search results.
+
+```typescript
+// Tool call format
+{ "type": "tool-call", "tool": "tavilySearch", "input": { "query": "..." } }
+
+// Result
+{ "type": "tool-result", "tool": "tavilySearch", "result": { "query": "...", "answer": "..." } }
+```
+
+#### createArtifact
+
+Used when user requests building/creating something (code, calculator, form, etc.).
+
+```typescript
+// Tool call format
+{ "type": "tool-call", "tool": "createArtifact", "input": {
+  "title": "Project Calculator",
+  "description": "...",
+  "html": "<!DOCTYPE html>...",
+  "css": "body { ... }",
+  "js": "// ..."
+} }
+
+// Result: rendered as iframe in chat
+```
+
+### Environment Variables
+
+```bash
+GROQ_API_KEY=your-groq-api-key
+QDRANT_URL=https://your-qdrant.cloud
+QDRANT_API_KEY=your-qdrant-key
+TAVILY_API_KEY=your-tavily-key
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+RAG_SIMILARITY_THRESHOLD=0.1
+RAG_MATCH_COUNT=5
+RAG_MAX_MESSAGE_LENGTH=500
+CHAT_HISTORY_TTL_SECONDS=1209600
+RAG_RETRIEVAL_CACHE_TTL_SECONDS=21600
+CHAT_RESPONSE_CACHE_TTL_SECONDS=86400
+```
+
+---
+
+## Contact API (`/api/contact`)
+
+**Location:** `src/app/api/contact/route.ts`
+
+Contact form submission with dual integration (Google Sheets + Gmail).
+
+### Request Format
+
+```
+POST /api/contact
+```
+
+**Headers:**
+- `Content-Type: application/json`
+
+**Body:**
+
+```typescript
+{
+  name: string;       // Min 2 characters
+  companyName: string; // Required
+  email: string;       // Valid email format
+  subject: string;     // Required
+  message: string;     // Min 10 characters
+}
+```
+
+### Response
+
+**Success (200):**
+
+```json
+{ "message": "Form submitted successfully" }
+```
+
+**Validation Error (400):**
+
+```json
+{
+  "error": {
+    "fieldErrors": {
+      "email": ["Please enter a valid email address."],
+      "message": ["Message must be at least 10 characters."]
     }
   }
 }
 ```
 
-### Configuration
+**Rate Limited (429):**
 
-**Environment Variables:**
+```json
+{
+  "error": "Too many submissions. Try again after 3:45 PM."
+}
+```
 
-```bash
-GROQ_API_KEY=your-groq-api-key
-FIREBASE_PROJECT_ID=your-firebase-project-id
-FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+**Server Error (500):**
 
-# Optional configuration
-RAG_SIMILARITY_THRESHOLD=0.1          # Vector search threshold (0-1)
-RAG_MATCH_COUNT=5                     # Number of documents to retrieve
-RAG_MAX_MESSAGE_LENGTH=500            # Max characters per message
+```json
+{ "error": "Failed to submit. Please try again." }
 ```
 
 ### Rate Limiting
 
-**Headers:**
+- **5 requests per minute per IP** (contact-specific limiter)
+- Separate from chat rate limit
+- Returns `429` with human-readable retry time
+
+### Backend Operations
+
+1. Validate input with Zod schema
+2. Append row to Google Sheet (timestamp + all fields)
+3. Send email via Gmail SMTP
+
+Both operations run in parallel via `Promise.allSettled()` — partial success (one fails, one succeeds) returns success.
+
+### Environment Variables
+
+```bash
+GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+GOOGLE_SHEET_ID=your-sheet-id
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
+GMAIL_RECIPIENTS=recipient1@example.com,recipient2@example.com  # Optional, defaults to GMAIL_USER
+```
+
+---
+
+## Transcribe API (`/api/transcribe`)
+
+**Location:** `src/app/api/transcribe/route.ts`
+
+Audio transcription using Groq Whisper via Vercel AI SDK.
+
+### Request Format
+
+```
+POST /api/transcribe
+Content-Type: multipart/form-data
+```
+
+**Body (FormData):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `audio` | File | Audio file (required) |
+
+**Supported formats:** Any format supported by Groq Whisper (mp3, wav, m4a, webm, etc.)
+
+### Response Format
+
+Server-Sent Events (SSE) streaming transcript:
+
+```
+data: {"type":"transcript-chunk","content":"Hello"}
+data: {"type":"transcript-chunk","content":" world"}
+data: {"type":"transcript-complete","content":"Hello world"}
+data: [DONE]
+```
+
+**Chunk types:**
+
+| Type | Description |
+|------|-------------|
+| `transcript-chunk` | Partial transcript segment (~50 chars) |
+| `transcript-complete` | Full transcript (sent when finished) |
+| `[DONE]` | Stream termination signal |
+
+### Response Headers
+
+```
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+```
+
+### Error Responses
+
+**No audio file (400):**
+
+```json
+{ "error": "No audio file provided" }
+```
+
+**Transcription failure (500):**
+
+```json
+{ "error": "Transcription failed: <error message>" }
+```
+
+### Environment Variables
+
+```bash
+GROQ_API_KEY=your-groq-api-key
+```
+
+---
+
+## Process Document API (`/api/process-document`)
+
+**Location:** `src/app/api/process-document/route.ts`
+
+PDF and image OCR using Mistral via Vercel AI SDK.
+
+### Request Format
+
+```
+POST /api/process-document
+Content-Type: multipart/form-data
+```
+
+**Body (FormData):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | File | PDF or image file (required) |
+
+**Supported file types:**
+- PDFs: `application/pdf`
+- Images: `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `image/heic`, `image/heif`
+
+### Response
+
+**Success (200):**
+
+```json
+{ "text": "Extracted text from document..." }
+```
+
+**No file provided (400):**
+
+```json
+{ "error": "No file provided" }
+```
+
+**File too large (400):**
+
+```json
+{ "error": "File exceeds 50MB limit" }
+```
+
+**Unsupported type (400):**
+
+```json
+{ "error": "Unsupported file type for OCR: video/mp4" }
+```
+
+**API key not configured (500):**
+
+```json
+{ "error": "Mistral API key not configured" }
+```
+
+**OCR failure (500):**
+
+```json
+{ "error": "OCR failed: <error message>" }
+```
+
+### File Size Limit
+
+**50MB maximum** — enforced before OCR processing.
+
+### Environment Variables
+
+```bash
+MISTRAL_API_KEY=your-mistral-api-key
+```
+
+---
+
+## Rate Limiting
+
+All API routes enforce rate limiting via Upstash Redis.
+
+### Rate Limit Headers
+
+All responses include rate limit information:
 
 ```
 X-RateLimit-Limit: 10
 X-RateLimit-Remaining: 9
-X-RateLimit-Reset: 1640000000000
+X-RateLimit-Reset: 1740000000000
 ```
 
-**429 Response:**
+### Limits by Endpoint
+
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| `/api/chat/stream` | 10 requests | 1 minute |
+| `/api/contact` | 5 requests | 1 minute |
+| `/api/transcribe` | No limit | — |
+| `/api/process-document` | No limit | — |
+
+### 429 Response Format
+
+**Chat API:**
 
 ```json
 {
@@ -459,44 +461,13 @@ X-RateLimit-Reset: 1640000000000
 }
 ```
 
-With headers:
-```
-Retry-After: 60
-```
+With headers: `Retry-After: <seconds>`
 
-### Security Features
+**Contact API:**
 
-1. **Input Sanitization:** Removes dangerous prompt injection patterns
-2. **Message Length Limit:** Caps messages at 500 characters
-3. **IP-Based Rate Limiting:** Prevents abuse
-4. **Safe Context Injection:** Validated knowledge base only
-
----
-
-## Rate Limiting
-
-**Location:** `src/server/lib/rate-limit.ts`
-
-In-memory rate limiting with sliding window algorithm.
-
-### Configuration
-
-- **Window:** 60 seconds
-- **Max Requests:** 10 per window
-- **Identifier:** IP address (from headers)
-
-### API
-
-```typescript
-import { checkRateLimit, getClientIdentifier } from '@/server/lib/rate-limit';
-
-const clientId = getClientIdentifier(request);
-const result = checkRateLimit(clientId);
-
-if (!result.allowed) {
-  // Rate limit exceeded
-  console.log(result.resetTime);    // Timestamp when limit resets
-  console.log(result.remaining);    // 0
+```json
+{
+  "error": "Too many submissions. Try again after 3:45 PM."
 }
 ```
 
@@ -504,151 +475,98 @@ if (!result.allowed) {
 
 ## Error Handling
 
-### tRPC Errors
+### HTTP Status Codes
 
-tRPC automatically handles errors with proper HTTP status codes:
+| Status | Meaning |
+|--------|---------|
+| 200 | Success |
+| 400 | Bad request / validation error |
+| 429 | Rate limit exceeded |
+| 500 | Internal server error |
 
-```typescript
-// Client-side error handling
-const mutation = trpc.contact.submit.useMutation({
-  onError: (error) => {
-    if (error.data?.code === "BAD_REQUEST") {
-      console.log("Validation error:", error.message);
-    } else if (error.data?.code === "INTERNAL_SERVER_ERROR") {
-      console.log("Server error:", error.message);
-    }
-  },
-});
+### Error Response Format
+
+All errors return JSON with an `error` field:
+
+```json
+{ "error": "Human-readable error message" }
 ```
 
-### Common Error Codes
+For validation errors, the response includes field-level detail:
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `BAD_REQUEST` | 400 | Invalid input or validation error |
-| `UNAUTHORIZED` | 401 | Authentication required |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `TIMEOUT` | 408 | Request timeout |
-| `INTERNAL_SERVER_ERROR` | 500 | Server error |
-
-### Validation Errors
-
-Zod validation errors include detailed field-level information:
-
-```typescript
+```json
 {
-  code: "BAD_REQUEST",
-  message: "Validation error",
-  data: {
-    zodError: {
-      fieldErrors: {
-        email: ["Invalid email address"],
-        message: ["String must contain at least 10 character(s)"]
-      }
+  "error": {
+    "fieldErrors": {
+      "email": ["Please enter a valid email address."],
+      "message": ["Message must be at least 10 characters."]
     }
   }
 }
 ```
 
----
+### Chat-Specific Errors
 
-## Client-Side Hooks
-
-### Query Hooks
-
-```typescript
-// Basic query
-const { data, isLoading, error } = trpc.content.getBlogPosts.useQuery({
-  limit: 10,
-});
-
-// With options
-const { data } = trpc.content.getBlogPost.useQuery(
-  { slug: "my-post" },
-  {
-    enabled: !!slug,          // Only fetch when slug exists
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  }
-);
-```
-
-### Mutation Hooks
-
-```typescript
-const mutation = trpc.contact.submit.useMutation({
-  onSuccess: (data) => {
-    console.log("Success:", data.message);
-  },
-  onError: (error) => {
-    console.error("Error:", error.message);
-  },
-});
-
-// Usage
-mutation.mutate({ name: "...", email: "...", ... });
-
-// Async
-await mutation.mutateAsync({ ... });
-```
+| Error | Status | Description |
+|-------|--------|-------------|
+| `No messages provided` | 400 | Empty request body |
+| `No valid messages provided` | 400 | Messages failed validation |
+| `Invalid message payload` | 400 | AI SDK message validation failed |
+| `Too many requests` | 429 | Rate limit exceeded |
+| `Internal server error` | 500 | Unexpected error in chat handler |
 
 ---
 
 ## Type Safety
 
-All API types are automatically inferred:
+All API responses are fully typed. Example TypeScript usage:
 
 ```typescript
-import type { AppRouter } from "@/server/routers";
+// Contact form
+type ContactInput = {
+  name: string;
+  companyName: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
-// Infer input types
-type ContactInput = RouterInputs["contact"]["submit"];
-
-// Infer output types
-type BlogPosts = RouterOutputs["content"]["getBlogPosts"];
-
-// Use in components
-function handleSubmit(data: ContactInput) {
-  // Fully typed!
-}
-```
-
----
-
-## Best Practices
-
-1. **Use React Query features** - Leverage caching, background refetch, optimistic updates
-2. **Handle loading states** - Always provide feedback during data fetching
-3. **Error boundaries** - Wrap components with error boundaries for graceful degradation
-4. **Input validation** - Validate on both client and server
-5. **Rate limiting awareness** - Handle 429 responses with retry logic
-6. **Type safety** - Let TypeScript catch errors at compile time
-
----
-
-## Testing
-
-### Unit Testing tRPC Procedures
-
-```typescript
-import { appRouter } from "@/server/routers";
-
-describe("Contact Router", () => {
-  it("should validate email format", async () => {
-    const caller = appRouter.createCaller({ domain: "test.com" });
-
-    await expect(
-      caller.contact.submit({
-        name: "Test",
-        companyName: "Test Inc",
-        email: "invalid-email",
-        subject: "Test",
-        message: "Test message",
-      })
-    ).rejects.toThrow("Invalid email");
-  });
+const response = await fetch('/api/contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(formData),
 });
+
+if (!response.ok) {
+  const error = await response.json();
+  console.error(error.error);
+}
+
+// Chat streaming
+const response = await fetch('/api/chat/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages: [{ role: 'user', parts: [{ type: 'text', text: query }] }] }),
+});
+
+const reader = response.body!.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+
+  const chunk = decoder.decode(value);
+  const lines = chunk.split('\n');
+
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+      if (data === '[DONE]') return;
+      console.log(JSON.parse(data));
+    }
+  }
+}
 ```
 
 ---
