@@ -10,6 +10,7 @@
 - [Data Flow](#data-flow)
 - [Component Architecture](#component-architecture)
 - [Multi-Tenant System](#multi-tenant-system)
+- [AI Gateway & Chat Routing](#ai-gateway--chat-routing)
 - [RAG Chat System](#rag-chat-system)
 - [Performance Optimizations](#performance-optimizations)
 
@@ -22,9 +23,10 @@ Other Dev is a modern, full-stack web application built with Next.js 16.2.1, lev
 ### Core Principles
 
 - **Type Safety First:** End-to-end TypeScript with Zod validation
+- **AI-Native:** Vercel AI Gateway for unified model routing with automatic fallbacks
 - **Performance:** Server Components, React Compiler, code splitting
 - **Developer Experience:** Hot reload, auto-imports, full IntelliSense
-- **Scalability:** Multi-tenant architecture, vector search, caching
+- **Scalability:** Multi-tenant architecture, Qdrant vector search, Redis caching
 - **Accessibility:** Radix UI primitives, ARIA compliance
 
 ---
@@ -42,19 +44,22 @@ graph TB
     subgraph "Application Layer"
         NextJS[Next.js 16 App Router]
         APIRoutes[API Routes]
-        RAG[RAG Chat System]
+        ChatRouting[Chat Router]
+        RAG[RAG Pipeline]
     end
 
     subgraph "Data Layer"
         Payload[Payload CMS Canvas]
-        Firebase[Firebase Firestore with Vector Search]
+        Qdrant[Qdrant Vector DB]
+        Upstash[Upstash Redis]
         Sheets[Google Sheets]
         Gmail[Gmail SMTP]
     end
 
     subgraph "External Services"
-        Groq[Groq LLM API]
-        Mistral[Mistral AI API]
+        AIGateway[Vercel AI Gateway]
+        Cohere[Cohere (embed/rerank)]
+        Tavily[Tavily Search]
     end
 
     Browser --> NextJS
@@ -63,24 +68,28 @@ graph TB
 
     RSC --> NextJS
     RCC --> APIRoutes
-    RCC --> RAG
+    RCC --> ChatRouting
+
+    ChatRouting --> RAG
+    RAG --> Qdrant
+    RAG --> AIGateway
+    RAG --> Cohere
 
     APIRoutes --> Payload
     APIRoutes --> Sheets
     APIRoutes --> Gmail
 
-    RAG --> Groq
-    RAG --> Mistral
-    RAG --> Firebase
+    ChatRouting --> Tavily
 
-    NextJS -.Dynamic Data.-> APIRoutes
-    NextJS -.Static Data.-> RSC
+    AIGateway --> GroqGroq[Groq LLM]
+    AIGateway --> Mistral[Mistral LLM]
 
     style Browser fill:#e1f5ff
     style NextJS fill:#fff4e1
     style APIRoutes fill:#ffe1f5
     style RAG fill:#e1ffe4
-    style Firebase fill:#f5e1ff
+    style Qdrant fill:#f5e1ff
+    style AIGateway fill:#ffe8cc
 ```
 
 ---
@@ -101,22 +110,31 @@ src/app/
 ├── work/
 │   ├── page.tsx                # Work listing
 │   └── [slug]/page.tsx         # Individual project page
-└── blog/
-    ├── page.tsx                # Blog listing
-    └── [slug]/page.tsx         # Individual blog post
+├── blog/
+│   ├── page.tsx                # Blog listing
+│   └── [slug]/page.tsx         # Individual blog post
+├── loom/page.tsx               # AI chat page (Loom)
+└── api/                        # API routes
+    ├── chat/stream/route.ts    # Streaming chat endpoint
+    ├── contact/route.ts         # Contact form
+    ├── transcribe/route.ts      # Audio transcription
+    └── process-document/route.ts # PDF/image OCR
 ```
 
 #### Components
 
 ```
 src/components/
-├── ui/                         # Radix UI primitives (shadcn pattern)
+├── ui/                         # Radix UI primitives (~50 components)
 ├── navigation.tsx              # Header navigation
 ├── footer.tsx                  # Footer component
-├── project-card.tsx            # Project display card
+├── project-card.tsx           # Project display card
 ├── contact-dialog.tsx          # Contact form modal
-├── chat-widget.tsx             # RAG AI chat interface
-└── providers.tsx               # React Query provider
+├── chat-widget.tsx             # Floating chat button + panel
+├── chat-core.tsx               # Shared chat logic (widget + Loom page)
+├── artifact-renderer.tsx        # Renders HTML/CSS/JS artifacts
+├── otherdev-loom-thread.tsx     # Loom page wrapper with artifact panel
+└── providers.tsx               # React Query provider (TRPCProvider legacy name)
 ```
 
 **Rendering Strategy:**
@@ -135,46 +153,62 @@ src/components/
 
 ```mermaid
 graph LR
-    Client[Client Code] -->|HTTP POST| Handler[/api/contact]
-    Handler --> ContactHandler[Contact Handler]
-    Client -->|HTTP GET| ContentHandler[/api/content/posts]
-    ContentHandler --> ContentHandler2[Content Handler]
+    Client[Client Code] -->|POST| Chat[/api/chat/stream]
+    Client -->|POST| Contact[/api/contact]
+    Client -->|POST| Transcribe[/api/transcribe]
+    Client -->|POST| Process[/api/process-document]
 
-    ContactHandler --> Sheets[Google Sheets]
-    ContactHandler --> Gmail[Gmail SMTP]
-    ContentHandler2 --> Payload[Payload CMS]
+    Chat --> StreamHandler[Stream Handler]
+    Contact --> Sheets[Google Sheets]
+    Contact --> Gmail[Gmail SMTP]
+    Transcribe --> GroqWhisper[Groq Whisper]
+    Process --> MistralOCR[Mistral OCR]
+
+    StreamHandler --> ChatRouting[Chat Router]
+    StreamHandler --> RateLimit[Upstash Rate Limit]
+    ChatRouting --> RAG[RAG Pipeline]
+    ChatRouting --> Tavily[Tavily Search]
 
     style Client fill:#e1f5ff
-    style Handler fill:#ffe1f5
-    style ContactHandler fill:#fff4e1
-    style ContentHandler fill:#fff4e1
+    style StreamHandler fill:#ffe1f5
+    style RateLimit fill:#fff4e1
+    style ChatRouting fill:#e1ffe4
 ```
 
 **Directory Structure:**
 
 ```
 src/app/api/
+├── chat/
+│   └── stream/route.ts         # Streaming RAG chat endpoint
 ├── contact/
-│   └── route.ts                 # Contact form handler
-├── content/
-│   └── posts/
-│       └── route.ts             # Blog posts handler
-└── chat/
-    └── stream/
-        └── route.ts             # RAG chat endpoint
+│   └── route.ts                 # Contact form (Google Sheets + Gmail)
+├── transcribe/
+│   └── route.ts                 # Audio transcription (Groq Whisper)
+└── process-document/
+    └── route.ts                 # PDF/image OCR (Mistral)
 
 src/server/lib/
-├── rate-limit.ts                # In-memory rate limiting
-└── rag/
-    └── vector-search.ts          # Firebase Firestore vector search
+├── chat/
+│   ├── models.ts               # AI Gateway model definitions + fallback chains
+│   ├── stream-handler.ts       # Core streaming logic (RAG, routing, streaming)
+│   ├── tools.ts                # tavilySearchTool, createArtifactTool
+│   └── index.ts                # Exports: getCapableModel, getFastModel, etc.
+├── rag/
+│   ├── embeddings.ts           # Cohere embeddings via AI Gateway + LRU cache + reranking
+│   └── vector-search.ts        # Qdrant vector search with reranking
+├── chat-routing.ts             # 4-category query classifier
+├── chat-cache-store.ts         # Upstash Redis chat message + response caching
+├── rate-limit.ts              # Upstash sliding window rate limiting
+└── artifact-tool.ts            # HTML artifact generation tool
 ```
 
 **Key Features:**
 
+- **Vercel AI Gateway:** Unified model routing with automatic failover chains
 - **Zod Validation:** Runtime schema validation for type safety
-- **Type Safety:** Full TypeScript inference from server to client
-- **Context Injection:** Domain information from request headers
-- **Error Handling:** Automatic HTTP status code mapping
+- **Upstash Redis:** Rate limiting + chat message caching
+- **Adaptive RAG:** Query quality detection adjusts similarity thresholds
 
 ---
 
@@ -193,46 +227,15 @@ export const payloadAPI = new PayloadAPI({
 });
 ```
 
-**Data Flow:**
+#### 3.2 Vector Database (Qdrant)
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant tRPC
-    participant Canvas
-    participant Payload
+**Collection:** `otherdev_documents` — 1536-dimensional vectors, cosine similarity
 
-    Client->>tRPC: getBlogPosts({ limit: 10 })
-    tRPC->>Canvas: payloadAPI.getBlogPosts(domain, options)
-    Canvas->>Payload: GET /api/posts?domain=X&limit=10
-    Payload-->>Canvas: { docs: [...], totalPages: N }
-    Canvas-->>tRPC: Typed response
-    tRPC-->>Client: Cached, typed data
-```
-
-#### 3.2 Contact Form Data
-
-**Dual Integration:**
-
-1. **Google Sheets:** Long-term storage, backup, manual review
-2. **Gmail:** Instant notifications to team
-
-```mermaid
-graph LR
-    Form[Contact Form] --> Router[Contact Router]
-    Router --> |Promise.all| Parallel{Parallel Execution}
-    Parallel --> Sheets[Google Sheets API]
-    Parallel --> Gmail[Gmail SMTP]
-
-    Sheets --> Success{Both Complete?}
-    Gmail --> Success
-    Success -->|Yes| Response[Success Response]
-    Success -->|No| Error[Error Response]
-```
-
-#### 3.3 Vector Database (Firebase Firestore)
-
-**Technology:** Firebase Firestore with native vector search
+**Key Features:**
+- **Payload indexes** on: `metadata.type`, `metadata.category`, `metadata.subtype`, `metadata.project`, `metadata.year`
+- **Idempotent upserts:** SHA-256 deterministic point IDs (re-running ingest updates, not duplicates)
+- **Batch upserts:** 64 points per batch, parallel batch execution
+- **Always-on reranking:** Cohere `rerank-v4-fast` cross-encoder after initial vector search
 
 **Document Schema:**
 
@@ -242,20 +245,28 @@ interface Document {
   metadata: {
     source: string;
     title: string;
-    type: string;
+    type: 'project' | 'service' | 'about' | 'general' | 'testimonial';
     category?: string;
     subtype?: string;
     project?: string;
     year?: string;
   };
-  embedding: FieldValue.vector(number[]); // Vector field
-  createdAt: FieldValue.serverTimestamp();
+  vector: number[]; // 1536 dimensions
 }
 ```
 
-**Vector Search:**
+**Environment Variables:**
+- `QDRANT_URL` — Qdrant server URL
+- `QDRANT_API_KEY` — Qdrant API key
 
-Uses Firebase Firestore's native `findNearest()` API for similarity matching with cosine distance.
+#### 3.3 Contact Form Data
+
+**Dual Integration:**
+
+1. **Google Sheets:** Long-term storage, backup, manual review
+2. **Gmail:** Instant notifications to team
+
+Both operations run in parallel via `Promise.all()`.
 
 ---
 
@@ -281,6 +292,64 @@ sequenceDiagram
     API->>CMS: Query blog content
     CMS-->>API: Blog data
     API-->>Browser: Typed response (cached)
+```
+
+### RAG Chat Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Widget as Chat Widget
+    participant API as /api/chat/stream
+    participant RL as Upstash Rate Limit
+    participant Cache as Upstash Redis
+    participant Routing as Chat Router
+    participant Embed as Cohere Embeddings
+    participant Qdrant as Qdrant
+    participant Rerank as Cohere Rerank
+    participant Gateway as Vercel AI Gateway
+
+    User->>Widget: Type message & send
+    Widget->>API: POST { messages: [...], chatId }
+    API->>RL: Check rate limit
+    RL-->>API: Allowed
+
+    API->>Cache: Load chat history
+    Cache-->>API: Previous messages
+
+    API->>Routing: classifyChatRoute(query)
+    Routing-->>API: route: "otherdev_rag"
+
+    alt RAG Path
+        API->>Embed: generateEmbedding(query)
+        Embed-->>API: queryVector (1536-dim)
+
+        API->>Qdrant: searchSimilarDocuments(queryVector, topK=3x)
+        Qdrant-->>API: initialResults[]
+
+        API->>Rerank: rerankDocuments(initialResults, topN=5)
+        Rerank-->>API: rerankedResults[]
+
+        API->>Cache: setCachedRetrievalContext(query, context)
+    else General Chat
+        API->>Routing: tavilySearchTool(query)
+        Routing-->>API: webResults[]
+    end
+
+    API->>API: Build system prompt with context
+    API->>Gateway: streamText(model, messages)
+    Gateway-->>API: SSE stream
+
+    API->>Cache: saveChatMessages(chatId, updatedMessages)
+
+    loop Stream chunks
+        Gateway-->>API: SSE chunk
+        API-->>Widget: data: {"content":"..."}
+        Widget->>User: Display token
+    end
+
+    Gateway-->>API: [DONE]
+    API-->>Widget: data: [DONE]
 ```
 
 ### Contact Form Submission Flow
@@ -312,39 +381,6 @@ sequenceDiagram
     Form->>User: Success toast notification
 ```
 
-### RAG Chat Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Widget as Chat Widget
-    participant API as /api/chat/stream
-    participant RL as Rate Limiter
-    participant FB as Firebase Firestore
-    participant Groq
-
-    User->>Widget: Type message & send
-    Widget->>API: POST { messages: [...] }
-    API->>RL: Check rate limit
-    RL-->>API: Allowed
-
-    API->>API: Sanitize input & fetch context
-    API->>FB: findNearest(vector, cosine distance)
-    FB-->>API: Similar docs with scores
-
-    API->>API: Build system prompt with context
-    API->>Groq: Stream chat completion
-
-    loop Stream chunks
-        Groq-->>API: SSE chunk
-        API-->>Widget: data: {"content":"..."}
-        Widget->>User: Display token
-    end
-
-    Groq-->>API: [DONE]
-    API-->>Widget: data: [DONE]
-```
-
 ---
 
 ## Component Architecture
@@ -354,13 +390,13 @@ sequenceDiagram
 ```mermaid
 graph TD
     Root[Root Layout] --> Providers[Providers]
-    Providers --> Theme[Theme Provider]
-    Providers --> ReactQuery[React Query Provider]
+    Providers --> Tenant[TenantProvider]
+    Providers --> TRPC[TRPCProvider<br/>QueryClientProvider]
+    Providers --> Suspense[Suspense]
 
-    Root --> Nav[Navigation]
-    Root --> Page[Page Component]
-    Root --> Footer[Footer]
-
+    TRPC --> Nav[Navigation]
+    TRPC --> Footer[Footer]
+    TRPC --> Page[Page Component]
     Page --> ServerContent[Server Components]
     Page --> ClientContent[Client Components]
 
@@ -368,9 +404,11 @@ graph TD
     ClientContent --> ChatWidget[Chat Widget]
     ClientContent --> ProjectCard[Project Card]
 
+    ChatWidget --> ChatCore[ChatCore]
+    ChatCore --> ArtifactRenderer[ArtifactRenderer]
+
     ContactDialog --> Form[React Hook Form]
-    ChatWidget --> MessageList[Message List]
-    ChatWidget --> MessageInput[Message Input]
+    ProjectCard --> ProjectCardHover[ProjectCardHover]
 
     style Root fill:#e1f5ff
     style Providers fill:#ffe1f5
@@ -456,7 +494,7 @@ graph LR
     Request[Incoming Request] --> Proxy[proxy.ts Middleware]
     Proxy --> Header{Set x-tenant-domain}
     Header --> NextJS[Next.js Router]
-    NextJS --> Context[API Context]
+    NextJS --> Context[Context Extraction]
     Context --> Handler[API Route Handlers]
 
     Handler --> CMS[Payload CMS<br/>Filter by domain]
@@ -498,10 +536,118 @@ export function getDomainFromRequest(request: Request): string {
 ```typescript
 export async function GET(request: Request) {
   const domain = getDomainFromRequest(request);
-  // ctx.domain is automatically available
   return await payloadAPI.getBlogPosts(domain);
 }
 ```
+
+---
+
+## AI Gateway & Chat Routing
+
+### Vercel AI Gateway
+
+All LLM calls route through `@ai-sdk/gateway` for unified observability and automatic failover:
+
+```typescript
+// src/server/lib/chat/models.ts
+import { gateway } from 'ai'
+
+// Fast model: Groq GPT-OSS → Groq Qwen → Mistral Large
+export function getFastModel() {
+  return gateway('openai/gpt-oss-120b')
+}
+
+// Capable model: Groq Scout (for reasoning, artifacts, tools)
+export function getCapableModel() {
+  return gateway('groq/llama-4-scout-17b-16e-instruct')
+}
+
+// Vision model: Groq Scout → Mistral Pixtral
+export function getVisionModel() {
+  return gateway('groq/llama-4-scout-17b-16e-instruct')
+}
+```
+
+**Fallback Chains:**
+
+| Model Role | Primary | Fallback 1 | Fallback 2 |
+|------------|---------|------------|------------|
+| Fast | `openai/gpt-oss-120b` | `groq/qwen-3-235b-a22b-instruct-2507` | `mistral/mistral-large-3` |
+| Vision | `groq/llama-4-scout-17b-16e-instruct` | `mistral/pixtral-12b-2409` | — |
+
+### Chat Routing (4-Category Classifier)
+
+**Location:** `src/server/lib/chat-routing.ts`
+
+```typescript
+export type ChatRoute = 'otherdev_rag' | 'otherdev_no_rag' | 'general_chat' | 'clarify'
+
+// Domain keywords: otherdev, founders, oussaid, kabeer, projects, agency, e-commerce, etc.
+// Non-domain keywords: war, politics, crypto, sports, weather, etc.
+
+export function classifyChatRoute(rawQuery: string, queryQuality: QueryQuality): ChatRouteDecision {
+  // Returns: route, confidence, reason, domainHits, nonDomainHits
+}
+
+// Route decisions:
+// - otherdev_rag: 2+ domain keywords, no non-domain → full RAG context
+// - otherdev_no_rag: 1 domain keyword, no non-domain → base facts only
+// - general_chat: non-domain keywords OR conversational → Tavily web search
+// - clarify: mixed signals (2+ domain + non-domain + has "otherdev" brand)
+```
+
+**Query Quality Detection:**
+
+```typescript
+export function detectQueryQuality(query: string): QueryQuality {
+  // - isLowQuality: < 3 tokens, repeated words, or purely conversational
+  // - isConversational: "ok", "thanks", "hi", "sure", etc.
+  // - hasRepeatedWords: unique tokens < 60% of total
+  // - needsArtifact: "build", "create", "make", "design", etc.
+}
+```
+
+### Rate Limiting (Upstash Redis)
+
+**Location:** `src/server/lib/rate-limit.ts`
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis from '@upstash/redis'
+
+// Chat: 10 requests per minute per IP
+const chatRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+  prefix: 'rl:chat',
+})
+
+// Contact: 5 requests per minute per IP
+const contactRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 m'),
+  prefix: 'rl:contact',
+})
+```
+
+### Chat Message Caching (Upstash Redis)
+
+**Location:** `src/server/lib/chat-cache-store.ts`
+
+**Three cache layers:**
+
+1. **Chat History** — TTL 14 days
+   - Key: `chat:history:v1:{chatId}`
+   - Stores: `UIMessage[]` array
+
+2. **RAG Retrieval Context** — TTL 6 hours
+   - Key: `rag:retrieval:v1:{KB_VERSION}:{queryHash}`
+   - Stores: serialized context string
+   - KB version auto-computed from `knowledge-base.ts` content
+
+3. **Chat Response** — TTL 24 hours
+   - Key: `chat:response:v1:{KB_VERSION}:{model}:{queryHash}`
+   - Stores: `{ text: string, suggestion: string | null }`
 
 ---
 
@@ -512,131 +658,90 @@ export async function GET(request: Request) {
 ```mermaid
 graph TB
     subgraph "Knowledge Base"
-        Docs[Knowledge Documents<br/>src/lib/knowledge-base.ts]
-        Ingest[Ingestion Script<br/>scripts/ingest-documents.ts]
+        KB[Knowledge Documents<br/>src/lib/knowledge-base.ts]
+        Ingest[Ingest Script<br/>scripts/ingest-documents.ts]
     end
 
-    subgraph "Vector Database"
-        Firebase[Firebase Firestore]
-        VectorSearch[Native Vector Search]
+    subgraph "Vector Store"
+        Qdrant[Qdrant<br/>otherdev_documents<br/>1536-dim Cosine]
+        Payloads[Payload Indexes<br/>type, category, subtype<br/>project, year]
+    end
+
+    subgraph "Embeddings & Reranking"
+        CohereEmbed[Cohere embed-v4.0<br/>via AI Gateway]
+        CohereRerank[Cohere rerank-v4-fast<br/>via AI Gateway]
+        LRUCache[LRU Cache<br/>100 entries]
     end
 
     subgraph "Chat Runtime"
         API[Chat Stream API]
-        RL[Rate Limiter]
+        Router[Chat Router]
         Sanitize[Input Sanitizer]
-        ContextFetch[Context Fetcher<br/>Pre-fetch before LLM]
-        Groq[Groq LLM<br/>llama-3.3-70b]
+        Gateway[Vercel AI Gateway]
+        Tavily[Tavily Search]
     end
 
-    Docs --> Ingest
-    Ingest --> Firebase
+    KB --> Ingest
+    Ingest --> Qdrant
 
-    API --> RL
-    API --> Sanitize
-    API --> ContextFetch
-    ContextFetch --> VectorSearch
-    VectorSearch --> Firebase
-    Firebase --> API
-    API --> Groq
+    Router --> CohereEmbed
+    CohereEmbed --> LRUCache
+    LRUCache --> Qdrant
 
-    style Docs fill:#e1ffe4
-    style Firebase fill:#f5e1ff
+    Qdrant --> CohereRerank
+    CohereRerank --> API
+
+    API --> Gateway
+    Gateway --> GroqGroq[Groq LLM]
+    Gateway --> Mistral[Mistral LLM]
+
+    Router --> Tavily
+
+    style KB fill:#e1ffe4
+    style Qdrant fill:#f5e1ff
+    style Gateway fill:#ffe8cc
     style API fill:#fff4e1
-    style Groq fill:#ffe1f5
 ```
 
-### Components
-
-#### 1. Knowledge Base
+### Knowledge Base
 
 **Location:** `src/lib/knowledge-base.ts`
 
-Structured documents about Other Dev's projects, services, and expertise.
+Structured documents about Other Dev's projects, services, team, and testimonials (~100 documents).
 
 ```typescript
 export interface KnowledgeDocument {
   content: string;
   metadata: {
-    source: string;
+    source: 'projects' | 'about' | 'services' | 'testimonials' | 'general';
     title: string;
-    type: 'project' | 'service' | 'team' | 'technology';
+    type: 'project' | 'service' | 'about' | 'general' | 'testimonial';
     category?: string;
+    subtype?: string;
+    project?: string;
+    year?: string;
   };
 }
-
-export const knowledgeBase: KnowledgeDocument[] = [
-  {
-    content: "...",
-    metadata: {
-      source: "website",
-      title: "About Other Dev",
-      type: "team",
-    },
-  },
-  // More documents...
-];
 ```
 
-#### 2. Vector Search
+### Ingest Pipeline
 
-**Similarity:** Cosine similarity with native vector search
+**Location:** `scripts/ingest-documents.ts`
 
-```typescript
-// src/server/lib/rag/vector-search.ts
-export async function searchSimilarDocuments(
-  queryEmbedding: number[],
-  matchThreshold: number = 0.1,
-  matchCount: number = 5
-) {
-  const db = getFirestore();
-  const collection = db.collection('documents');
-
-  const vectorQuery = collection.findNearest({
-    vectorField: 'embedding',
-    queryVector: FieldValue.vector(queryEmbedding),
-    limit: matchCount,
-    distanceMeasure: 'COSINE',
-    distanceThreshold: 1 - matchThreshold,
-  });
-
-  const snapshot = await vectorQuery.get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
+```mermaid
+graph TB
+    A[Check collection exists] --> B{Exists?}
+    B -->|No| C[resetCollection()<br/>Create + payload indexes]
+    B -->|Yes| D[deletePointsByFilter()<br/>Preserve collection + indexes]
+    C --> E[Generate all embeddings<br/>generateEmbeddingBatch()]
+    D --> E
+    E --> F{All 1536-dim?}
+    F -->|Fail| G[Exit with error]
+    F -->|Pass| H[upsertDocumentBatch()<br/>64 pts/batch, parallel]
+    H --> I[Done: N documents ingested]
 ```
 
-#### 4. LLM Integration
-
-**Provider:** Groq
-**Model:** `llama-3.3-70b-versatile`
-
-```typescript
-const completion = await groq.chat.completions.create({
-  model: 'llama-3.3-70b-versatile',
-  messages: [
-    { role: 'system', content: systemPrompt },
-    ...userMessages,
-  ],
-  temperature: 0.7,
-  max_tokens: 1024,
-  stream: true,
-});
-```
-
-### Security Measures
-
-1. **Input Sanitization:**
-   - Removes prompt injection patterns (`[INST]`, `<|im_start|>`, etc.)
-   - Caps message length at 500 characters
-
-2. **Rate Limiting:**
-   - 10 requests per minute per IP
-   - Sliding window algorithm
-   - Returns 429 with `Retry-After` header
-
-3. **Context Isolation:**
-   - LLM only sees knowledge base context
-   - No access to system prompts or internal data
+**Idempotent upserts:** Point ID is `SHA-256(source::title::content)` — re-running ingest updates existing points.
 
 ---
 
@@ -645,15 +750,9 @@ const completion = await groq.chat.completions.create({
 ### 1. React Compiler
 
 **Automatic Optimization:**
-- Automatic memoization of components and hooks
+- Automatic memoization of components and hooks (`'use memo'`)
 - Reduced re-renders without manual `useMemo`/`useCallback`
-- Enabled in `next.config.ts`:
-
-```typescript
-experimental: {
-  reactCompiler: true,
-}
-```
+- `compilationMode: 'annotation'` — opt-in per file
 
 ### 2. Code Splitting
 
@@ -677,7 +776,6 @@ const HeavyComponent = dynamic(() => import('./heavy-component'), {
 - Automatic WebP conversion
 - Responsive images with srcSet
 - Lazy loading by default
-- Remote image patterns configured
 
 ```typescript
 // next.config.ts
@@ -685,6 +783,7 @@ images: {
   remotePatterns: [
     { protocol: 'https', hostname: 'unsplash.com' },
     { protocol: 'https', hostname: 'cdn.jsdelivr.net' },
+    { protocol: 'https', hostname: 'picsum.photos' },
   ],
 }
 ```
@@ -704,9 +803,10 @@ const queryClient = new QueryClient({
 });
 ```
 
-**API Batching:**
-- Multiple requests batched into single HTTP call
-- Reduces network overhead
+**Upstash Redis caching:**
+- RAG retrieval context: 6-hour TTL
+- Chat responses: 24-hour TTL
+- Chat history: 14-day TTL
 
 ### 5. Server Components
 
@@ -746,15 +846,16 @@ graph TB
     end
 
     subgraph "Serverless Functions"
-        Pages[Next.js Pages<br/>Serverless]
-        API[API Routes<br/>Serverless]
-        Chat[Chat Stream<br/>Edge Function]
+        Pages[Next.js Pages<br/>Fluid Compute]
+        API[API Routes<br/>Fluid Compute]
+        Chat[Chat Stream<br/>Fluid Compute]
     end
 
     subgraph "External Services"
         CMS[Payload CMS<br/>VPS/Cloud]
-        Vector[Firebase Firestore<br/>Vector Search]
-        LLM[Groq API]
+        Qdrant[Qdrant Cloud<br/>Vector Search]
+        Upstash[Upstash Redis<br/>Rate Limit + Cache]
+        LLM[Vercel AI Gateway<br/>Groq + Mistral]
     end
 
     Vercel --> Pages
@@ -764,27 +865,55 @@ graph TB
 
     Pages --> CMS
     API --> CMS
-    Chat --> Vector
+    Chat --> Qdrant
+    Chat --> Upstash
     Chat --> LLM
 
     style Vercel fill:#e1f5ff
     style Pages fill:#ffe1f5
     style CMS fill:#fff4e1
-    style Vector fill:#f5e1ff
+    style Qdrant fill:#f5e1ff
+    style Upstash fill:#ffe8cc
 ```
 
 ### Environment Configuration
 
 ```bash
-# Production
-NODE_ENV=production
+# Site
 NEXT_PUBLIC_SITE_URL=https://otherdev.com
-PAYLOAD_API_URL=https://cms.otherdev.com
 
-# Development
-NODE_ENV=development
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-PAYLOAD_API_URL=http://localhost:3845
+# Canvas CMS
+CANVAS_API_URL=https://client5.otherdev.com/canvas/v1/api/
+CANVAS_API_KEY=your-api-key
+
+# Google Services
+GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+GOOGLE_SHEET_ID=your-google-sheet-id
+GMAIL_USER=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-app-password
+
+# AI Services
+GROQ_API_KEY=your-groq-api-key
+
+# Vector Search (Qdrant)
+QDRANT_URL=https://your-qdrant.cloud
+QDRANT_API_KEY=your-qdrant-key
+
+# Web Search (Tavily)
+TAVILY_API_KEY=your-tavily-key
+
+# Rate Limiting & Chat Cache (Upstash)
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+
+# RAG Configuration
+RAG_SIMILARITY_THRESHOLD=0.1
+RAG_MATCH_COUNT=5
+RAG_MAX_MESSAGE_LENGTH=500
+CHAT_HISTORY_TTL_SECONDS=1209600
+RAG_RETRIEVAL_CACHE_TTL_SECONDS=21600
+CHAT_RESPONSE_CACHE_TTL_SECONDS=86400
 ```
 
 ---
