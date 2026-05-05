@@ -1,8 +1,55 @@
 import { tavily } from '@tavily/core'
 import { tool } from 'ai'
 import { z } from 'zod'
+import type { MatchedDocument } from '@/server/lib/rag/vector-search'
 
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY })
+
+/**
+ * RAG retrieval tool — searches Other Dev's knowledge base via Qdrant + Cohere.
+ * Called by the model when the user asks about projects, services, technologies,
+ * or anything related to Other Dev's work.
+ *
+ * Follows AI SDK tool pattern: description guides model behavior, execute runs server-side.
+ */
+export const retrieveKnowledgeTool = tool({
+  description: `Search Other Dev's knowledge base to answer questions about their projects,
+services, technologies, team, case studies, or capabilities.
+Use this when the user asks about: Other Dev's portfolio, past projects, client work,
+services offered, tech stack, team members, company background, or anything specific
+to Other Dev's business.
+Returns the most relevant knowledge base entries with relevance scores.`,
+  inputSchema: z.object({
+    query: z
+      .string()
+      .describe(
+        'The search query to find relevant knowledge base entries. Be specific — include project names, technologies, or service names when available.'
+      ),
+  }),
+  execute: async ({ query }: { query: string }): Promise<string> => {
+    try {
+      const { generateEmbedding } = await import('@/server/lib/rag/embeddings')
+      const { searchSimilarDocuments } = await import('@/server/lib/rag/vector-search')
+
+      const embedding = await generateEmbedding(query)
+      const results = await searchSimilarDocuments(query, embedding, 0.1, 5)
+
+      if (results.length === 0) {
+        return 'No relevant knowledge base entries found for this query.'
+      }
+
+      return results
+        .map(
+          (doc: MatchedDocument, idx: number) =>
+            `Document ${idx + 1} (Relevance: ${(doc.similarity * 100).toFixed(1)}%):\nTitle: ${doc.metadata.title}\n${doc.content}\n`
+        )
+        .join('---\n\n')
+    } catch (error) {
+      console.error('[retrieveKnowledge] execute error:', error instanceof Error ? error.message : String(error))
+      throw error
+    }
+  },
+})
 
 /**
  * Web search tool using Tavily — grounded general chat.
