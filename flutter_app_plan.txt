@@ -532,25 +532,22 @@ curl -X POST http://localhost:3000/api/chat/native \
 ### Phase 1: Foundations (2-3 weeks)
 
 > **Use skills + MCP tools for everything.** Do NOT scaffold manually when MCP/skill covers the task.
+> **Firebase & Auth deferred — will be added when explicitly requested.** For now, auth state is a simple boolean toggle.
 
 - [ ] **Flutter project scaffold**: `flutter create --platforms=ios,android,macos,windows,linux flutter_app` (MCP `mcp__flutter__create` equivalent)
 - [ ] **Riverpod setup**: Use `flutter-apply-architecture-best-practices` for provider patterns
 - [ ] **JSON serialization**: Use `flutter-implement-json-serialization` for all Freezed models
 - [ ] **Declarative routing**: Use `flutter-setup-declarative-routing` for GoRouter setup
 - [ ] **HTTP client**: Use `flutter-use-http-package` for dio/api_client setup
-- [ ] **Theme system**: Material 3 base + shadcn_flutter dark/light (scaffold with `flutter-apply-architecture-best-practices` for shared layer)
+- [ ] **Theme system**: Material 3 base + dark/light (scaffold with `flutter-apply-architecture-best-practices` for shared layer)
 - [ ] **Localization**: Use `flutter-setup-localization` when adding i18n support (Phase 2+)
-- [ ] **Firebase init**: Manual (Firebase console config not covered by skill/MCP)
-- [ ] **Auth flow**: Scaffold with `flutter-apply-architecture-best-practices` for auth feature
-- [ ] **Unit tests**: Use `dart-add-unit-test` for all new code
 - [ ] **Static analysis**: Run `dart-run-static-analysis` before commits
 - [ ] **Verify builds**: Use `mcp__flutter__build` for iOS/Android/macOS platform builds
 
 **Success Criteria:**
 - `flutter analyze` passes with zero errors
 - App builds on iOS, Android, macOS (use `mcp__flutter__build` for each)
-- Auth flow (signup, login, logout) works end-to-end
-- Theme toggle persists
+- Theme toggle persists (basic — no Firebase auth yet)
 - API client can make HTTP requests
 
 ### Phase 2: Core Portfolio Features (3-4 weeks)
@@ -1325,26 +1322,32 @@ definitions:
 
 ### Phase 1: Foundations
 
-- [ ] **Flutter project scaffold**: `flutter create --platforms=ios,android,macos,windows,linux flutter_app` (use `mcp__flutter__create` equivalent MCP)
-- [ ] **Riverpod setup**: Use `flutter-apply-architecture-best-practices`
-- [ ] **JSON serialization**: Use `flutter-implement-json-serialization` for all models
-- [ ] **Declarative routing**: Use `flutter-setup-declarative-routing`
-- [ ] **HTTP client**: Use `flutter-use-http-package`
-- [ ] **Theme system**: shadcn_flutter + dark/light mode (scaffold with `flutter-apply-architecture-best-practices` for shared layer)
-- [ ] **GoRouter config**: Use `flutter-setup-declarative-routing`
-- [ ] **API client (Dio)**: Use `flutter-use-http-package` + manual interceptors
-- [ ] **Firebase init**: Manual (Firebase console config)
-- [ ] **AuthService**: Scaffold with `flutter-apply-architecture-best-practices` for auth feature
-- [ ] **Auth Riverpod providers**: Use `flutter-apply-architecture-best-practices`
-- [ ] **Secure token storage**: Manual (secure_storage)
-- [ ] **Login & signup pages**: Manual UI + `flutter-apply-architecture-best-practices` providers
+**Firebase & Auth deferred — added when explicitly requested.**
+
+- [x] **Flutter project scaffold**: `flutter create --platforms=ios,android,macos,windows,linux flutter_app` (use `mcp__flutter__create` equivalent MCP)
+- [x] **Riverpod setup**: Use `flutter-apply-architecture-best-practices`
+- [x] **JSON serialization**: Use `flutter-implement-json-serialization` for all models
+- [x] **Declarative routing**: Use `flutter-setup-declarative-routing`
+- [x] **HTTP client**: Use `flutter-use-http-package`
+- [x] **Theme system**: shadcn_flutter + dark/light mode (scaffold with `flutter-apply-architecture-best-practices` for shared layer)
+- [x] **GoRouter config**: Use `flutter-setup-declarative-routing`
+- [x] **API client (Dio)**: Use `flutter-use-http-package` + manual interceptors
+- [ ] **Firebase init**: Deferred — add when explicitly requested
+- [ ] **AuthService**: Deferred — add when explicitly requested
+- [ ] **Auth Riverpod providers**: Deferred — add when explicitly requested
+- [ ] **Secure token storage**: Deferred — add when explicitly requested
+- [ ] **Login & signup pages**: Deferred — add when explicitly requested
 - [ ] **Unit tests**: Use `dart-add-unit-test` for AuthService, API client, validators
 - [ ] **Static analysis**: Use `dart-run-static-analysis` — zero errors before push
-- [ ] **Build verification**: Use `mcp__flutter__build` for iOS, Android, macOS
+- [x] **Build verification**: Use `mcp__flutter__build` for iOS, Android, macOS
 - [ ] **Document setup**: README.md with skill invocation commands
 
 **Success Metrics:**
-- [ ] App launches on iOS, Android, macOS
+- [x] `flutter analyze` passes with zero errors
+- [x] App builds on iOS, Android, macOS (use `mcp__flutter__build` for each)
+- [ ] Auth flow (signup, login, logout) works end-to-end — Deferred
+- [x] Theme toggle persists — basic implementation done
+- [x] API client can make HTTP requests
 - [ ] Sign up with email works
 - [ ] Google Sign-In works
 - [ ] Login persists across app restart
