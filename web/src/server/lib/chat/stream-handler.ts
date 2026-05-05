@@ -484,7 +484,7 @@ CONTACT INFORMATION
 - Location: Karachi, Pakistan
 - Specializations: fashion, e-commerce, real estate, legal tech, SaaS, enterprise systems
 
-FORMAT RULE: Always format links, phone numbers, and email addresses in blue text.
+FORMAT RULE: Always format URLs as [label](url) markdown links — never output bare URLs. Phone numbers as [tel:+...](tel:+...), emails as [email](mailto:...). Example: [otherdev.com](https://otherdev.com), not https://otherdev.com.
 
 Be professional, friendly, and focused on helping potential clients learn about Other Dev.`
 }
