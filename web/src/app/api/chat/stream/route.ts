@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { createJsonResponse } from '@/server/lib/api-helpers'
 import { handleStreamChat } from '@/server/lib/chat'
-import { createArtifactTool, tavilySearchTool } from '@/server/lib/chat/tools'
+import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from '@/server/lib/chat/tools'
 import { loadChatMessages, saveChatMessages } from '@/server/lib/chat-cache-store'
 import { checkRateLimit, getClientIdentifier, REQUESTS_PER_WINDOW } from '@/server/lib/rate-limit'
 
@@ -88,6 +88,8 @@ export async function POST(request: Request): Promise<Response> {
           // biome-ignore lint/suspicious/noExplicitAny: AI SDK tool validation
           createArtifact: artifactTool as any,
           // biome-ignore lint/suspicious/noExplicitAny: AI SDK tool validation
+          retrieveKnowledge: retrieveKnowledgeTool as any,
+          // biome-ignore lint/suspicious/noExplicitAny: AI SDK tool validation
           tavilySearch: tavilySearchTool as any,
         },
       })) as UIMessage[]
@@ -103,7 +105,6 @@ export async function POST(request: Request): Promise<Response> {
     await saveChatMessages(chatId, uiMessages)
 
     const { response } = await handleStreamChat({
-      chatId,
       messages: uiMessages,
       supportsArtifacts,
       request,
