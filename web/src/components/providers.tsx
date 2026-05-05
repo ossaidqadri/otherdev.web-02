@@ -14,6 +14,6 @@ function getQueryClient() {
   return browserQueryClient
 }
 
-export function TRPCProvider({ children }: { children: React.ReactNode }) {
+export function QueryProvider({ children }: { children: React.ReactNode }) {
   return <QueryClientProvider client={getQueryClient()}>{children}</QueryClientProvider>
 }

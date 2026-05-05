@@ -5,7 +5,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import dynamic from 'next/dynamic'
 import localFont from 'next/font/local'
 import { Suspense } from 'react'
-import { TRPCProvider } from '@/components/providers'
+import { QueryProvider } from '@/components/providers'
 import { buildSocialMetadata, DEFAULT_SITE_DESCRIPTION, SITE_URL } from '@/lib/metadata'
 import { TenantProvider } from '@/lib/tenant-context'
 
@@ -106,10 +106,10 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-background">
         <TenantProvider initialDomain="otherdev.com">
-          <TRPCProvider>
+          <QueryProvider>
             <Suspense fallback={null}>{children}</Suspense>
             <ChatWidget />
-          </TRPCProvider>
+          </QueryProvider>
         </TenantProvider>
         <GoogleAnalytics gaId="G-YXVG798Y18" />
       </body>

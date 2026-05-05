@@ -14,7 +14,7 @@ Next.js 16 application serving as otherdev's primary portfolio site.
 
 **Highlights:**
 - ~17 portfolio projects showcasing work for fashion, design, and enterprise clients
-- AI-powered chat assistant (Loom) with RAG capabilities
+- AI-powered chat assistant (Loom) with Cohere RAG capabilities (embed-v4 + rerank-v4 via Vercel AI Gateway)
 - Vercel AI Gateway with model fallback chains
 - Radix UI + Tailwind component system
 - SEO-optimized with OG images and structured data
