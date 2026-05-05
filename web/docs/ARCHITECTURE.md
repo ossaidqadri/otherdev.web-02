@@ -21,7 +21,7 @@ Other Dev is a modern, full-stack web application built with Next.js 16.2.1, lev
 
 ### Core Principles
 
-- **Type Safety First:** End-to-end TypeScript with tRPC for API layer
+- **Type Safety First:** End-to-end TypeScript with Zod validation
 - **Performance:** Server Components, React Compiler, code splitting
 - **Developer Experience:** Hot reload, auto-imports, full IntelliSense
 - **Scalability:** Multi-tenant architecture, vector search, caching
@@ -41,7 +41,7 @@ graph TB
 
     subgraph "Application Layer"
         NextJS[Next.js 16 App Router]
-        tRPC[tRPC Router]
+        APIRoutes[API Routes]
         RAG[RAG Chat System]
     end
 
@@ -62,23 +62,23 @@ graph TB
     Browser --> RCC
 
     RSC --> NextJS
-    RCC --> tRPC
+    RCC --> APIRoutes
     RCC --> RAG
 
-    tRPC --> Payload
-    tRPC --> Sheets
-    tRPC --> Gmail
+    APIRoutes --> Payload
+    APIRoutes --> Sheets
+    APIRoutes --> Gmail
 
     RAG --> Groq
     RAG --> Mistral
     RAG --> Firebase
 
-    NextJS -.Dynamic Data.-> tRPC
+    NextJS -.Dynamic Data.-> APIRoutes
     NextJS -.Static Data.-> RSC
 
     style Browser fill:#e1f5ff
     style NextJS fill:#fff4e1
-    style tRPC fill:#ffe1f5
+    style APIRoutes fill:#ffe1f5
     style RAG fill:#e1ffe4
     style Firebase fill:#f5e1ff
 ```
@@ -116,7 +116,7 @@ src/components/
 ├── project-card.tsx            # Project display card
 ├── contact-dialog.tsx          # Contact form modal
 ├── chat-widget.tsx             # RAG AI chat interface
-└── providers.tsx               # React Query + tRPC providers
+└── providers.tsx               # React Query provider
 ```
 
 **Rendering Strategy:**
@@ -129,45 +129,49 @@ src/components/
 
 ### 2. API Layer
 
-**Location:** `src/server/`, `src/app/api/`
+**Location:** `src/app/api/`, `src/server/lib/`
 
-#### tRPC Routers
+#### API Routes
 
 ```mermaid
 graph LR
-    Client[Client Code] -->|HTTP POST| Handler[/api/trpc/trpc]
-    Handler --> AppRouter[App Router]
-    AppRouter --> ContactRouter[Contact Router]
-    AppRouter --> ContentRouter[Content Router]
+    Client[Client Code] -->|HTTP POST| Handler[/api/contact]
+    Handler --> ContactHandler[Contact Handler]
+    Client -->|HTTP GET| ContentHandler[/api/content/posts]
+    ContentHandler --> ContentHandler2[Content Handler]
 
-    ContactRouter --> Sheets[Google Sheets]
-    ContactRouter --> Gmail[Gmail SMTP]
-    ContentRouter --> Payload[Payload CMS]
+    ContactHandler --> Sheets[Google Sheets]
+    ContactHandler --> Gmail[Gmail SMTP]
+    ContentHandler2 --> Payload[Payload CMS]
 
     style Client fill:#e1f5ff
-    style AppRouter fill:#ffe1f5
-    style ContactRouter fill:#fff4e1
-    style ContentRouter fill:#fff4e1
+    style Handler fill:#ffe1f5
+    style ContactHandler fill:#fff4e1
+    style ContentHandler fill:#fff4e1
 ```
 
 **Directory Structure:**
 
 ```
-src/server/
-├── trpc.ts                     # tRPC initialization & context
-├── routers/
-│   ├── index.ts                # App router (combines all routers)
-│   ├── contact.ts              # Contact form handler
-│   └── content.ts              # Blog/CMS content fetcher
-└── lib/
-    ├── rate-limit.ts           # In-memory rate limiting
-    └── rag/
-        └── vector-search.ts    # Firebase Firestore vector search
+src/app/api/
+├── contact/
+│   └── route.ts                 # Contact form handler
+├── content/
+│   └── posts/
+│       └── route.ts             # Blog posts handler
+└── chat/
+    └── stream/
+        └── route.ts             # RAG chat endpoint
+
+src/server/lib/
+├── rate-limit.ts                # In-memory rate limiting
+└── rag/
+    └── vector-search.ts          # Firebase Firestore vector search
 ```
 
 **Key Features:**
 
-- **SuperJSON Transformer:** Handles Date, Map, Set serialization
+- **Zod Validation:** Runtime schema validation for type safety
 - **Type Safety:** Full TypeScript inference from server to client
 - **Context Injection:** Domain information from request headers
 - **Error Handling:** Automatic HTTP status code mapping
@@ -264,7 +268,7 @@ sequenceDiagram
     participant Browser
     participant Next.js
     participant RSC as React Server Components
-    participant tRPC
+    participant API as API Routes
     participant CMS as Payload CMS
 
     Browser->>Next.js: GET /work
@@ -273,10 +277,10 @@ sequenceDiagram
     Next.js-->>Browser: HTML + Hydration instructions
 
     Browser->>Browser: Hydrate client components
-    Browser->>tRPC: Optional: Fetch blog posts
-    tRPC->>CMS: Query blog content
-    CMS-->>tRPC: Blog data
-    tRPC-->>Browser: Typed response (cached)
+    Browser->>API: Optional: Fetch blog posts
+    API->>CMS: Query blog content
+    CMS-->>API: Blog data
+    API-->>Browser: Typed response (cached)
 ```
 
 ### Contact Form Submission Flow
@@ -285,26 +289,26 @@ sequenceDiagram
 sequenceDiagram
     participant User
     participant Form as Contact Dialog
-    participant tRPC
-    participant Router as Contact Router
+    participant API as API Routes
+    participant Handler as Contact Handler
     participant Sheets as Google Sheets
     participant Gmail
 
     User->>Form: Fill form & submit
     Form->>Form: Client-side validation (Zod)
-    Form->>tRPC: contact.submit(data)
-    tRPC->>Router: Mutation handler
-    Router->>Router: Server-side validation (Zod)
+    Form->>API: POST /api/contact(data)
+    API->>Handler: Mutation handler
+    Handler->>Handler: Server-side validation (Zod)
 
     par Parallel Execution
-        Router->>Sheets: Append row
-        Router->>Gmail: Send email
+        Handler->>Sheets: Append row
+        Handler->>Gmail: Send email
     end
 
-    Sheets-->>Router: Success
-    Gmail-->>Router: Success
-    Router-->>tRPC: { message: "Success" }
-    tRPC-->>Form: Response
+    Sheets-->>Handler: Success
+    Gmail-->>Handler: Success
+    Handler-->>API: { message: "Success" }
+    API-->>Form: Response
     Form->>User: Success toast notification
 ```
 
@@ -352,7 +356,6 @@ graph TD
     Root[Root Layout] --> Providers[Providers]
     Providers --> Theme[Theme Provider]
     Providers --> ReactQuery[React Query Provider]
-    Providers --> tRPC[tRPC Provider]
 
     Root --> Nav[Navigation]
     Root --> Page[Page Component]
@@ -384,8 +387,9 @@ graph TD
 'use client';
 
 export function ContactDialogContainer() {
-  const mutation = trpc.contact.submit.useMutation();
-  const form = useForm<ContactFormData>();
+  const mutation = useMutation({
+    mutationFn: submitContact,
+  });
 
   const handleSubmit = async (data: ContactFormData) => {
     await mutation.mutateAsync(data);
@@ -452,10 +456,10 @@ graph LR
     Request[Incoming Request] --> Proxy[proxy.ts Middleware]
     Proxy --> Header{Set x-tenant-domain}
     Header --> NextJS[Next.js Router]
-    NextJS --> Context[tRPC Context]
-    Context --> Router[Router Procedures]
+    NextJS --> Context[API Context]
+    Context --> Handler[API Route Handlers]
 
-    Router --> CMS[Payload CMS<br/>Filter by domain]
+    Handler --> CMS[Payload CMS<br/>Filter by domain]
 
     style Request fill:#e1f5ff
     style Proxy fill:#ffe1f5
@@ -481,24 +485,22 @@ export function middleware(request: NextRequest) {
 }
 ```
 
-**2. tRPC Context (`src/server/trpc.ts`):**
+**2. Context Extraction (`src/server/lib/context.ts`):**
 
 ```typescript
-export const createTRPCContext = async (opts: { req: Request }) => {
-  const domain = opts.req.headers.get("x-tenant-domain") || "otherdev.com";
-  return { domain };
-};
+export function getDomainFromRequest(request: Request): string {
+  return request.headers.get("x-tenant-domain") || "otherdev.com";
+}
 ```
 
-**3. Router Usage (`src/server/routers/content.ts`):**
+**3. API Route Usage (`src/app/api/content/posts/route.ts`):**
 
 ```typescript
-export const contentRouter = router({
-  getBlogPosts: publicProcedure.query(async ({ ctx }) => {
-    // ctx.domain is automatically available
-    return await payloadAPI.getBlogPosts(ctx.domain);
-  }),
-});
+export async function GET(request: Request) {
+  const domain = getDomainFromRequest(request);
+  // ctx.domain is automatically available
+  return await payloadAPI.getBlogPosts(domain);
+}
 ```
 
 ---
@@ -695,14 +697,14 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000,      // 1 minute
-      cacheTime: 5 * 60 * 1000,  // 5 minutes
+      gcTime: 5 * 60 * 1000,    // 5 minutes (formerly cacheTime)
       refetchOnWindowFocus: false,
     },
   },
 });
 ```
 
-**tRPC Batching:**
+**API Batching:**
 - Multiple requests batched into single HTTP call
 - Reduces network overhead
 
