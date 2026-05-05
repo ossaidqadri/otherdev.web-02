@@ -145,8 +145,9 @@ web/
 │   │   │   └── [slug]/page.tsx       # Individual project
 │   │   ├── blog/                     # Blog pages (optional)
 │   │   └── api/                      # API routes
-│   │       ├── trpc/[trpc]/route.ts  # tRPC handler
-│   │       └── chat/stream/route.ts  # RAG chat endpoint
+│   │       ├── api/                      # API routes
+│   │       │   ├── contact/route.ts     # Contact form handler
+│   │       │   └── chat/stream/route.ts  # RAG chat endpoint
 │   ├── components/
 │   │   ├── ui/                       # Radix UI primitives (56 components)
 │   │   ├── navigation.tsx            # Main navigation
@@ -154,24 +155,21 @@ web/
 │   │   ├── project-card.tsx          # Project card
 │   │   ├── contact-dialog.tsx        # Contact form
 │   │   ├── chat-widget.tsx           # AI chat widget
-│   │   └── providers.tsx             # React Query + tRPC
+│   │   └── providers.tsx             # React Query provider
 │   ├── lib/
 │   │   ├── utils.ts                  # Utility functions
 │   │   ├── projects.ts               # Project data
-│   │   ├── trpc.ts                   # tRPC client setup
 │   │   ├── knowledge-base.ts         # RAG knowledge base
 │   │   └── constants.ts              # App constants
 │   ├── server/
-│   │   ├── trpc.ts                   # tRPC server init
-│   │   ├── routers/                  # API routers
-│   │   │   ├── index.ts              # App router
-│   │   │   ├── contact.ts            # Contact form handler
-│   │   │   └── content.ts            # Blog content fetcher
+│   │   └── api/                      # API route handlers
+│   │       ├── contact.ts            # Contact form handler
+│   │       └── content.ts            # Blog content fetcher
 │   │   └── lib/
 │   │       ├── rate-limit.ts         # Rate limiting
 │   │       └── rag/
 │   │           ├── embeddings.ts     # Embedding generation
-│   │           └── vector-search.ts  # Vector search
+│   │           └── vector-search.ts   # Vector search
 │   └── hooks/                        # Custom React hooks
 ├── public/
 │   └── images/                       # Static images
@@ -350,71 +348,65 @@ import {
 
 ---
 
-### Creating a tRPC Router
+### Creating an API Route
 
-1. **Create router file:**
+1. **Create route file:**
 
 ```bash
-touch src/server/routers/newsletter.ts
+mkdir -p src/app/api/newsletter
+touch src/app/api/newsletter/route.ts
 ```
 
-2. **Define router:**
+2. **Define route handler:**
 
 ```tsx
-// src/server/routers/newsletter.ts
-import { z } from "zod";
-import { publicProcedure, router } from "../trpc";
+// src/app/api/newsletter/route.ts
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-export const newsletterRouter = router({
-  subscribe: publicProcedure
-    .input(subscribeSchema)
-    .mutation(async ({ input }) => {
-      // Save email to database or mailing service
-      console.log("Subscribing:", input.email);
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { email } = subscribeSchema.parse(body);
 
-      return { message: "Successfully subscribed!" };
-    }),
-});
-```
+    // Save email to database or mailing service
+    console.log("Subscribing:", email);
 
-3. **Add to app router:**
-
-```tsx
-// src/server/routers/index.ts
-import { router } from "../trpc";
-import { contactRouter } from "./contact";
-import { contentRouter } from "./content";
-import { newsletterRouter } from "./newsletter";  // Add import
-
-export const appRouter = router({
-  contact: contactRouter,
-  content: contentRouter,
-  newsletter: newsletterRouter,  // Add router
-});
-
-export type AppRouter = typeof appRouter;
-```
-
-4. **Use in client:**
-
-```tsx
-function Newsletter() {
-  const subscribe = trpc.newsletter.subscribe.useMutation();
-
-  const handleSubmit = async (email: string) => {
-    try {
-      await subscribe.mutateAsync({ email });
-      toast.success("Subscribed successfully!");
-    } catch (error) {
-      toast.error("Subscription failed");
+    return NextResponse.json({ message: "Successfully subscribed!" });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation error", details: error.errors },
+        { status: 400 }
+      );
     }
-  };
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+```
 
-  return <form onSubmit={...}>...</form>;
+3. **Call from client:**
+
+```tsx
+async function subscribe(email: string) {
+  const response = await fetch('/api/newsletter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Subscription failed');
+  }
+
+  return response.json();
 }
 ```
 
@@ -553,8 +545,8 @@ export function Component({ title, description, onClick }: ComponentProps) {
 // Good - infer types from Zod schema
 type FormData = z.infer<typeof formSchema>;
 
-// Good - infer tRPC types
-type BlogPosts = RouterOutputs["content"]["getBlogPosts"];
+// Good - type-safe API responses
+type BlogPosts = Awaited<ReturnType<typeof fetchBlogPosts>>;
 ```
 
 3. **Avoid `any`:**
@@ -672,25 +664,25 @@ import Image from "next/image";
 3. **Use React Query caching:**
 
 ```tsx
-const { data } = trpc.content.getBlogPosts.useQuery(
-  { limit: 10 },
-  {
-    staleTime: 5 * 60 * 1000,  // 5 minutes
-    cacheTime: 10 * 60 * 1000,  // 10 minutes
-  }
-);
+const { data } = useQuery({
+  queryKey: ['posts', { limit: 10 }],
+  queryFn: () => fetchBlogPosts({ limit: 10 }),
+  staleTime: 5 * 60 * 1000,  // 5 minutes
+  gcTime: 10 * 60 * 1000,  // 10 minutes (formerly cacheTime)
+});
 ```
 
 ---
 
 ### Error Handling
 
-1. **Handle tRPC errors:**
+1. **Handle API errors:**
 
 ```tsx
-const mutation = trpc.contact.submit.useMutation({
+const mutation = useMutation({
+  mutationFn: submitContact,
   onError: (error) => {
-    if (error.data?.code === "BAD_REQUEST") {
+    if (error.message === "Validation error") {
       toast.error("Invalid form data");
     } else {
       toast.error("Server error. Please try again.");
@@ -768,17 +760,17 @@ bun dev
 
 ---
 
-#### tRPC Type Errors
+#### API Type Errors
 
 ```bash
-Type error: Property 'newsletter' does not exist on type 'AppRouter'
+Type error: Property 'newsletter' does not exist on type 'ApiRoutes'
 ```
 
 **Solution:**
 
 1. Restart TypeScript server
-2. Check that router is exported from `src/server/routers/index.ts`
-3. Verify `AppRouter` type is exported
+2. Check that route is defined in `src/app/api/`
+3. Verify the route file exports a handler (GET, POST, etc.)
 
 ---
 
@@ -841,24 +833,25 @@ describe("Button", () => {
 
 ### Integration Testing
 
-Test tRPC procedures:
+Test API routes:
 
 ```tsx
-import { appRouter } from "@/server/routers";
+import { POST } from '@/app/api/contact/route';
 
-describe("Contact Router", () => {
+describe("Contact API", () => {
   it("validates email format", async () => {
-    const caller = appRouter.createCaller({ domain: "test.com" });
+    const response = await POST(new Request('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Test',
+        companyName: 'Test Inc',
+        email: 'invalid',
+        subject: 'Test',
+        message: 'Test message',
+      }),
+    }));
 
-    await expect(
-      caller.contact.submit({
-        name: "Test",
-        companyName: "Test Inc",
-        email: "invalid",
-        subject: "Test",
-        message: "Test message",
-      })
-    ).rejects.toThrow();
+    expect(response.status).toBe(400);
   });
 });
 ```
@@ -948,7 +941,8 @@ docker run -p 3000:3000 otherdev-web
 ## Additional Resources
 
 - **Next.js Documentation:** [nextjs.org/docs](https://nextjs.org/docs)
-- **tRPC Documentation:** [trpc.io](https://trpc.io)
+- **API Routes:** [nextjs.org/docs/app/api-reference](https://nextjs.org/docs/app/api-reference)
+- **React Query:** [tanstack.com/query](https://tanstack.com/query)
 - **Radix UI:** [radix-ui.com](https://www.radix-ui.com)
 - **Tailwind CSS:** [tailwindcss.com](https://tailwindcss.com)
 - **React Hook Form:** [react-hook-form.com](https://react-hook-form.com)

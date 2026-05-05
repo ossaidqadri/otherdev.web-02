@@ -4,7 +4,7 @@
 
 ## Overview
 
-This directory contains comprehensive documentation for developers working on the Other Dev portfolio and agency website. The application is built with Next.js 16.2.1, React 19.2.4, TypeScript, and tRPC for type-safe API communication.
+This directory contains comprehensive documentation for developers working on the Other Dev portfolio and agency website. The application is built with Next.js 16.2.1, React 19.2.4, TypeScript, and direct API routes for type-safe API communication.
 
 ## Documentation Structure
 
@@ -13,7 +13,7 @@ This directory contains comprehensive documentation for developers working on th
 | Document | Description |
 |----------|-------------|
 | [Developer Guide](./DEVELOPER_GUIDE.md) | Getting started, workflow, common tasks, and best practices |
-| [API Reference](./API_REFERENCE.md) | Complete tRPC API documentation with examples |
+| [API Reference](./API_REFERENCE.md) | Complete API route documentation with examples |
 | [Architecture](./ARCHITECTURE.md) | System architecture, data flow, and technical design |
 | [Component Library](./COMPONENTS.md) | UI component documentation with usage examples |
 
@@ -56,10 +56,9 @@ This directory contains comprehensive documentation for developers working on th
 
 ### API & Data
 
-- **tRPC 11** - Type-safe API layer
+- **Next.js API Routes** - Server-side API endpoints
 - **React Query** - Data fetching and caching
 - **Zod** - Schema validation
-- **SuperJSON** - Enhanced serialization
 
 ### UI Components
 
@@ -99,10 +98,10 @@ This directory contains comprehensive documentation for developers working on th
 ┌─────────────────────────────────────────┐
 │       Next.js 16 App Router             │
 │  ┌──────────────────────────────────┐   │
-│  │       tRPC API Layer             │   │
+│  │       API Routes              │   │
 │  │  ┌──────────┐  ┌──────────┐     │   │
 │  │  │ Contact  │  │ Content  │     │   │
-│  │  │  Router  │  │  Router  │     │   │
+│  │  │  Route   │  │  Route   │     │   │
 │  │  └──────────┘  └──────────┘     │   │
 │  └──────────────────────────────────┘   │
 └─────────────────────────────────────────┘
@@ -121,7 +120,7 @@ This directory contains comprehensive documentation for developers working on th
 
 - **Multi-Tenant Architecture**: Domain-based context for serving multiple sites
 - **RAG Chat System**: AI-powered chat with vector search and semantic retrieval
-- **Type-Safe APIs**: Full TypeScript inference from server to client
+- **API Routes**: Full TypeScript inference from server to client
 - **Server Components**: Optimal performance with minimal client JavaScript
 - **Contact System**: Dual integration with Google Sheets and Gmail
 - **Dark Mode**: System-wide theme support
@@ -207,10 +206,10 @@ See [Developer Guide - Getting Started](./DEVELOPER_GUIDE.md#getting-started) fo
 
 | Router | Endpoint | Description |
 |--------|----------|-------------|
-| `contact` | `/api/trpc/contact.submit` | Submit contact form (Google Sheets + Gmail) |
-| `content` | `/api/trpc/content.getBlogPosts` | Fetch paginated blog posts |
-| `content` | `/api/trpc/content.getBlogPost` | Fetch single blog post by slug |
-| `content` | `/api/trpc/content.getCategories` | Fetch all blog categories |
+| `contact` | `/api/contact` | Submit contact form (Google Sheets + Gmail) |
+| `content` | `/api/content/posts` | Fetch paginated blog posts |
+| `content` | `/api/content/posts/[slug]` | Fetch single blog post by slug |
+| `content` | `/api/content/categories` | Fetch all blog categories |
 
 ### Chat API
 
@@ -289,4 +288,4 @@ This is proprietary software for Other Dev's portfolio. Unauthorized copying, mo
 
 ---
 
-**Last Updated**: December 2024
+**Last Updated**: May 2026
