@@ -13,9 +13,9 @@ Next.js 16 application serving as otherdev's primary portfolio site.
 **Stack:** Next.js 16 · React 19 · TypeScript 5.9 · Tailwind CSS 4 · Bun
 
 **Highlights:**
-- 13+ portfolio projects showcasing work for fashion, design, and enterprise clients
+- ~17 portfolio projects showcasing work for fashion, design, and enterprise clients
 - AI-powered chat assistant (Loom) with RAG capabilities
-- tRPC API layer with end-to-end type safety
+- Vercel AI Gateway with model fallback chains
 - Radix UI + Tailwind component system
 - SEO-optimized with OG images and structured data
 
@@ -58,9 +58,10 @@ cd qwik-app && bun dev
 | Languages | TypeScript 5.9, CSS |
 | Runtime | Bun |
 | UI | Radix UI, Tailwind CSS 4, Framer Motion |
-| AI | Groq SDK, HuggingFace Inference, Vercel AI SDK |
-| API | tRPC, TanStack Query, Zod |
-| Database | Firebase Admin, Upstash Redis |
+| AI | Vercel AI Gateway, Groq, Mistral, Cohere (embed + rerank) |
+| Vector Search | Qdrant (1536-dim, cosine similarity) |
+| API | Next.js API Routes, TanStack Query, Zod |
+| Cache/Rate Limit | Upstash Redis |
 | Email | Nodemailer, Google APIs |
 | Infrastructure | Vercel |
 
@@ -70,11 +71,11 @@ cd qwik-app && bun dev
 otherdev-v2/
 ├── web/                    # Next.js portfolio (main production app)
 │   ├── src/
-│   │   ├── app/           # App Router pages
+│   │   ├── app/           # App Router pages + API routes
 │   │   ├── components/    # React components
-│   │   ├── server/        # tRPC routers
+│   │   ├── server/lib/    # Server utilities (rate limit, RAG, chat)
 │   │   ├── hooks/         # Custom hooks
-│   │   └── lib/           # Utilities
+│   │   └── lib/           # Utilities, projects data
 │   ├── public/            # Static assets
 │   └── package.json
 ├── qwik-app/              # Qwik City (experimental)
