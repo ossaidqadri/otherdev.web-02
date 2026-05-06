@@ -185,7 +185,10 @@ web/
 │   │   └── lib/
 │   │       ├── rate-limit.ts            # Upstash rate limiting
 │   │       ├── chat-cache-store.ts      # Upstash chat cache
-│   │       ├── chat-routing.ts          # 4-category chat classifier
+│   │       ├── chat/
+│   │       │   ├── models.ts          # AI Gateway model definitions
+│   │       │   ├── stream-handler.ts  # Tool-driven chat handler
+│   │       │   └── tools.ts           # retrieveKnowledge, tavilySearch, createArtifact
 │   │       └── rag/
 │   │           ├── embeddings.ts        # Cohere via AI Gateway
 │   │           ├── vector-search.ts    # Qdrant vector search

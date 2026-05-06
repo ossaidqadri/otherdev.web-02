@@ -112,41 +112,25 @@ X-RateLimit-Remaining: 9
 X-RateLimit-Reset: 1740000000000
 ```
 
-### Chat Routing
+### Tool-Driven Routing
 
-Queries are classified into 4 routes (`src/server/lib/chat-routing.ts`):
+The LLM decides at runtime via `toolChoice: 'auto'` — there is no pre-flight query classification. The model chooses which tool to call based on the system prompt guidance:
 
-| Route | Trigger | Behavior |
-|-------|---------|----------|
-| `otherdev_rag` | 2+ domain keywords, no non-domain keywords | Full RAG context from knowledge base |
-| `otherdev_no_rag` | 1 domain keyword, no non-domain keywords | Base facts only, no vector search |
-| `general_chat` | Non-domain keywords or conversational | Tavily web search enabled |
-| `clarify` | Mixed signals (domain + non-domain + "otherdev" brand) | Request clarification |
+| Tool | When the model calls it |
+|------|------------------------|
+| `retrieveKnowledge` | Questions about Other Dev's projects, services, team, or domain knowledge |
+| `tavilySearch` | General knowledge, current events, or factual queries |
+| `createArtifact` | Requests to build or create something (gated by `supportsArtifacts`) |
+| *(no tool)* | Conversational acknowledgments ("ok", "thanks", "hi") |
 
-**Domain keywords:** `other dev`, `otherdev`, `founders`, `ossaid`, `kabeer`, `karachi`, `services`, `case studies`, `portfolio`, `projects`, `agency`, `studio`, `e-commerce`, `saas`, `legal tech`, `real estate`, etc.
+### RAG Context
 
-**Non-domain keywords:** `war`, `news`, `politics`, `crypto`, `weather`, `sports`, `iran`, `usa`, `israel`, `ukraine`, `russia`, `gaza`, etc.
-
-### Query Quality Detection
-
-```typescript
-interface QueryQuality {
-  isLowQuality: boolean;      // < 3 tokens, repeated words, or purely conversational
-  isConversational: boolean;   // "ok", "thanks", "hi", "sure", etc.
-  tokenCount: number;
-  hasRepeatedWords: boolean;
-  needsArtifact: boolean;     // "build", "create", "make", "design", etc.
-}
-```
-
-### RAG Context Injection
-
-1. Query is classified → if `otherdev_rag` or `otherdev_no_rag`, RAG is enabled
-2. Generate embedding via **Cohere `embed-v4.0`** via AI Gateway (1536-dim)
-3. Search **Qdrant** collection `otherdev_documents` (3x results, cosine similarity)
-4. Re-rank results via **Cohere `rerank-v4-fast`** cross-encoder (always-on)
-5. Build context prompt with top results
-6. Response cached in Upstash Redis (24-hour TTL)
+When the model calls `retrieveKnowledge`:
+1. Generate embedding via **Cohere `embed-v4.0`** via AI Gateway (1536-dim)
+2. Search **Qdrant** collection `otherdev_documents` (3× results, cosine similarity)
+3. Re-rank results via **Cohere `rerank-v4-fast`** cross-encoder (always-on)
+4. Return formatted context to the model
+5. Response cached in Upstash Redis (24-hour TTL)
 
 ### Tools
 
@@ -171,9 +155,7 @@ Used when user requests building/creating something (code, calculator, form, etc
 { "type": "tool-call", "tool": "createArtifact", "input": {
   "title": "Project Calculator",
   "description": "...",
-  "html": "<!DOCTYPE html>...",
-  "css": "body { ... }",
-  "js": "// ..."
+  "code": "<!DOCTYPE html><style>body{...}</style><script>...</script>"
 } }
 
 // Result: rendered as iframe in chat

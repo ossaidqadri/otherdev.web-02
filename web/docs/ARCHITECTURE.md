@@ -212,16 +212,15 @@ src/app/api/
 src/server/lib/
 ├── chat/
 │   ├── models.ts               # AI Gateway model definitions + fallback chains
-│   ├── stream-handler.ts       # Core streaming logic (RAG, routing, streaming)
-│   ├── tools.ts                # tavilySearchTool, createArtifactTool
-│   └── index.ts                # Exports: getCapableModel, getFastModel, etc.
+│   ├── stream-handler.ts       # Core streaming logic (tools, streaming)
+│   ├── tools.ts                # retrieveKnowledgeTool, tavilySearchTool, createArtifactTool
+│   └── index.ts                # Exports: handleStreamChat, createArtifactTool, tavilySearchTool
 ├── rag/
 │   ├── embeddings.ts           # Cohere embeddings via AI Gateway + LRU cache + reranking
 │   └── vector-search.ts        # Qdrant vector search with reranking
-├── chat-routing.ts             # 4-category query classifier
 ├── chat-cache-store.ts         # Upstash Redis chat message + response caching
 ├── rate-limit.ts              # Upstash sliding window rate limiting
-└── artifact-tool.ts            # HTML artifact generation tool
+└── api-helpers.ts              # JSON response helpers + CORS
 ```
 
 **Key Features:**
@@ -510,10 +509,8 @@ graph LR
     Request[Incoming Request] --> Proxy[proxy.ts Middleware]
     Proxy --> Header{Set x-tenant-domain}
     Header --> NextJS[Next.js Router]
-    NextJS --> Context[Context Extraction]
     Context --> Handler[API Route Handlers]
-
-    Handler --> CMS[Payload CMS<br/>Filter by domain]
+    Handler --> CMS[Canvas CMS<br/>Filter by domain]
 
     style Request fill:#e1f5ff
     style Proxy fill:#ffe1f5
@@ -526,35 +523,33 @@ graph LR
 **1. Proxy Middleware (`proxy.ts`):**
 
 ```typescript
-export function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host') || 'otherdev.com';
+// web/proxy.ts
+import { type NextRequest, NextResponse } from 'next/server'
 
-  // Map hostname to tenant identifier
-  const domain = getTenantDomain(hostname);
+export function proxy(request: NextRequest) {
+  const hostname = request.headers.get('host') || ''
+  const domain = hostname.split(':')[0]
+  const response = NextResponse.next()
+  response.headers.set('x-tenant-domain', domain)
+  return response
+}
 
-  // Inject into request headers
-  request.headers.set('x-tenant-domain', domain);
-
-  return NextResponse.next({ request });
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_next).*)'],
 }
 ```
 
-**2. Context Extraction (`src/server/lib/context.ts`):**
+**2. API Route Usage:**
+
+API routes read the `x-tenant-domain` header to scope data:
 
 ```typescript
-export function getDomainFromRequest(request: Request): string {
-  return request.headers.get("x-tenant-domain") || "otherdev.com";
-}
+// In any API route
+const domain = request.headers.get('x-tenant-domain') || 'otherdev.com'
+// Use domain to filter CMS queries, etc.
 ```
 
-**3. API Route Usage (`src/app/api/content/posts/route.ts`):**
-
-```typescript
-export async function GET(request: Request) {
-  const domain = getDomainFromRequest(request);
-  return await payloadAPI.getBlogPosts(domain);
-}
-```
+Note: The multi-tenant system is partial — `proxy.ts` sets the header, but full domain-based content filtering through `src/server/lib/context.ts` is not yet wired up.
 
 ---
 
