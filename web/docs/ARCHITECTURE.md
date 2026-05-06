@@ -572,7 +572,7 @@ export function getVisionModel() {
 
 | Model Role | Primary | Fallback 1 | Fallback 2 |
 |------------|---------|------------|------------|
-| Fast | `groq/gpt-oss-120b` | `cerebras/qwen-3-235b-a22b-instruct-2507` | `cerebras/qwen-3-32b-a22b-instruct-2507` |
+| Fast | `groq/gpt-oss-120b` | `cerebras/qwen-3-235b-a22b-instruct-2507` | `groq/qwen3-32b` |
 | Vision | `mistral/pixtral-large` | `groq/llama-4-scout-17b-16e-instruct` | — |
 
 ### Chat Routing (4-Category Classifier)
