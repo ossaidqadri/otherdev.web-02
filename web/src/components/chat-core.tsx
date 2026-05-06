@@ -293,7 +293,7 @@ function UserMessage({
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex justify-end items-end gap-2 sm:gap-3">
-        <div className="max-w-[85%] gap-2 sm:gap-3 lg:max-w-4xl flex flex-col">
+        <div className="max-w-[85%] gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
           <div className="flex flex-col gap-2">
             {imageParts.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-end">
@@ -458,7 +458,7 @@ function AssistantMessage({
           className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
           style={{ width: 'auto', height: 'auto' }}
         />
-        <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-4xl mx-auto flex flex-col">
+        <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-5xl mx-auto flex flex-col">
           <div className="flex-1 space-y-3 min-w-0">
             {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
             {cleanedText && (
@@ -527,7 +527,7 @@ function AssistantMessage({
         className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
         style={{ width: 'auto', height: 'auto' }}
       />
-      <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-4xl mx-auto flex flex-col">
+      <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-5xl mx-auto flex flex-col">
         <div className="flex-1 space-y-2 min-w-0">
           {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
           {cleanedText && (
