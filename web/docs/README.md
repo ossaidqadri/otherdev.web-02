@@ -78,7 +78,21 @@ This directory contains comprehensive documentation for developers working on th
 - **Qdrant** - Vector search database (1536-dim, cosine similarity)
 - **Upstash Redis** - Rate limiting and chat message caching
 - **Tavily** - Web search for general chat queries
+- **Streamdown** - Progressive markdown streaming with blurIn animation
 - **Shiki** - Code syntax highlighting
+
+### Cross-Platform
+
+- **Flutter** - Desktop (macOS, Windows, Linux) + mobile companion app
+- **GoRouter** - Flutter navigation
+- **Riverpod** - Flutter state management
+
+### Chat UX Features
+
+- **Inline bubble editing** — Click pencil icon → textarea in bubble, Enter to regenerate
+- **Branch navigation** — `<`/`>` to switch between edited versions
+- **Suggestion pills** — Follow-up questions shown above prompt bar (via `messageMetadata`)
+- **Progressive streaming** — blurIn word-by-word animation via Streamdown
 
 ### Development Tools
 
