@@ -16,7 +16,7 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ children, isAnimating = false, animated = true }: MarkdownRendererProps) {
   const animationConfig = animated === true
-    ? { animation: 'blurIn' as const, duration: 150, easing: 'ease-out', sep: 'word' as const }
+    ? { animation: 'blurIn' as const, duration: 250, easing: 'ease-out', sep: 'word' as const }
     : animated === false
     ? undefined
     : animated
