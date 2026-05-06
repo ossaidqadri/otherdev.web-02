@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/signup_page.dart';
+import 'features/portfolio/presentation/pages/home_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_detail_page.dart';
 import 'features/blog/presentation/pages/blog_page.dart';
@@ -15,8 +16,8 @@ import 'shared/presentation/widgets/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-// TODO: Wire to actual auth state (Firebase Auth)
-bool _isAuthenticated = false;
+// Auth disabled for now — always bypasses login redirect
+const _isAuthenticated = true;
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
@@ -59,7 +60,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/home',
-              builder: (context, state) => const PortfolioPage(),
+              builder: (context, state) => const HomePage(),
               routes: [
                 GoRoute(
                   path: 'work/:slug',
@@ -81,6 +82,23 @@ final router = GoRouter(
                 GoRoute(
                   path: ':slug',
                   builder: (context, state) => BlogDetailPage(
+                    slug: state.pathParameters['slug']!,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        // Work / Portfolio
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/work',
+              builder: (context, state) => const PortfolioPage(),
+              routes: [
+                GoRoute(
+                  path: ':slug',
+                  builder: (context, state) => PortfolioDetailPage(
                     slug: state.pathParameters['slug']!,
                   ),
                 ),

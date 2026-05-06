@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
+
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Skip splash and go directly to home
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.go('/home');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
