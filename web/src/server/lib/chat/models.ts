@@ -1,10 +1,10 @@
 // ─── Text Models ────────────────────────────────────────────────────────────────
-// groq/gpt-oss-120b: Primary — fast free tier via Groq
-// cerebras/qwen-3-235b: First fallback (full model via Cerebras)
-// cerebras/qwen-3-32b: Second fallback (smaller, faster via Cerebras)
+// groq/gpt-oss-120b:   Primary — Groq BYOK; gateway also falls back to Cerebras/Bedrock for this model
+// alibaba/qwen-3-235b: First fallback — canonical slug, gateway routes via Cerebras or Groq
+// groq/qwen3-32b:      Second fallback — canonical alibaba/qwen-3-32b served via Groq
 
 export const TEXT_MODEL = 'groq/gpt-oss-120b'
-export const TEXT_MODEL_FALLBACK = 'cerebras/qwen-3-235b-a22b-instruct-2507'
+export const TEXT_MODEL_FALLBACK = 'alibaba/qwen-3-235b'
 export const TEXT_MODEL_FALLBACK_2 = 'groq/qwen3-32b'
 
 // ─── Vision Models ────────────────────────────────────────────────────────────
