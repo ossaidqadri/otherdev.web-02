@@ -318,9 +318,11 @@ function UserMessage({ message }: { message: UIMessage }) {
 function AssistantMessage({
   message,
   setActiveArtifact,
+  isAnimating = false,
 }: {
   message: UIMessage
   setActiveArtifact: (artifact: ArtifactToolCall | null) => void
+  isAnimating?: boolean
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -370,7 +372,6 @@ function AssistantMessage({
   const hasArtifact = Boolean(artifactToolCall)
 
   const cleanedText = cleanSuggestionMarkers(textPart)
-
   const getHtmlContent = () => contentRef.current?.innerHTML
 
   if (hasArtifact && artifactToolCall) {
@@ -398,7 +399,7 @@ function AssistantMessage({
             {cleanedText && (
               <div ref={contentRef}>
                 <div className="max-w-none rounded-lg bg-transparent p-0">
-                  <MarkdownRenderer>{cleanedText}</MarkdownRenderer>
+                  <MarkdownRenderer isAnimating={isAnimating}>{cleanedText}</MarkdownRenderer>
                 </div>
               </div>
             )}
@@ -457,7 +458,7 @@ function AssistantMessage({
           {cleanedText && (
             <div ref={contentRef}>
               <div className="max-w-none rounded-lg bg-transparent p-0">
-                <MarkdownRenderer>{cleanedText}</MarkdownRenderer>
+                <MarkdownRenderer isAnimating={isAnimating}>{cleanedText}</MarkdownRenderer>
               </div>
             </div>
           )}
@@ -839,6 +840,7 @@ export function ChatCore({
                     key={message.id}
                     message={message}
                     setActiveArtifact={setActiveArtifact}
+                    isAnimating={status === 'streaming' && index === messages.length - 1}
                   />
                 )
               )}
