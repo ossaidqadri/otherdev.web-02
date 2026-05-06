@@ -639,17 +639,14 @@ export function ChatCore({
   const pendingBranchRef = useRef<string | null>(null)
 
   // Persist chatId in localStorage for session continuity
-  const [chatId, setChatId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('chatId') || crypto.randomUUID()
-    }
-    return crypto.randomUUID()
-  })
+  // Use useEffect to ensure crypto.randomUUID runs only in browser, not during SSR
+  const [chatId, setChatId] = useState<string>('')
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('chatId', chatId)
-    }
-  }, [chatId])
+    const stored = localStorage.getItem('chatId')
+    const id = stored || (crypto.randomUUID?.() ?? Math.random().toString(36).slice(2))
+    localStorage.setItem('chatId', id)
+    setChatId(id)
+  }, [])
   const [isRecording, setIsRecording] = useState(false)
   const [isRecordingProcessing, setIsRecordingProcessing] = useState(false)
 

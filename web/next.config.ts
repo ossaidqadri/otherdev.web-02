@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Allow cross-origin access from mobile/desktop devices on the same network during dev
+  allowedDevOrigins: ['192.168.0.95', '192.168.0.100', '192.168.0.101', '192.168.0.102'],
   // Disable TypeScript type checking during build (CI runs tsc --noEmit separately)
   typescript: {
     ignoreBuildErrors: true,
