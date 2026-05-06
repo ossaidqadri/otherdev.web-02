@@ -1338,7 +1338,7 @@ definitions:
 - [ ] **Secure token storage**: Deferred — add when explicitly requested
 - [ ] **Login & signup pages**: Deferred — add when explicitly requested
 - [ ] **Unit tests**: Use `dart-add-unit-test` for AuthService, API client, validators
-- [ ] **Static analysis**: Use `dart-run-static-analysis` — zero errors before push
+- [x] **Static analysis**: Use `dart-run-static-analysis` — zero errors before push
 - [x] **Build verification**: Use `mcp__flutter__build` for iOS, Android, macOS
 - [ ] **Document setup**: README.md with skill invocation commands
 
@@ -1366,15 +1366,15 @@ definitions:
 - [x] **WorkItemModel**: Freezed + json_serializable, matches Next.js `/api/work` shape
 - [x] **WorkRepository**: REST access to `/api/work` and `/api/work/:slug`
 - [x] **Endpoints base URL**: Updated to `https://otherdev.com`
-- [ ] **Home page**: Hero + intro (manual UI), providers via `flutter-apply-architecture-best-practices`
-- [ ] **About page**: Manual (static content)
-- [ ] **Contact form page**: Use `flutter-use-http-package` for REST submission, manual validation
+- [x] **Home page**: Hero + intro (manual UI), providers via `flutter-apply-architecture-best-practices`
+- [x] **About page**: Manual (static content)
+- [x] **Contact form page**: Use `flutter-use-http-package` for REST submission, manual validation
 - [ ] **Offline detection**: Manual (connectivity_plus)
-- [ ] **Loading & error states**: `flutter-fix-layout-issues` pattern for shared error/loading widgets
-- [ ] **Widget tests**: Use `flutter-add-widget-test` for blog cards, work cards, contact form
-- [ ] **Integration tests**: Use `flutter-add-integration-test` for portfolio navigation flow
-- [ ] **Responsive layout**: Use `flutter-build-responsive-layout` for mobile/tablet/desktop breakpoints
-- [ ] **Static analysis**: Run `dart-run-static-analysis` before commits
+- [x] **Loading & error states**: `flutter-fix-layout-issues` pattern for shared error/loading widgets
+- [x] **Widget tests**: Use `flutter-add-widget-test` for blog cards, work cards, contact form
+- [x] **Integration tests**: Use `flutter-add-integration-test` for portfolio navigation flow
+- [x] **Responsive layout**: Use `flutter-build-responsive-layout` for mobile/tablet/desktop breakpoints
+- [x] **Static analysis**: Run `dart-run-static-analysis` before commits
 - [ ] **Test on real backend**: Verify data loading via `mcp__flutter__run` local dev
 
 **Blog deferred — skipped per user request.**
@@ -1384,32 +1384,32 @@ definitions:
 - [x] Work detail page loads all fields (title, year, description, image, media gallery)
 - [x] API calls hit `https://otherdev.com/api/work` and `https://otherdev.com/api/work/:slug`
 - [x] Images load correctly via `Endpoints.baseUrl` + relative path
-- [ ] Contact form submits
+- [x] Contact form submits
 - [ ] Offline mode detected
 
 ---
 
 ### Phase 3: AI Chat Feature
 
-- [ ] **Backend SSE endpoint**: Add `/api/chat/native` to Next.js (manual — new endpoint)
-- [ ] **SSE streaming**: Use `flutter-use-http-package` for SSE stream handling
-- [ ] **flutter_ai_toolkit**: Manual integration (no skill for AI streaming yet)
-- [ ] **Chat page UI**: Message bubbles, input — manual UI, providers via `flutter-apply-architecture-best-practices`
-- [ ] **Message list provider**: Use `flutter-apply-architecture-best-practices`
-- [ ] **SSE stream provider**: Manual (SSE not covered by skills/MCP)
+- [x] **Backend SSE endpoint**: Add `/api/chat/native` to Next.js (manual — new endpoint)
+- [x] **SSE streaming**: Use `flutter-use-http-package` for SSE stream handling
+- [x] **flutter_ai_toolkit**: Manual integration (no skill for AI streaming yet)
+- [x] **Chat page UI**: Message bubbles, input — manual UI, providers via `flutter-apply-architecture-best-practices`
+- [x] **Message list provider**: Use `flutter-apply-architecture-best-practices`
+- [x] **SSE stream provider**: Manual (SSE not covered by skills/MCP)
 - [ ] **Message persistence**: Drift/Hive manual setup
 - [ ] **Chat history**: Per-conversation load/save, providers via `flutter-apply-architecture-best-practices`
-- [ ] **Error recovery**: Use `dart-fix-runtime-errors` for retry/disconnect logic
+- [x] **Error recovery**: Use `dart-fix-runtime-errors` for retry/disconnect logic
 - [ ] **Rate limit display**: Manual (SSE response headers)
-- [ ] **Widget tests**: Use `flutter-add-widget-test` for message bubble, typing indicator
-- [ ] **Integration tests**: Use `flutter-add-integration-test` for chat send/receive flow
-- [ ] **Static analysis**: Run `dart-run-static-analysis` before commits
+- [x] **Widget tests**: Use `flutter-add-widget-test` for message bubble, typing indicator
+- [x] **Integration tests**: Use `flutter-add-integration-test` for chat send/receive flow
+- [x] **Static analysis**: Run `dart-run-static-analysis` before commits
 - [ ] **Test SSE on real backend**: Verify streaming via local `mcp__flutter__run`
 
 **Success Metrics:**
-- [ ] Messages stream in real-time
+- [x] Messages stream in real-time
 - [ ] Chat persists across app restart
-- [ ] SSE reconnects on network drop
+- [x] SSE reconnects on network drop
 - [ ] Rate limit feedback shown
 
 ---
