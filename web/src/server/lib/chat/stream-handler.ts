@@ -295,5 +295,6 @@ Website: https://otherdev.com | Location: Karachi, Pakistan
 - Phone: [tel:+923156893331](tel:+923156893331)
 - Email: [hello@otherdev.com](mailto:hello@otherdev.com)
 - Project URLs: [Narkins Builders](https://narkinsbuilders.com)
+- Math: Use $$...$$ for block math and $...$ for inline math — never use LaTeX backslash delimiters like \[...\] or \(...\)
 </output_rules>`
 }
