@@ -7,12 +7,21 @@ interface MarkdownRendererProps {
   children: string
   /** Set to true while streaming to enable per-word animation */
   isAnimating?: boolean
+  /** Animation config, defaults to blurIn word-level */
+  animated?: boolean | { animation?: 'fadeIn' | 'blurIn' | 'slideUp'; duration?: number; easing?: string; sep?: 'word' | 'char' }
 }
 
-export function MarkdownRenderer({ children, isAnimating = false }: MarkdownRendererProps) {
+export function MarkdownRenderer({ children, isAnimating = false, animated = true }: MarkdownRendererProps) {
+  const animationConfig = animated === true
+    ? { animation: 'blurIn' as const, duration: 150, easing: 'ease-out', sep: 'word' as const }
+    : animated === false
+    ? undefined
+    : animated
+
   return (
     <Streamdown
       plugins={{ code }}
+      animated={animationConfig}
       isAnimating={isAnimating}
       components={{
         inlineCode: ({ children }) => (
