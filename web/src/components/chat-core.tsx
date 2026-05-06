@@ -5,7 +5,6 @@ import {
   DefaultChatTransport,
   getToolName,
   isToolUIPart,
-  lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from 'ai'
 import {
@@ -257,17 +256,24 @@ function SuggestionButton({
 
 function UserMessage({
   message,
-  onEdit,
+  isEditing,
+  onEditConfirm,
+  onEditCancel,
   branchCount = 1,
   branchIndex = 0,
   onBranchSwitch,
+  onStartEdit,
 }: {
   message: UIMessage
-  onEdit?: (message: UIMessage) => void
+  isEditing?: boolean
+  onEditConfirm?: (messageId: string, newText: string) => void
+  onEditCancel?: (messageId: string) => void
   branchCount?: number
   branchIndex?: number
   onBranchSwitch?: (delta: number) => void
+  onStartEdit?: (messageId: string) => void
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const textContent =
     message.parts
       ?.filter(p => p.type === 'text')
@@ -323,10 +329,32 @@ function UserMessage({
                 ))}
               </div>
             )}
-            {textContent.trim() && (
-              <div className="rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground sm:px-4 sm:py-3 sm:text-base">
-                {textContent}
-              </div>
+            {isEditing ? (
+              <textarea
+                ref={textareaRef}
+                autoFocus
+                defaultValue={textContent}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    const target = e.currentTarget as HTMLTextAreaElement
+                    const newText = target.value.trim()
+                    if (newText) onEditConfirm?.(message.id, newText)
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault()
+                    onEditCancel?.(message.id)
+                  }
+                }}
+                className="rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground sm:px-4 sm:py-3 sm:text-base resize-none min-h-[60px] max-h-[300px] overflow-y-auto w-full"
+                rows={3}
+              />
+            ) : (
+              textContent.trim() && (
+                <div className="rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground sm:px-4 sm:py-3 sm:text-base">
+                  {textContent}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -339,41 +367,65 @@ function UserMessage({
           style={{ width: 'auto', height: 'auto' }}
         />
       </div>
-      <div className="flex items-center gap-0.5 mr-8 sm:mr-10">
-        {branchCount > 1 && (
-          <>
+      {!isEditing && (
+        <div className="flex items-center gap-0.5 mr-8 sm:mr-10">
+          {branchCount > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => onBranchSwitch?.(-1)}
+                disabled={branchIndex === 0}
+                className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
+                aria-label="Previous version"
+              >
+                <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+              <span className="text-xs text-muted-foreground select-none px-0.5">
+                {branchIndex + 1}/{branchCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => onBranchSwitch?.(1)}
+                disabled={branchIndex === branchCount - 1}
+                className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
+                aria-label="Next version"
+              >
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </>
+          )}
+          {onStartEdit && (
             <button
               type="button"
-              onClick={() => onBranchSwitch?.(-1)}
-              disabled={branchIndex === 0}
-              className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
-              aria-label="Previous version"
+              onClick={() => onStartEdit(message.id)}
+              className="p-1.5 rounded-full hover:bg-accent"
+              aria-label="Edit message"
             >
-              <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
-            <span className="text-xs text-muted-foreground select-none px-0.5">
-              {branchIndex + 1}/{branchCount}
-            </span>
-            <button
-              type="button"
-              onClick={() => onBranchSwitch?.(1)}
-              disabled={branchIndex === branchCount - 1}
-              className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
-              aria-label="Next version"
-            >
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
-          </>
-        )}
-        <button
-          type="button"
-          onClick={() => onEdit?.(message)}
-          className="p-1.5 rounded-full hover:bg-accent"
-          aria-label="Edit message"
-        >
-          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-      </div>
+          )}
+        </div>
+      )}
+      {isEditing && (
+        <div className="flex items-center gap-1 mr-8 sm:mr-10">
+          <button
+            type="button"
+            onClick={() => onEditConfirm?.(message.id, (textareaRef.current?.value ?? '').trim())}
+            className="px-2 py-1 rounded-lg bg-primary text-primary-foreground text-xs hover:bg-primary/90"
+            aria-label="Confirm edit"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={() => onEditCancel?.(message.id)}
+            className="px-2 py-1 rounded-lg bg-muted text-muted-foreground text-xs hover:bg-muted/80"
+            aria-label="Cancel edit"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -683,7 +735,6 @@ export function ChatCore({
       },
     }),
     experimental_throttle: 30,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     async onToolCall({ toolCall }) {
       if (toolCall.dynamic) {
         return
@@ -741,35 +792,28 @@ export function ChatCore({
     inputRef.current?.focus()
   }
 
-  const handleStartEdit = (message: UIMessage) => {
-    const textContent =
-      message.parts
-        ?.filter(p => p.type === 'text')
-        .map(p => p.text)
-        .join('') || ''
-    setEditingMessageId(message.id)
-    setEditInputValue(textContent)
-    setInputValue(textContent)
+  const handleStartEditInline = (_messageId: string) => {
+    // No-op: editing is initiated directly via isEditing prop from parent
+    // This is kept for backward compatibility but actual editing is controlled inline
   }
 
-  const handleCancelEdit = () => {
+  const handleEditCancel = (_messageId: string) => {
     setEditingMessageId(null)
-    setEditInputValue('')
-    setInputValue('')
   }
 
-  const handleSubmitEdit = async () => {
-    if (!editingMessageId) return
-    const value = inputValue.trim()
-    if (!value) return
+  const handleEditConfirm = async (messageId: string, newText: string) => {
+    if (!newText.trim()) {
+      setEditingMessageId(null)
+      return
+    }
 
-    const messageIndex = messages.findIndex(m => m.id === editingMessageId)
+    const messageIndex = messages.findIndex(m => m.id === messageId)
     if (messageIndex === -1) return
 
     const editedMsg: ChatUIMessage = {
       ...messages[messageIndex],
       parts: messages[messageIndex].parts?.map(p => {
-        if (p.type === 'text') return { ...p, text: value }
+        if (p.type === 'text') return { ...p, text: newText.trim() }
         return p
       }) as ChatUIMessage['parts'],
     }
@@ -778,9 +822,9 @@ export function ChatCore({
     const currentSnapshots = messages
     setMessageBranches(prev => {
       const next = new Map(prev)
-      next.set(editingMessageId, {
-        snapshots: [...(prev.get(editingMessageId)?.snapshots ?? [currentSnapshots]), currentSnapshots],
-        activeIndex: (prev.get(editingMessageId)?.snapshots.length ?? 1),
+      next.set(messageId, {
+        snapshots: [...(prev.get(messageId)?.snapshots ?? [currentSnapshots]), currentSnapshots],
+        activeIndex: prev.get(messageId)?.snapshots.length ?? 1,
       })
       return next
     })
@@ -790,8 +834,6 @@ export function ChatCore({
 
     setMessages(updatedMessages)
     setEditingMessageId(null)
-    setEditInputValue('')
-    setInputValue('')
     setSuggestion('')
 
     await handleSubmitWithMessages(updatedMessages)
@@ -1060,7 +1102,10 @@ export function ChatCore({
                   <UserMessage
                     key={message.id}
                     message={message}
-                    onEdit={handleStartEdit}
+                    isEditing={message.id === editingMessageId}
+                    onEditConfirm={handleEditConfirm}
+                    onEditCancel={handleEditCancel}
+                    onStartEdit={id => setEditingMessageId(id)}
                     branchCount={(messageBranches.get(message.id)?.snapshots.length ?? 0) + 1}
                     branchIndex={messageBranches.get(message.id)?.activeIndex ?? 0}
                     onBranchSwitch={delta => handleBranchSwitch(message.id, delta)}
@@ -1158,18 +1203,6 @@ export function ChatCore({
         </div>
 
         <PromptInput className="relative rounded-2xl border-border shadow-sm pointer-events-auto">
-          {isEditing && (
-            <div className="flex items-center gap-2 px-3 pt-2 pb-0">
-              <span className="text-xs text-muted-foreground shrink-0">Editing message</span>
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
           {recordingStream ? (
             <VoiceWaveform stream={recordingStream} />
           ) : (
@@ -1182,26 +1215,11 @@ export function ChatCore({
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
-                  if (isEditing) {
-                    handleSubmitEdit()
-                  } else {
-                    handleSubmit()
-                  }
+                  handleSubmit()
                 }
               }}
               autoFocus
             />
-          )}
-          {isEditing && (
-            <div className="flex items-center gap-2 px-3 pb-2">
-              <button
-                type="button"
-                onClick={handleSubmitEdit}
-                className="text-xs bg-foreground text-background px-2 py-1 rounded-full hover:opacity-90 transition-opacity ml-auto"
-              >
-                Submit edit
-              </button>
-            </div>
           )}
           <PromptInputActions className="w-full justify-between">
             <div className="flex gap-2">
