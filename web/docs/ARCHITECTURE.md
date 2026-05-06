@@ -552,9 +552,9 @@ All LLM calls route through `@ai-sdk/gateway` for unified observability and auto
 // src/server/lib/chat/models.ts
 import { gateway } from 'ai'
 
-// Fast model: Groq GPT-OSS → Groq Qwen → Mistral Large
+// Fast model: Groq GPT-OSS → Cerebras Qwen (full) → Cerebras Qwen (32b)
 export function getFastModel() {
-  return gateway('openai/gpt-oss-120b')
+  return gateway('groq/gpt-oss-120b')
 }
 
 // Capable model: Groq Scout (for reasoning, artifacts, tools)
@@ -562,9 +562,9 @@ export function getCapableModel() {
   return gateway('groq/llama-4-scout-17b-16e-instruct')
 }
 
-// Vision model: Groq Scout → Mistral Pixtral
+// Vision model: Mistral Pixtral → Groq Scout
 export function getVisionModel() {
-  return gateway('groq/llama-4-scout-17b-16e-instruct')
+  return gateway('mistral/pixtral-large')
 }
 ```
 
@@ -572,8 +572,8 @@ export function getVisionModel() {
 
 | Model Role | Primary | Fallback 1 | Fallback 2 |
 |------------|---------|------------|------------|
-| Fast | `openai/gpt-oss-120b` | `groq/qwen-3-235b-a22b-instruct-2507` | `mistral/mistral-large-3` |
-| Vision | `groq/llama-4-scout-17b-16e-instruct` | `mistral/pixtral-12b-2409` | — |
+| Fast | `groq/gpt-oss-120b` | `cerebras/qwen-3-235b-a22b-instruct-2507` | `cerebras/qwen-3-32b-a22b-instruct-2507` |
+| Vision | `mistral/pixtral-large` | `groq/llama-4-scout-17b-16e-instruct` | — |
 
 ### Chat Routing (4-Category Classifier)
 

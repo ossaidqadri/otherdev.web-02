@@ -242,6 +242,13 @@ export async function handleStreamChat({
     ? [VISION_MODEL_FALLBACK]
     : [TEXT_MODEL_FALLBACK, TEXT_MODEL_FALLBACK_2]
 
+  // Provider priority: primary provider first, then failover
+  // Text: Groq primary → Cerebras fallback → Groq smaller fallback
+  // Vision: Mistral primary → Groq fallback
+  const providerPriority = hasImageContent
+    ? ['mistral', 'groq']
+    : ['groq', 'cerebras']
+
   const result = streamText({
     model: gateway(selectedModelId),
     system: getSystemPrompt(),
@@ -253,7 +260,10 @@ export async function handleStreamChat({
     tools,
     providerOptions: {
       gateway: {
-        models: fallbacks,
+        // Try providers in priority order; failover to next on error
+        order: providerPriority,
+        // Final fallback model if all providers fail
+        models: ['openai/gpt-5.4'],
       },
     },
   })
