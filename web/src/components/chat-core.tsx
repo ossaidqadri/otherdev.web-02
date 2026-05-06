@@ -178,7 +178,7 @@ function ReasoningCollapsible({ reasoning }: { reasoning: string }) {
         <span>View thinking process</span>
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-2">
-        <div className="prose prose-sm max-w-full break-words rounded-xl border border-border bg-muted/50 p-3 font-sans text-xs leading-relaxed text-muted-foreground dark:prose-invert sm:p-4 sm:text-sm">
+        <div className="max-w-full break-words rounded-xl border border-border bg-muted/50 p-3 font-sans text-xs leading-relaxed text-muted-foreground sm:p-4 sm:text-sm">
           <MarkdownRenderer>{reasoning}</MarkdownRenderer>
         </div>
       </CollapsibleContent>
