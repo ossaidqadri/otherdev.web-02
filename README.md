@@ -21,17 +21,17 @@ graph TB
     end
 
     subgraph "Web Stack"
-        APIStream[/api/chat/stream]
-        APINative[/api/chat/native]
-        StreamHandler[Stream Handler]
-        RAG[RAG Pipeline<br/>retrieveKnowledge + tavilySearch]
+        APIStream["/api/chat/stream"]
+        APINative["/api/chat/native"]
+        StreamHandler["Stream Handler"]
+        RAG["RAG Pipeline<br/>retrieveKnowledge + tavilySearch"]
     end
 
     subgraph "AI Services"
-        Gateway[Vercel AI Gateway<br/>Groq + Mistral + Cerebras]
-        Cohere[Cohere<br/>embed-v4 + rerank-v4]
-        Qdrant[Qdrant<br/>Vector Search]
-        Tavily[Tavily<br/>Web Search]
+        Gateway["Vercel AI Gateway<br/>Groq + Mistral + Cerebras"]
+        Cohere["Cohere<br/>embed-v4 + rerank-v4"]
+        Qdrant["Qdrant<br/>Vector Search"]
+        Tavily["Tavily<br/>Web Search"]
     end
 
     Web --> APIStream
