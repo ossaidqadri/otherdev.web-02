@@ -121,12 +121,12 @@ jobs:
           name: Flutter App v${{ steps.version.outputs.value }}
           draft: false
           prerelease: false
-          generate_release_notes: true
+          generate_release_notes: false
           files: |
-            artifacts/flutter_app_windows_x64/flutter_app.exe
-            artifacts/flutter_app_macos/Runner.app
-            artifacts/flutter_app_linux/bundle/**
-            artifacts/flutter_app_ios/Runner.app
-            artifacts/flutter_app_android/app-release.apk
+            artifacts/flutter_app_windows_x64/**
+            artifacts/flutter_app_macos/**
+            artifacts/flutter_app_linux/**
+            artifacts/flutter_app_ios/**
+            artifacts/flutter_app_android/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
