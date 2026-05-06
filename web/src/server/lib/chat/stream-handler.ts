@@ -220,24 +220,6 @@ export async function handleStreamChat({
   const sanitizedMessages = sanitizeModelMessages(rawModelMessages)
   const modelMessages = resolveDataURIs(sanitizedMessages)
 
-  // Generate suggestions before streaming — use text model regardless of vision content
-  const suggestionsPromise = generateText({
-    model: gateway(TEXT_MODEL),
-    output: Output.object({
-      schema: SUGGESTIONS_SCHEMA,
-    }),
-    system:
-      'Generate 2-3 short follow-up questions (max 10 words each) a user might ask next about web development, design, or Other Dev services. Be specific to what was asked. Return only the questions.',
-    prompt: `User asked: "${normalizedQuery}".`,
-  })
-    .then(r => r.output?.suggestions ?? [])
-    .catch(err => {
-      console.error('[chat] suggestion generation failed:', err)
-      return [] as string[]
-    })
-
-  const resolvedSuggestions = await suggestionsPromise
-
   const fallbacks = hasImageContent
     ? [VISION_MODEL_FALLBACK]
     : [TEXT_MODEL_FALLBACK, TEXT_MODEL_FALLBACK_2]
@@ -249,21 +231,43 @@ export async function handleStreamChat({
     ? ['mistral', 'groq']
     : ['groq', 'cerebras']
 
+  // Generate suggestions before streaming — always text model with same fallback chain
+  const suggestionsPromise = generateText({
+    model: gateway(TEXT_MODEL),
+    output: Output.object({
+      schema: SUGGESTIONS_SCHEMA,
+    }),
+    system:
+      'Generate 2-3 short follow-up questions (max 10 words each) a user might ask next about web development, design, or Other Dev services. Be specific to what was asked. Return only the questions.',
+    prompt: `User asked: "${normalizedQuery}".`,
+    providerOptions: {
+      gateway: {
+        order: ['groq', 'cerebras'],
+        models: [TEXT_MODEL_FALLBACK, TEXT_MODEL_FALLBACK_2],
+      },
+    },
+  })
+    .then(r => r.output?.suggestions ?? [])
+    .catch(err => {
+      console.error('[chat] suggestion generation failed:', err)
+      return [] as string[]
+    })
+
+  const resolvedSuggestions = await suggestionsPromise
+
   const result = streamText({
     model: gateway(selectedModelId),
     system: getSystemPrompt(),
     messages: modelMessages,
-    temperature: 0.7,
+    temperature: 0.5,
     maxOutputTokens: supportsArtifacts ? 4096 : 1024,
     stopWhen: stepCountIs(5),
     toolChoice: 'auto',
     tools,
     providerOptions: {
       gateway: {
-        // Try providers in priority order; failover to next on error
         order: providerPriority,
-        // Final fallback model if all providers fail
-        models: ['openai/gpt-5.4'],
+        models: fallbacks,
       },
     },
   })
@@ -282,10 +286,10 @@ export async function handleStreamChat({
 }
 
 function getSystemPrompt(): string {
-  return `You are a helpful assistant representing Other Dev — a web development and design studio in Karachi, Pakistan.
+  return `You are a consultative associate at Other Dev — think of yourself as a knowledgeable colleague who gives honest, direct answers. You acknowledge limitations openly, never oversell, and prioritize what's right for the caller over closing a deal.
 
 <who>
-Other Dev specializes in fashion, e-commerce, real estate, legal tech, SaaS, and enterprise systems.
+Other Dev is a web development and design studio in Karachi, Pakistan, specializing in fashion e-commerce, real estate, legal tech, SaaS, and enterprise systems.
 Website: https://otherdev.com | Location: Karachi, Pakistan
 </who>
 
@@ -300,13 +304,39 @@ Website: https://otherdev.com | Location: Karachi, Pakistan
 - When discussing projects, include the project name and year when available
 </instructions>
 
+<examples>
+Example 1 - retrieveKnowledge tool:
+<user>"What projects has Other Dev built?"</user>
+<tool_calls>[retrieveKnowledge: {"query": "Other Dev portfolio projects"}]</tool_calls>
+<tool_result>[Narkins Builders 2024, Fashion Store v2, Enterprise SaaS portal]</tool_result>
+<response>Other Dev has built [Narkins Builders](https://narkinsbuilders.com) (2024), a fashion e-commerce platform, and an enterprise SaaS portal. See more at [otherdev.com/work](https://otherdev.com/work).</response>
+
+Example 2 - conversational no-tool:
+<user>"Ok thanks!"</user>
+<response>You're welcome! Let me know if you have any other questions.</response>
+
+Example 3 - mermaid output (ASCII labels only, no special chars):
+<task>"Draw checkout flow"</task>
+<response>graph TD
+A[User] --> B[Cart]
+B --> C[Checkout]
+C --> D[Payment]
+D --> E[Done]
+</response>
+
+Example 4 - no knowledge found:
+<user>"What is Other Dev's refund policy?"</user>
+<tool_result>[no relevant info found]</tool_result>
+<response>I don't have information about that. Contact them directly at [hello@otherdev.com](mailto:hello@otherdev.com).</response>
+</examples>
+
 <output_rules>
 - Links: ALWAYS format every link as [visible text](url). Example: [React Docs](https://react.dev/reference/react/useEffect). NEVER write a bare URL or plain text link. Every URL must be wrapped in square brackets with descriptive text.
 - Website links: [otherdev.com](https://otherdev.com), not https://otherdev.com
 - Phone: [tel:+923156893331](tel:+923156893331)
 - Email: [hello@otherdev.com](mailto:hello@otherdev.com)
 - Project URLs: [Narkins Builders](https://narkinsbuilders.com)
-- Math: Use $$...$$ for block math and $...$ for inline math — never use LaTeX backslash delimiters like \[...\] or \(...\)
+- Math: Use $$...$$ for block math and $...$ for inline math. Never use raw LaTeX display commands like \\[ or \\( . Example: $$x^2 + y^2 = z^2$$ not \\[x^2 + y^2 = z^2\\]
 - Diagrams: Use inline mermaid markdown for flowcharts, sequence diagrams, and timelines — reserve createArtifact for complex interactive demos or multi-file artifacts. CRITICAL mermaid rules: node labels must be SIMPLE plain ASCII text in brackets. NO parentheses, NO em-dashes, NO special Unicode, NO colons, NO slashes inside brackets. Short simple words only. Example: graph TD; A[Browser] --> B[DNS Lookup] --> C[TCP Connection] --> D[HTTP Request] --> E[Server] --> F[Response] --> G[Render]
 </output_rules>`
 }

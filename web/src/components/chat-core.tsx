@@ -11,6 +11,7 @@ import {
 import {
   ArrowUp,
   AudioLines,
+  Brain,
   Briefcase,
   ChevronDown,
   ChevronRight,
@@ -19,6 +20,8 @@ import {
   FileText,
   Globe,
   Paperclip,
+  Pencil,
+  RotateCcw,
   Square,
   Users,
   X,
@@ -173,9 +176,10 @@ function useScrollToBottom(containerRef: React.RefObject<HTMLDivElement | null>)
 function ReasoningCollapsible({ reasoning }: { reasoning: string }) {
   return (
     <Collapsible defaultOpen={false}>
-      <CollapsibleTrigger className="flex items-center gap-1 font-sans text-xs text-muted-foreground transition-colors hover:text-foreground group">
-        <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]:rotate-90" />
+      <CollapsibleTrigger className="flex items-center gap-1.5 font-sans text-xs text-muted-foreground transition-colors hover:text-foreground group">
+        <Brain className="h-3 w-3" />
         <span>View thinking process</span>
+        <ChevronRight className="h-3 w-3 transition-transform group-data-[state=open]:rotate-90" />
       </CollapsibleTrigger>
       <CollapsibleContent className="mt-2">
         <div className="max-w-full break-words rounded-xl border border-border bg-muted/50 p-3 font-sans text-xs leading-relaxed text-muted-foreground sm:p-4 sm:text-sm">
@@ -241,7 +245,13 @@ function SuggestionButton({
   )
 }
 
-function UserMessage({ message }: { message: UIMessage }) {
+function UserMessage({
+  message,
+  onEdit,
+}: {
+  message: UIMessage
+  onEdit?: (message: UIMessage) => void
+}) {
   const textContent =
     message.parts
       ?.filter(p => p.type === 'text')
@@ -265,7 +275,15 @@ function UserMessage({ message }: { message: UIMessage }) {
     }>) || []
 
   return (
-    <div className="flex justify-end items-end gap-2">
+    <div className="flex justify-end items-end gap-2 group">
+      <button
+        type="button"
+        onClick={() => onEdit?.(message)}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent mb-1"
+        aria-label="Edit message"
+      >
+        <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
       <div className="max-w-[95%] gap-2 sm:max-w-[85%] sm:gap-3 md:max-w-[80%] flex flex-col">
         <div className="flex flex-col gap-2">
           {imageParts.length > 0 && (
@@ -319,10 +337,12 @@ function AssistantMessage({
   message,
   setActiveArtifact,
   isAnimating = false,
+  onRegenerate,
 }: {
   message: UIMessage
   setActiveArtifact: (artifact: ArtifactToolCall | null) => void
   isAnimating?: boolean
+  onRegenerate?: (message: UIMessage) => void
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -384,7 +404,7 @@ function AssistantMessage({
     const _description = artifactData?.description
 
     return (
-      <div className="flex justify-start items-start gap-2 mt-12">
+      <div className="flex justify-start items-start gap-2 mt-12 group">
         <Image
           src="/otherdev-chat-logo-32.webp"
           alt="OtherDev Loom"
@@ -393,6 +413,14 @@ function AssistantMessage({
           className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
           style={{ width: 'auto', height: 'auto' }}
         />
+        <button
+          type="button"
+          onClick={() => onRegenerate?.(message)}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent self-start mt-1"
+          aria-label="Regenerate response"
+        >
+          <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
         <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
           <div className="flex-1 space-y-3 min-w-0">
             {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
@@ -443,7 +471,7 @@ function AssistantMessage({
   }
 
   return (
-    <div className="flex justify-start items-start gap-2">
+    <div className="flex justify-start items-start gap-2 group">
       <Image
         src="/otherdev-chat-logo-32.webp"
         alt="OtherDev Loom"
@@ -452,6 +480,14 @@ function AssistantMessage({
         className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
         style={{ width: 'auto', height: 'auto' }}
       />
+      <button
+        type="button"
+        onClick={() => onRegenerate?.(message)}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent self-start mt-1"
+        aria-label="Regenerate response"
+      >
+        <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
       <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
         <div className="flex-1 space-y-2 min-w-0">
           {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
@@ -547,6 +583,8 @@ export function ChatCore({
   const [inputError, setInputError] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editInputValue, setEditInputValue] = useState('')
 
   // Persist chatId in localStorage for session continuity
   const [chatId, setChatId] = useState<string>(() => {
@@ -583,12 +621,14 @@ export function ChatCore({
       body: {
         supportsArtifacts: true,
       },
-      prepareSendMessagesRequest({ id, messages }) {
+      prepareSendMessagesRequest({ id: _id, messages }) {
         return {
           body: {
             id: chatId,
             message: messages[messages.length - 1],
+            messages,
             supportsArtifacts: true,
+            trigger: 'submit-user-message' as const,
           },
         }
       },
@@ -645,6 +685,110 @@ export function ChatCore({
   const handleTranscriptReceived = (text: string) => {
     setInputValue(text)
     inputRef.current?.focus()
+  }
+
+  const handleStartEdit = (message: UIMessage) => {
+    const textContent =
+      message.parts
+        ?.filter(p => p.type === 'text')
+        .map(p => p.text)
+        .join('') || ''
+    setEditingMessageId(message.id)
+    setEditInputValue(textContent)
+    setInputValue(textContent)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null)
+    setEditInputValue('')
+    setInputValue('')
+  }
+
+  const handleSubmitEdit = async () => {
+    if (!editingMessageId) return
+    const value = inputValue.trim()
+    if (!value) return
+
+    const messageIndex = messages.findIndex(m => m.id === editingMessageId)
+    if (messageIndex === -1) return
+
+    const editedMsg: ChatUIMessage = {
+      ...messages[messageIndex],
+      parts: messages[messageIndex].parts?.map(p => {
+        if (p.type === 'text') return { ...p, text: value }
+        return p
+      }) as ChatUIMessage['parts'],
+    }
+
+    const updatedMessages = messages.slice(0, messageIndex + 1)
+    updatedMessages[messageIndex] = editedMsg
+
+    setMessages(updatedMessages)
+    setEditingMessageId(null)
+    setEditInputValue('')
+    setInputValue('')
+    setSuggestion('')
+
+    await handleSubmitWithMessages(updatedMessages)
+  }
+
+  const handleRegenerate = async (message: UIMessage) => {
+    const messageIndex = messages.findIndex(m => m.id === message.id)
+    if (messageIndex === -1) return
+
+    const updatedMessages = messages.slice(0, messageIndex)
+    setMessages(updatedMessages as ChatUIMessage[])
+    setEditingMessageId(null)
+    setEditInputValue('')
+    setInputValue('')
+    setSuggestion('')
+
+    await handleSubmitWithMessages(updatedMessages as ChatUIMessage[])
+  }
+
+  const handleSubmitWithMessages = async (
+    msgs: ChatUIMessage[],
+    editedUserMsg?: ChatUIMessage,
+  ) => {
+    if (isRecording || isRecordingProcessing) return
+    const value = inputValue.trim()
+    if (!value && attachments.length === 0 && !editedUserMsg) return
+
+    const attachmentsToSend = attachments.length > 0 ? await Promise.all(attachments.map(processAttachment)) : []
+    const fileParts = attachmentsToSend.map(a => ({
+      type: 'file' as const,
+      mediaType: a.contentType,
+      url: a.url,
+      filename: a.name,
+    }))
+
+    const lastMsg = editedUserMsg ?? msgs[msgs.length - 1]
+
+    if (fileParts.length > 0 || value) {
+      sendMessage(
+        {
+          role: 'user',
+          parts: [...fileParts, ...(value ? [{ type: 'text' as const, text: value }] : [])],
+        },
+        {
+          body: {
+            id: chatId,
+            message: lastMsg,
+            messages: msgs,
+            trigger: 'edit-message' as const,
+            messageId: lastMsg.id,
+            supportsArtifacts: true,
+          },
+        },
+      )
+    }
+
+    setSuggestion('')
+    setInputValue('')
+    setAttachments([])
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const handleStartRecording = async () => {
@@ -710,7 +854,6 @@ export function ChatCore({
 
   const handleSubmit = async () => {
     if (isRecording || isRecordingProcessing) return
-
     const value = inputValue.trim()
     if (!value && attachments.length === 0) return
 
@@ -775,6 +918,8 @@ export function ChatCore({
     return (!hasText && !hasValidAttachments) || isBlocked
   }, [inputValue, attachments, isRecording, isRecordingProcessing])
 
+  const isEditing = editingMessageId !== null
+
   const placeholder = suggestion || 'Type your message...'
 
   return (
@@ -834,27 +979,25 @@ export function ChatCore({
             <div className="space-y-4 container px-3 mt-12 md:mt-30 py-6 max-w-4xl mx-auto sm:space-y-6 sm:px-4 sm:py-8 md:px-12">
               {messages.map((message, index) =>
                 message.role === 'user' ? (
-                  <UserMessage key={message.id} message={message} />
+                  <UserMessage
+                    key={message.id}
+                    message={message}
+                    onEdit={handleStartEdit}
+                  />
                 ) : (
                   <AssistantMessage
                     key={message.id}
                     message={message}
                     setActiveArtifact={setActiveArtifact}
                     isAnimating={status === 'streaming' && index === messages.length - 1}
+                    onRegenerate={handleRegenerate}
                   />
                 )
               )}
 
-              {(status === 'submitted' || status === 'streaming') && (
+              {status === 'submitted' && (
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <Image
-                    src="/otherdev-chat-logo-32.webp"
-                    alt="Other Dev Loom"
-                    width={32}
-                    height={32}
-                    className="h-6 w-6 flex-shrink-0 animate-spin sm:h-6 sm:w-6"
-                    style={{ width: 'auto', height: 'auto' }}
-                  />
+                  <Brain className="h-6 w-6 flex-shrink-0 text-muted-foreground animate-pulse" />
                   <div className="flex items-center gap-2 font-sans text-xs text-muted-foreground sm:text-sm">
                     <span className="text-sm">Thinking </span>
                     <div className="flex gap-1">
@@ -915,6 +1058,18 @@ export function ChatCore({
         </div>
 
         <PromptInput className="relative rounded-2xl border-border shadow-sm pointer-events-auto">
+          {isEditing && (
+            <div className="flex items-center gap-2 px-3 pt-2 pb-0">
+              <span className="text-xs text-muted-foreground shrink-0">Editing message</span>
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
           {recordingStream ? (
             <VoiceWaveform stream={recordingStream} />
           ) : (
@@ -932,11 +1087,26 @@ export function ChatCore({
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
-                  handleSubmit()
+                  if (isEditing) {
+                    handleSubmitEdit()
+                  } else {
+                    handleSubmit()
+                  }
                 }
               }}
               autoFocus
             />
+          )}
+          {isEditing && (
+            <div className="flex items-center gap-2 px-3 pb-2">
+              <button
+                type="button"
+                onClick={handleSubmitEdit}
+                className="text-xs bg-foreground text-background px-2 py-1 rounded-full hover:opacity-90 transition-opacity ml-auto"
+              >
+                Submit edit
+              </button>
+            </div>
           )}
           {suggestion && !inputValue && (
             <button
