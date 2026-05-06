@@ -48,6 +48,14 @@ jobs:
             artifact_name: flutter_app_linux
             build_cmd: flutter build linux --release
             artifact_path: flutter_app/build/linux/x64/release/bundle/
+          - os: macos-latest
+            artifact_name: flutter_app_ios
+            build_cmd: flutter build ios --release --no-codesign
+            artifact_path: flutter_app/build/ios/iphone/Build/Products/Release-iphoneos/Runner.app
+          - os: ubuntu-latest
+            artifact_name: flutter_app_android
+            build_cmd: flutter build apk --release
+            artifact_path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
 
     steps:
       - uses: actions/checkout@v4
@@ -118,5 +126,7 @@ jobs:
             artifacts/flutter_app_windows_x64/flutter_app.exe
             artifacts/flutter_app_macos/Runner.app
             artifacts/flutter_app_linux/bundle/**
+            artifacts/flutter_app_ios/Runner.app
+            artifacts/flutter_app_android/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
