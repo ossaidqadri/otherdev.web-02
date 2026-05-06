@@ -6,6 +6,7 @@ import { handleStreamChat } from '@/server/lib/chat'
 import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from '@/server/lib/chat/tools'
 import { loadChatMessages, saveChatMessages } from '@/server/lib/chat-cache-store'
 import { checkRateLimit, getClientIdentifier, REQUESTS_PER_WINDOW } from '@/server/lib/rate-limit'
+import { replaceMessageAtId } from '@/server/lib/chat/message-utils'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -13,6 +14,15 @@ export const maxDuration = 30
 const suggestionDataSchema = z.object({
   suggestion: z.string(),
 })
+
+type RequestBody = {
+  id?: string
+  message?: UIMessage
+  messages?: UIMessage[]
+  supportsArtifacts?: boolean
+  trigger?: 'submit-user-message' | 'edit-message'
+  messageId?: string
+}
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -29,24 +39,30 @@ export async function POST(request: Request): Promise<Response> {
       })
     }
 
-    const body = (await request.json()) as {
-      id?: string
-      message?: UIMessage
-      messages?: UIMessage[]
-      supportsArtifacts?: boolean
-    }
+    const body = (await request.json()) as RequestBody
 
     const chatId =
       typeof body.id === 'string' && body.id.trim().length > 0 ? body.id : crypto.randomUUID()
     const supportsArtifacts = body.supportsArtifacts === true
+    const isEditMessage = body.trigger === 'edit-message'
 
     let candidateMessages: UIMessage[] = []
 
-    if (body.message) {
-      const previousMessages = await loadChatMessages(chatId)
-      candidateMessages = [...previousMessages, body.message]
-    } else if (Array.isArray(body.messages)) {
-      candidateMessages = body.messages
+    if (isEditMessage) {
+      // Industry-standard replace-and-replay: client sends full history + the messageId to edit
+      // We slice at messageId, replace with the new content, and re-run the model.
+      if (!body.messageId || !Array.isArray(body.messages)) {
+        return createJsonResponse({ error: 'messageId and messages required for edit-message' }, 400)
+      }
+      candidateMessages = replaceMessageAtId(body.messages, body.messageId, body.message)
+    } else {
+      // submit-user-message: append new user message to loaded history, or use provided full history
+      if (body.message) {
+        const previousMessages = await loadChatMessages(chatId)
+        candidateMessages = [...previousMessages, body.message]
+      } else if (Array.isArray(body.messages)) {
+        candidateMessages = body.messages
+      }
     }
 
     if (candidateMessages.length === 0) {
@@ -101,8 +117,11 @@ export async function POST(request: Request): Promise<Response> {
       throw error
     }
 
-    // Save messages before streaming
-    await saveChatMessages(chatId, uiMessages)
+    // For submit: save BEFORE streaming (existing messages as history)
+    // For edit: save AFTER streaming (new AI response messages as history)
+    if (!isEditMessage) {
+      await saveChatMessages(chatId, uiMessages)
+    }
 
     const { response } = await handleStreamChat({
       messages: uiMessages,
@@ -110,10 +129,18 @@ export async function POST(request: Request): Promise<Response> {
       request,
     })
 
+    if (isEditMessage) {
+      // After streaming, replace the streamed history with new messages from result.response
+      // result.response is a PromiseLike — accessing it triggers full stream consumption
+      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
+      const streamedMessages = resultResponse.messages as UIMessage[]
+      await saveChatMessages(chatId, streamedMessages)
+    }
+
     return new Response(response.body, {
       status: 200,
       headers: {
-        ...Object.fromEntries(response.headers.entries()),
+        ...Object.fromEntries((response as { headers: Headers }).headers.entries()),
         'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
         'X-RateLimit-Remaining': String(rateLimitResult.remaining),
         'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),

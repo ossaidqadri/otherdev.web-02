@@ -6,6 +6,7 @@ import { handleStreamChat } from '@/server/lib/chat'
 import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from '@/server/lib/chat/tools'
 import { loadChatMessages, saveChatMessages } from '@/server/lib/chat-cache-store'
 import { checkRateLimit, getClientIdentifier, REQUESTS_PER_WINDOW } from '@/server/lib/rate-limit'
+import { replaceMessageAtId } from '@/server/lib/chat/message-utils'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -13,6 +14,51 @@ export const maxDuration = 30
 const suggestionDataSchema = z.object({
   suggestion: z.string(),
 })
+
+type RequestBody = {
+  id?: string
+  message?: UIMessage
+  messages?: UIMessage[]
+  supportsArtifacts?: boolean
+  trigger?: 'submit-user-message' | 'edit-message'
+  messageId?: string
+}
+
+function toSseChunk(chunk: { type: string; [k: string]: unknown }): Uint8Array {
+  const encoder = new TextEncoder()
+  switch (chunk.type) {
+    case 'text-delta':
+      return encoder.encode(`data: ${JSON.stringify({ type: 'text', content: chunk.text })}\n\n`)
+    case 'tool-call':
+      return encoder.encode(
+        `data: ${JSON.stringify({ type: 'tool', name: chunk.toolName, args: chunk.args })}\n\n`,
+      )
+    case 'tool-result':
+      return encoder.encode(
+        `data: ${JSON.stringify({ type: 'tool-result', name: chunk.toolName, result: chunk.result })}\n\n`,
+      )
+    case 'reasoning':
+      return encoder.encode(
+        `data: ${JSON.stringify({ type: 'reasoning', content: chunk.textDelta })}\n\n`,
+      )
+    case 'error':
+      return encoder.encode(
+        `data: ${JSON.stringify({ type: 'error', message: chunk.error })}\n\n`,
+      )
+    case 'finish': {
+      const finishData = {
+        type: 'finish',
+        reason: chunk.finishReason,
+        usage: chunk.usage,
+      }
+      return encoder.encode(`data: ${JSON.stringify(finishData)}\n\n`)
+    }
+    default:
+      return encoder.encode(
+        `data: ${JSON.stringify({ type: 'unknown', chunkType: chunk.type })}\n\n`,
+      )
+  }
+}
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -29,31 +75,33 @@ export async function POST(request: Request): Promise<Response> {
       })
     }
 
-    const body = (await request.json()) as {
-      id?: string
-      message?: UIMessage
-      messages?: UIMessage[]
-      supportsArtifacts?: boolean
-    }
+    const body = (await request.json()) as RequestBody
 
     const chatId =
       typeof body.id === 'string' && body.id.trim().length > 0 ? body.id : crypto.randomUUID()
     const supportsArtifacts = body.supportsArtifacts === true
+    const isEditMessage = body.trigger === 'edit-message'
 
     let candidateMessages: UIMessage[] = []
 
-    if (body.message) {
-      const previousMessages = await loadChatMessages(chatId)
-      candidateMessages = [...previousMessages, body.message]
-    } else if (Array.isArray(body.messages)) {
-      candidateMessages = body.messages
+    if (isEditMessage) {
+      if (!body.messageId || !Array.isArray(body.messages)) {
+        return createJsonResponse({ error: 'messageId and messages required for edit-message' }, 400)
+      }
+      candidateMessages = replaceMessageAtId(body.messages, body.messageId, body.message)
+    } else {
+      if (body.message) {
+        const previousMessages = await loadChatMessages(chatId)
+        candidateMessages = [...previousMessages, body.message]
+      } else if (Array.isArray(body.messages)) {
+        candidateMessages = body.messages
+      }
     }
 
     if (candidateMessages.length === 0) {
       return createJsonResponse({ error: 'No messages provided' }, 400)
     }
 
-    // Filter to only valid messages
     candidateMessages = candidateMessages.filter(m => {
       if (m.role === 'user') {
         if (!m.parts || m.parts.length === 0) {
@@ -65,7 +113,6 @@ export async function POST(request: Request): Promise<Response> {
           return false
         })
       }
-
       return Boolean(m.parts && m.parts.length > 0)
     })
 
@@ -73,10 +120,8 @@ export async function POST(request: Request): Promise<Response> {
       return createJsonResponse({ error: 'No valid messages provided' }, 400)
     }
 
-    // Pass artifact tool for validation (no execute = client-side only)
     const artifactTool = createArtifactTool
 
-    // Validate messages
     let uiMessages: UIMessage[]
     try {
       uiMessages = (await validateUIMessages({
@@ -101,8 +146,9 @@ export async function POST(request: Request): Promise<Response> {
       throw error
     }
 
-    // Save messages before streaming
-    await saveChatMessages(chatId, uiMessages)
+    if (!isEditMessage) {
+      await saveChatMessages(chatId, uiMessages)
+    }
 
     const { response } = await handleStreamChat({
       messages: uiMessages,
@@ -110,36 +156,49 @@ export async function POST(request: Request): Promise<Response> {
       request,
     })
 
+    // For edit-message: consume stream manually to get result.response.messages for Redis
+    // For submit-user-message: use existing pipeThrough (no message tracking needed post-stream)
+    if (isEditMessage) {
+      const chunks: Uint8Array[] = []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for await (const chunk of (response as any).fullStream) {
+        chunks.push(toSseChunk(chunk))
+      }
+      chunks.push(new TextEncoder().encode('data: [DONE]\n\n'))
+
+      // result.response is a PromiseLike — accessing triggers full stream consumption
+      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
+      const streamedMessages = resultResponse.messages as UIMessage[]
+      await saveChatMessages(chatId, streamedMessages)
+
+      const stream = new ReadableStream({
+        start(controller) {
+          for (const chunk of chunks) {
+            controller.enqueue(chunk)
+          }
+          controller.close()
+        },
+      })
+
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+          'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
+        },
+      })
+    }
+
+    // submit-user-message: use pipeThrough with explicit chunk type coverage
     const encoder = new TextEncoder()
 
-    // Wrap the AI SDK stream in a TransformStream that converts to plain W3C SSE
     const transformer = new TransformStream({
       transform(chunk, controller) {
-        switch (chunk.type) {
-          case 'text-delta':
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: 'text', content: chunk.text })}\n\n`),
-            )
-            break
-          case 'tool-call':
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ type: 'tool', name: chunk.toolName, args: chunk.args })}\n\n`,
-              ),
-            )
-            break
-          case 'tool-result':
-            // Send tool result — Flutter can display or ignore
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ type: 'tool-result', name: chunk.toolName, result: chunk.result })}\n\n`,
-              ),
-            )
-            break
-          case 'finish':
-            // AI SDK finish — nothing to forward, [DONE] comes after
-            break
-        }
+        controller.enqueue(toSseChunk(chunk as { type: string; [k: string]: unknown }))
       },
       flush(controller) {
         controller.enqueue(encoder.encode('data: [DONE]\n\n'))
