@@ -58,7 +58,7 @@ src/components/
 │   ├── assistant-message.tsx   # Assistant message with Streamdown rendering
 │   ├── artifact-renderer.tsx   # Renders HTML/CSS/JS artifacts from AI
 │   ├── otherdev-loom-thread.tsx # Loom page wrapper with artifact panel
-│   ├── providers.tsx           # React Query provider (formerly TRPCProvider)
+│   ├── providers.tsx           # React Query provider
 │   └── voice-waveform.tsx      # Audio recording waveform display
 ```
 
