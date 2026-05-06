@@ -39,17 +39,16 @@ Otherdev produces digital platforms for pioneering creatives across fashion, des
 
 ### AI & Assistant
 
-- **[@assistant-ui/react](https://www.assistant-ui.com/)** - Custom AI assistant interface
-- **[@ai-sdk/groq](https://sdk.vercel.ai/)** - Groq AI integration
-- **[@huggingface/inference](https://huggingface.co/)** - HF model inference
-- **Shiki** - Syntax highlighting for code artifacts
+- **[Vercel AI SDK](https://sdk.vercel.ai/)** - AI integration with `useChat` hook
+- **[Vercel AI Gateway](https://vercel.com/docs/ai-gateway)** - Unified API with model fallback chains
+- **Tool-driven chat** - LLM decides via `toolChoice: 'auto'` between retrieveKnowledge, tavilySearch, createArtifact
+- **Streamdown** - Progressive markdown streaming with blurIn animation, Shiki code, KaTeX math, Mermaid diagrams
 
-### API & Data Fetching
+### API & Data
 
-- **[tRPC](https://trpc.io/)** - End-to-end typesafe APIs
+- **[Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing)** - Direct API endpoints (`/api/chat/stream`, `/api/chat/native`, `/api/contact`)
 - **[TanStack Query](https://tanstack.com/query)** - Async state management
-- **[Zustand](https://zustand-demo.pmnd.rs/)** - Lightweight state management
-- **[SuperJSON](https://github.com/blitz-js/superjson)** - Enhanced JSON serialization
+- **[Zod](https://zod.dev/)** - Runtime schema validation
 
 ### Forms & Validation
 
@@ -122,12 +121,11 @@ GMAIL_RECIPIENTS=email1@example.com,email2@example.com
 
 # AI Services
 GROQ_API_KEY=your-groq-api-key
-HUGGINGFACE_API_KEY=your-huggingface-api-key
-
-# Firebase Admin
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+QDRANT_URL=https://your-qdrant.cloud
+QDRANT_API_KEY=your-qdrant-key
+TAVILY_API_KEY=your-tavily-api-key
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-upstash-token
 
 # RAG Configuration
 RAG_SIMILARITY_THRESHOLD=0.1
@@ -152,46 +150,44 @@ CHAT_RESPONSE_CACHE_TTL_SECONDS=86400
 otherdev-v2/
 ├── web/                          # Main Next.js application
 │   ├── src/
-│   │   ├── app/                  # App Router pages
+│   │   ├── app/                  # App Router pages + API routes
 │   │   │   ├── page.tsx          # Homepage with project grid
-│   │   │   ├── about/            # About page with team & clients
-│   │   │   ├── work/             # Work showcase
-│   │   │   │   ├── page.tsx      # Projects listing
-│   │   │   │   └── [slug]/       # Individual project pages
-│   │   │   ├── blog/             # Blog listing and posts
-│   │   │   ├── loom/             # AI assistant chat interface
-│   │   │   ├── api/              # API routes
-│   │   │   │   └── trpc/[trpc]/  # tRPC HTTP handler
-│   │   │   └── layout.tsx        # Root layout
-│   │   ├── components/           # React components
-│   │   │   ├── ui/               # Radix UI component wrappers
-│   │   │   ├── navigation.tsx    # Main navigation
-│   │   │   ├── project-card.tsx  # Project display card
+│   │   │   ├── about/             # About page with team & clients
+│   │   │   ├── work/              # Work showcase
+│   │   │   │   ├── page.tsx       # Projects listing
+│   │   │   │   └── [slug]/        # Individual project pages
+│   │   │   ├── loom/              # AI assistant chat interface
+│   │   │   ├── api/               # API routes
+│   │   │   │   ├── chat/stream/   # Streaming RAG chat
+│   │   │   │   ├── chat/native/  # SSE for Flutter
+│   │   │   │   ├── contact/       # Contact form
+│   │   │   │   └── transcribe/    # Audio transcription
+│   │   │   └── layout.tsx         # Root layout
+│   │   ├── components/             # React components
+│   │   │   ├── ui/                # Radix UI component wrappers
+│   │   │   ├── navigation.tsx     # Main navigation
+│   │   │   ├── project-card.tsx   # Project display card
 │   │   │   ├── contact-dialog.tsx # Contact form modal
-│   │   │   ├── chat-widget.tsx   # AI assistant widget
-│   │   │   ├── artifact-renderer.tsx # Code artifact display
-│   │   │   └── providers.tsx     # tRPC & React Query providers
-│   │   ├── server/               # tRPC server code
-│   │   │   ├── trpc.ts           # tRPC initialization
-│   │   │   └── routers/          # API routers
-│   │   │       ├── contact.ts    # Contact form handler
-│   │   │       └── content.ts    # Blog/content handler
-│   │   ├── hooks/                # Custom React hooks
-│   │   └── lib/                  # Utilities & data
-│   │       ├── projects.ts       # Project data & types
-│   │       ├── trpc.ts           # tRPC client utilities
-│   │       └── utils.ts          # Helper functions
-│   ├── public/                   # Static assets
-│   │   └── images/               # Project images & media
+│   │   │   ├── chat-widget.tsx    # Floating chat button + panel
+│   │   │   ├── chat-core.tsx      # Shared chat logic
+│   │   │   ├── providers.tsx      # React Query provider
+│   │   │   └── voice-waveform.tsx # Audio waveform
+│   │   ├── server/                # Server-side utilities
+│   │   │   └── lib/
+│   │   │       ├── chat/          # Stream handler + tools
+│   │   │       ├── rag/            # Embeddings + vector search
+│   │   │       └── rate-limit.ts  # Upstash rate limiting
+│   │   ├── hooks/                 # Custom React hooks
+│   │   └── lib/                   # Utilities & data
+│   │       ├── projects.ts        # Project data
+│   │       └── knowledge-base.ts  # RAG knowledge documents
+│   ├── public/                    # Static assets
 │   ├── scripts/                  # Utility scripts
 │   │   └── ingest-documents.ts   # Document ingestion for RAG
-│   ├── biome.json                # Biome configuration
+│   ├── biome.json                 # Biome configuration
 │   ├── components.json           # Shadcn UI config
 │   ├── next.config.ts            # Next.js configuration
-│   ├── package.json              # Dependencies
-│   ├── postcss.config.mjs        # PostCSS configuration
-│   ├── tailwind.config.ts        # Tailwind CSS configuration
-│   └── tsconfig.json             # TypeScript configuration
+│   └── package.json              # Dependencies
 ├── .gitignore
 └── README.md
 ```
@@ -220,16 +216,17 @@ Run these commands from the `web/` directory:
 
 ### Blog
 
-- **Dynamic Content** - CMS-powered blog posts via tRPC
-- **Markdown Rendering** - Shiki syntax highlighting with rehype/remark
-- **Category Filtering** - Organized content by topics
+- **CMS-powered posts** via Canvas SDK
+- **Streamdown** - Progressive markdown with Shiki syntax highlighting
+- **Category filtering** - Organized content by topics
 
 ### AI Assistant (Loom)
 
-- **Custom Chat Interface** - Built with @assistant-ui/react
-- **Artifact Rendering** - Inline code display with syntax highlighting
-- **RAG-Powered** - Context-aware responses from ingested documents
-- **Multi-Model Support** - Groq and HuggingFace integrations
+- **Tool-driven chat** - LLM decides at runtime via `toolChoice: 'auto'`
+- **RAG-powered** - retrieveKnowledge tool searches vector DB for Other Dev domain knowledge
+- **Web search** - tavilySearch tool for general queries and current events
+- **Artifact rendering** - createArtifact tool builds interactive HTML content
+- **Streamdown** - Progressive markdown with blurIn animation, Shiki code, KaTeX, Mermaid
 
 ### About Section
 
@@ -245,13 +242,10 @@ Run these commands from the `web/` directory:
 
 ### Technical Features
 
-- **Server Components** - Leveraging React Server Components for performance
-- **tRPC API Layer** - End-to-end type-safe APIs
-- **React Query + Zustand** - Optimized data fetching and state management
+- **Server Components** - React Server Components for optimal performance
+- **Next.js API Routes** - Direct API endpoints for chat, contact, transcribe, document processing
+- **TanStack Query** - Optimized data fetching with React Query
 - **Image Optimization** - Next.js Image component with WebP format
-- **Route Transitions** - Smooth navigation with App Router
-- **Type Safety** - End-to-end TypeScript coverage
-- **Code Quality** - Enforced via Biome linter and formatter
 
 ## Notable Projects
 
