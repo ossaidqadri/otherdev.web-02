@@ -14,39 +14,51 @@ Monorepo containing multiple web applications built by [otherdev](https://otherd
 
 ```mermaid
 graph TB
-    subgraph "Clients"
-        Web[Web App<br/>Next.js 16]
-        Flutter[Flutter App<br/>Desktop + Mobile]
+    %% ── Clients ──────────────────────────────────────────────────────────────
+    Web[Web App<br/>Next.js 16]
+    Flutter[Flutter App<br/>Desktop + Mobile]
+
+    %% ── API Layer ─────────────────────────────────────────────────────────────
+    APIStream["/api/chat/stream"]
+    APINative["/api/chat/native"]
+
+    %% ── Stream Handler ────────────────────────────────────────────────────────
+    StreamHandler[Stream Handler<br/>rate limit + sanitize]
+
+    %% ── LLM (toolChoice auto — decides at runtime) ───────────────────────────
+    LLM[LLM<br/>Groq via AI Gateway]
+
+    %% ── Toolset (model decides which to invoke) ───────────────────────────────
+    subgraph "Toolset"
+        direction LR
+        TK[retrieveKnowledge] --- TA[createArtifact] --- TV[tavilySearch]
     end
 
-    subgraph "Web Stack"
-        APIStream["/api/chat/stream"]
-        APINative["/api/chat/native"]
-        StreamHandler["Stream Handler"]
-        RAG["RAG Pipeline<br/>retrieveKnowledge + tavilySearch"]
-    end
+    %% ── RAG Pipeline (inside retrieveKnowledge tool) ─────────────────────────
+    TK --> Embed[Cohere embed-v4.0<br/>via AI Gateway]
+    Embed --> Qdrant[Qdrant<br/>Vector Search]
+    Qdrant --> Rerank[Cohere rerank-v4-fast]
+    Rerank -.->|"context to model"| LLM
+    TV -.->|"web results to model"| LLM
 
-    subgraph "AI Services"
-        Gateway["Vercel AI Gateway<br/>Groq + Mistral + Cerebras"]
-        Cohere["Cohere<br/>embed-v4 + rerank-v4"]
-        Qdrant["Qdrant<br/>Vector Search"]
-        Tavily["Tavily<br/>Web Search"]
-    end
-
+    %% ── Connections ────────────────────────────────────────────────────────────
     Web --> APIStream
     Flutter --> APINative
     APIStream --> StreamHandler
     APINative --> StreamHandler
-    StreamHandler --> Gateway
-    StreamHandler --> RAG
-    RAG --> Cohere
-    RAG --> Qdrant
-    RAG --> Tavily
+    StreamHandler --> LLM
 
+    %% ── Styles ────────────────────────────────────────────────────────────────
     style Web fill:#e1f5ff
     style Flutter fill:#e1ffe4
-    style Gateway fill:#ffe8cc
+    style StreamHandler fill:#fff4e1
+    style LLM fill:#ffe8cc
+    style TK fill:#e1ffe4
+    style TV fill:#ffe8cc
+    style TA fill:#f5e1ff
+    style Embed fill:#e1ffe4
     style Qdrant fill:#f5e1ff
+    style Rerank fill:#e1ffe4
 ```
 
 ---
