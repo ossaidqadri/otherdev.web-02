@@ -14,6 +14,7 @@ import {
   Brain,
   Briefcase,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Code2,
   FileCode2,
@@ -64,6 +65,11 @@ type ChatDataParts = {
 
 // Custom UIMessage type with our data parts
 type ChatUIMessage = UIMessage<unknown, ChatDataParts>
+
+type MessageBranchState = {
+  snapshots: ChatUIMessage[][]
+  activeIndex: number
+}
 
 const GREETINGS: { range: [number, number]; options: string[] }[] = [
   {
@@ -248,9 +254,15 @@ function SuggestionButton({
 function UserMessage({
   message,
   onEdit,
+  branchCount = 1,
+  branchIndex = 0,
+  onBranchSwitch,
 }: {
   message: UIMessage
   onEdit?: (message: UIMessage) => void
+  branchCount?: number
+  branchIndex?: number
+  onBranchSwitch?: (delta: number) => void
 }) {
   const textContent =
     message.parts
@@ -275,60 +287,89 @@ function UserMessage({
     }>) || []
 
   return (
-    <div className="flex justify-end items-end gap-2 group">
-      <button
-        type="button"
-        onClick={() => onEdit?.(message)}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent mb-1"
-        aria-label="Edit message"
-      >
-        <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-      </button>
-      <div className="max-w-[95%] gap-2 sm:max-w-[85%] sm:gap-3 md:max-w-[80%] flex flex-col">
-        <div className="flex flex-col gap-2">
-          {imageParts.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-end">
-              {imageParts.map((img, i) => (
-                <Image
-                  key={`img-${i}-${img.url}`}
-                  src={img.url}
-                  alt={img.filename || 'Attachment'}
-                  width={192}
-                  height={192}
-                  className="max-h-48 max-w-48 rounded-xl object-cover"
-                  unoptimized
-                />
-              ))}
-            </div>
-          )}
-          {fileParts.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-end">
-              {fileParts.map((file, i) => (
-                <div
-                  key={`file-${i}-${file.filename || 'file'}`}
-                  className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
-                >
-                  <FileText className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                  <span className="max-w-[180px] truncate">{file.filename || 'File'}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {textContent.trim() && (
-            <div className="rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground sm:px-4 sm:py-3 sm:text-base">
-              {textContent}
-            </div>
-          )}
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex justify-end items-end gap-2">
+        <div className="max-w-[95%] gap-2 sm:max-w-[85%] sm:gap-3 md:max-w-[80%] flex flex-col">
+          <div className="flex flex-col gap-2">
+            {imageParts.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-end">
+                {imageParts.map((img, i) => (
+                  <Image
+                    key={`img-${i}-${img.url}`}
+                    src={img.url}
+                    alt={img.filename || 'Attachment'}
+                    width={192}
+                    height={192}
+                    className="max-h-48 max-w-48 rounded-xl object-cover"
+                    unoptimized
+                  />
+                ))}
+              </div>
+            )}
+            {fileParts.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-end">
+                {fileParts.map((file, i) => (
+                  <div
+                    key={`file-${i}-${file.filename || 'file'}`}
+                    className="flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs text-accent-foreground"
+                  >
+                    <FileText className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                    <span className="max-w-[180px] truncate">{file.filename || 'File'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {textContent.trim() && (
+              <div className="rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground sm:px-4 sm:py-3 sm:text-base">
+                {textContent}
+              </div>
+            )}
+          </div>
         </div>
+        <Image
+          src="/loom-avatar-64.webp"
+          alt="User"
+          width={32}
+          height={32}
+          className="h-7 w-7 flex-shrink-0 rounded-full sm:h-8 sm:w-8"
+          style={{ width: 'auto', height: 'auto' }}
+        />
       </div>
-      <Image
-        src="/loom-avatar-64.webp"
-        alt="User"
-        width={32}
-        height={32}
-        className="h-7 w-7 flex-shrink-0 rounded-full sm:h-8 sm:w-8"
-        style={{ width: 'auto', height: 'auto' }}
-      />
+      <div className="flex items-center gap-0.5 mr-9 sm:mr-10">
+        {branchCount > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => onBranchSwitch?.(-1)}
+              disabled={branchIndex === 0}
+              className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
+              aria-label="Previous version"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+            <span className="text-xs text-muted-foreground select-none px-0.5">
+              {branchIndex + 1}/{branchCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => onBranchSwitch?.(1)}
+              disabled={branchIndex === branchCount - 1}
+              className="p-1 rounded-full hover:bg-accent disabled:opacity-30"
+              aria-label="Next version"
+            >
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => onEdit?.(message)}
+          className="p-1.5 rounded-full hover:bg-accent"
+          aria-label="Edit message"
+        >
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
     </div>
   )
 }
@@ -404,7 +445,7 @@ function AssistantMessage({
     const _description = artifactData?.description
 
     return (
-      <div className="flex justify-start items-start gap-2 mt-12 group">
+      <div className="flex justify-start items-start gap-2 mt-12">
         <Image
           src="/otherdev-chat-logo-32.webp"
           alt="OtherDev Loom"
@@ -413,14 +454,6 @@ function AssistantMessage({
           className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
           style={{ width: 'auto', height: 'auto' }}
         />
-        <button
-          type="button"
-          onClick={() => onRegenerate?.(message)}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent self-start mt-1"
-          aria-label="Regenerate response"
-        >
-          <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
         <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
           <div className="flex-1 space-y-3 min-w-0">
             {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
@@ -464,6 +497,16 @@ function AssistantMessage({
                 </CardHeader>
               </Card>
             )}
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => onRegenerate?.(message)}
+                className="p-1.5 rounded-full hover:bg-accent"
+                aria-label="Regenerate response"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -471,7 +514,7 @@ function AssistantMessage({
   }
 
   return (
-    <div className="flex justify-start items-start gap-2 group">
+    <div className="flex justify-start items-start gap-2">
       <Image
         src="/otherdev-chat-logo-32.webp"
         alt="OtherDev Loom"
@@ -480,14 +523,6 @@ function AssistantMessage({
         className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
         style={{ width: 'auto', height: 'auto' }}
       />
-      <button
-        type="button"
-        onClick={() => onRegenerate?.(message)}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-accent self-start mt-1"
-        aria-label="Regenerate response"
-      >
-        <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
-      </button>
       <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
         <div className="flex-1 space-y-2 min-w-0">
           {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
@@ -499,11 +534,21 @@ function AssistantMessage({
             </div>
           )}
           {cleanedText && (
-            <CopyButton
-              content={cleanedText}
-              htmlContent={getHtmlContent()}
-              copyMessage="Copied response to clipboard"
-            />
+            <div className="flex items-center gap-0.5">
+              <CopyButton
+                content={cleanedText}
+                htmlContent={getHtmlContent()}
+                copyMessage="Copied response to clipboard"
+              />
+              <button
+                type="button"
+                onClick={() => onRegenerate?.(message)}
+                className="p-1.5 rounded-full hover:bg-accent"
+                aria-label="Regenerate response"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -585,6 +630,8 @@ export function ChatCore({
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editInputValue, setEditInputValue] = useState('')
+  const [messageBranches, setMessageBranches] = useState<Map<string, MessageBranchState>>(new Map())
+  const pendingBranchRef = useRef<string | null>(null)
 
   // Persist chatId in localStorage for session continuity
   const [chatId, setChatId] = useState<string>(() => {
@@ -621,14 +668,14 @@ export function ChatCore({
       body: {
         supportsArtifacts: true,
       },
-      prepareSendMessagesRequest({ id: _id, messages }) {
+      prepareSendMessagesRequest({ id: _id, messages, extraBody }) {
         return {
           body: {
             id: chatId,
             message: messages[messages.length - 1],
             messages,
             supportsArtifacts: true,
-            trigger: 'submit-user-message' as const,
+            trigger: extraBody?.trigger ?? ('submit-user-message' as const),
           },
         }
       },
@@ -720,6 +767,17 @@ export function ChatCore({
       }) as ChatUIMessage['parts'],
     }
 
+    // Save current branch snapshot before replacing
+    const currentSnapshots = messages
+    setMessageBranches(prev => {
+      const next = new Map(prev)
+      next.set(editingMessageId, {
+        snapshots: [...(prev.get(editingMessageId)?.snapshots ?? [currentSnapshots]), currentSnapshots],
+        activeIndex: (prev.get(editingMessageId)?.snapshots.length ?? 1),
+      })
+      return next
+    })
+
     const updatedMessages = messages.slice(0, messageIndex + 1)
     updatedMessages[messageIndex] = editedMsg
 
@@ -744,6 +802,20 @@ export function ChatCore({
     setSuggestion('')
 
     await handleSubmitWithMessages(updatedMessages as ChatUIMessage[])
+  }
+
+  const handleBranchSwitch = (messageId: string, delta: number) => {
+    const branch = messageBranches.get(messageId)
+    if (!branch) return
+    const newIndex = branch.activeIndex + delta
+    if (newIndex < 0 || newIndex >= branch.snapshots.length) return
+    const targetMessages = branch.snapshots[newIndex]
+    setMessages(targetMessages as ChatUIMessage[])
+    setMessageBranches(prev => {
+      const next = new Map(prev)
+      next.set(messageId, { ...branch, activeIndex: newIndex })
+      return next
+    })
   }
 
   const handleSubmitWithMessages = async (
@@ -983,6 +1055,9 @@ export function ChatCore({
                     key={message.id}
                     message={message}
                     onEdit={handleStartEdit}
+                    branchCount={(messageBranches.get(message.id)?.snapshots.length ?? 0) + 1}
+                    branchIndex={messageBranches.get(message.id)?.activeIndex ?? 0}
+                    onBranchSwitch={delta => handleBranchSwitch(message.id, delta)}
                   />
                 ) : (
                   <AssistantMessage
