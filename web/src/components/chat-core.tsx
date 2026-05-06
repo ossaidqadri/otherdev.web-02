@@ -292,8 +292,8 @@ function UserMessage({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <div className="flex justify-end items-end gap-2">
-        <div className="max-w-[95%] gap-2 sm:max-w-[85%] sm:gap-3 md:max-w-[80%] flex flex-col">
+      <div className="flex justify-end items-end gap-2 sm:gap-3">
+        <div className="max-w-[85%] gap-2 sm:gap-3 lg:max-w-4xl flex flex-col">
           <div className="flex flex-col gap-2">
             {imageParts.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-end">
@@ -339,7 +339,7 @@ function UserMessage({
           style={{ width: 'auto', height: 'auto' }}
         />
       </div>
-      <div className="flex items-center gap-0.5 mr-9 sm:mr-10">
+      <div className="flex items-center gap-0.5 mr-8 sm:mr-10">
         {branchCount > 1 && (
           <>
             <button
@@ -458,7 +458,7 @@ function AssistantMessage({
           className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
           style={{ width: 'auto', height: 'auto' }}
         />
-        <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
+        <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-4xl mx-auto flex flex-col">
           <div className="flex-1 space-y-3 min-w-0">
             {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
             {cleanedText && (
@@ -527,7 +527,7 @@ function AssistantMessage({
         className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
         style={{ width: 'auto', height: 'auto' }}
       />
-      <div className="w-full max-w-full gap-2 sm:gap-3 lg:max-w-5xl flex flex-col">
+      <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-4xl mx-auto flex flex-col">
         <div className="flex-1 space-y-2 min-w-0">
           {reasoning && <ReasoningCollapsible reasoning={reasoning} />}
           {cleanedText && (
@@ -572,7 +572,7 @@ function AttachmentChip({ file, onRemove }: { file: File; onRemove: () => void }
   }, [isImage, file])
 
   return (
-    <div className="relative flex group items-center gap-1.5 border rounded-t-xl pb-4 mb-[-10px] bg-accent px-2 py-1.5 text-xs text-accent-foreground">
+    <div className="relative flex group items-center gap-1.5 border rounded-t-xl pb-4 mb-2.5 bg-accent px-2 py-1.5 text-xs text-accent-foreground">
       {isImage && previewUrl ? (
         <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-background">
           <Image src={previewUrl} alt={file.name} fill className="object-contain" unoptimized />
@@ -1117,7 +1117,7 @@ export function ChatCore({
       <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 w-full max-w-3xl mx-auto pointer-events-none">
         <div className="space-y-3 pointer-events-auto">
           {inputError && (
-            <div className="rounded-t-lg bg-red-100 px-3 py-2 text-sm text-destructive flex items-center justify-between pb-4 mb-[-8px]">
+            <div className="rounded-t-lg bg-red-100 px-3 py-2 text-sm text-destructive flex items-center justify-between pb-4 mb-2">
               <span>{inputError}</span>
               <button
                 type="button"
@@ -1142,13 +1142,13 @@ export function ChatCore({
           )}
 
           {followUpSuggestions.length > 0 && (
-            <div className="flex flex-wrap gap-2 animate-in fade-in duration-300">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {followUpSuggestions.map(q => (
                 <button
                   key={q}
                   type="button"
                   onClick={() => applyFollowUp(q)}
-                  className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                  className="flex-shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground max-w-[200px] truncate"
                 >
                   {q}
                 </button>
