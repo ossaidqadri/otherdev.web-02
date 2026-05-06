@@ -7,36 +7,14 @@ interface MarkdownRendererProps {
   children: string
   /** Set to true while streaming to enable per-word animation */
   isAnimating?: boolean
-  /** Animation config, defaults to blurIn word-level */
-  animated?: boolean | { animation?: 'fadeIn' | 'blurIn' | 'slideUp'; duration?: number; easing?: string; sep?: 'word' | 'char' }
 }
 
-function autoLinkPhoneNumbers(text: string): string {
-  const phoneRegex = /(\+?\d{1,3}[\s-]?\d{3}[\s-]?\d{3}[\s-]?\d{4})/g
-  return text.replace(phoneRegex, match => {
-    const cleanNumber = match.replace(/[\s-]/g, '')
-    return `[${match}](tel:${cleanNumber})`
-  })
-}
-
-export function MarkdownRenderer({ children, isAnimating = false, animated = true }: MarkdownRendererProps) {
-  // Replace <br> and <br/> tags with double spaces + newline for proper markdown line breaks
-  let processedContent = children.replace(/<br\s*\/?>/gi, '  \n')
-  processedContent = autoLinkPhoneNumbers(processedContent)
-
-  const animationConfig = animated === true
-    ? { animation: 'blurIn' as const, duration: 150, easing: 'ease-out', sep: 'word' as const }
-    : animated === false
-    ? undefined
-    : animated
-
+export function MarkdownRenderer({ children, isAnimating = false }: MarkdownRendererProps) {
   return (
     <Streamdown
       plugins={{ code }}
-      animated={animationConfig}
       isAnimating={isAnimating}
       components={{
-        // Only override inline code — let @streamdown/code handle fenced code blocks
         inlineCode: ({ children }) => (
           <code className="bg-muted/50 px-1.5 py-0.5 rounded text-[0.875em] font-mono border border-border/50">
             {children}
@@ -99,7 +77,7 @@ export function MarkdownRenderer({ children, isAnimating = false, animated = tru
         ),
       }}
     >
-      {processedContent}
+      {children}
     </Streamdown>
   )
 }
