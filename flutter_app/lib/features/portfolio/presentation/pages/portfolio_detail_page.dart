@@ -44,7 +44,7 @@ class _WorkDetailBody extends StatelessWidget {
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (context, error, stack) => Container(
                   color: Colors.grey[300],
                   child: const Icon(Icons.image_not_supported, size: 48),
                 ),
@@ -75,7 +75,7 @@ class _WorkDetailBody extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: (item.media as List).length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (context, _) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final mediaUrl = Uri.parse(
                     '${Endpoints.baseUrl}${(item.media as List)[index]}',
@@ -86,7 +86,7 @@ class _WorkDetailBody extends StatelessWidget {
                       mediaUrl,
                       width: 280,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (context, error, stack) => Container(
                         width: 280,
                         color: Colors.grey[300],
                         child: const Icon(Icons.image_not_supported),
