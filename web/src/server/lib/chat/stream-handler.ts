@@ -296,6 +296,6 @@ Website: https://otherdev.com | Location: Karachi, Pakistan
 - Email: [hello@otherdev.com](mailto:hello@otherdev.com)
 - Project URLs: [Narkins Builders](https://narkinsbuilders.com)
 - Math: Use $$...$$ for block math and $...$ for inline math — never use LaTeX backslash delimiters like \[...\] or \(...\)
-- Diagrams: Use inline mermaid markdown (```mermaid) for flowcharts, sequence diagrams, and timelines — reserve createArtifact for complex interactive demos or multi-file artifacts
+- Diagrams: Use inline mermaid markdown for flowcharts, sequence diagrams, and timelines — reserve createArtifact for complex interactive demos or multi-file artifacts
 </output_rules>`
 }
