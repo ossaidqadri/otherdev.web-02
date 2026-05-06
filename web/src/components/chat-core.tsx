@@ -824,7 +824,7 @@ export function ChatCore({
       const next = new Map(prev)
       next.set(messageId, {
         snapshots: [...(prev.get(messageId)?.snapshots ?? [currentSnapshots]), currentSnapshots],
-        activeIndex: prev.get(messageId)?.snapshots.length ?? 1,
+        activeIndex: prev.get(messageId)?.snapshots.length ?? 0,
       })
       return next
     })
