@@ -11,12 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1.7
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk-version: 3.11.5
 
       - name: Install Flutter
-        uses: flutter-actions/setup-flutter@v4.2
+        uses: flutter-actions/setup-flutter@v4
         with:
           version: 3.41.9
 
@@ -52,12 +52,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1.7
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk-version: 3.11.5
 
       - name: Install Flutter
-        uses: flutter-actions/setup-flutter@v4.2
+        uses: flutter-actions/setup-flutter@v4
         with:
           version: 3.41.9
 
