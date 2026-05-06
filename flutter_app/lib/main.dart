@@ -82,7 +82,7 @@ class _DesktopManager with WindowListener, TrayListener {
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
-      title: 'otherdev',
+      title: 'otherdev chat',
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -275,7 +275,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'otherdev',
+      title: 'otherdev chat',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
