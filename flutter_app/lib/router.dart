@@ -7,8 +7,6 @@ import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/portfolio/presentation/pages/home_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_detail_page.dart';
-import 'features/blog/presentation/pages/blog_page.dart';
-import 'features/blog/presentation/pages/blog_detail_page.dart';
 import 'features/chat/presentation/pages/chat_page.dart';
 import 'features/contact/presentation/pages/contact_page.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
@@ -65,23 +63,6 @@ final router = GoRouter(
                 GoRoute(
                   path: 'work/:slug',
                   builder: (context, state) => PortfolioDetailPage(
-                    slug: state.pathParameters['slug']!,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // Blog
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/blog',
-              builder: (context, state) => const BlogPage(),
-              routes: [
-                GoRoute(
-                  path: ':slug',
-                  builder: (context, state) => BlogDetailPage(
                     slug: state.pathParameters['slug']!,
                   ),
                 ),

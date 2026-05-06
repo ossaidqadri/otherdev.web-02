@@ -28,7 +28,7 @@ class AppShell extends StatelessWidget {
           NavigationRail(
             selectedIndex: navigationShell.currentIndex,
             onDestinationSelected: (index) => _goBranch(index),
-            labelType: NavigationRailLabelType.all,
+            labelType: NavigationRailLabelType.none,
             extended: true,
             minExtendedWidth: 180,
             leading: Padding(
@@ -47,9 +47,9 @@ class AppShell extends StatelessWidget {
                 label: Text('Home'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.article_outlined),
-                selectedIcon: Icon(Icons.article),
-                label: Text('Blog'),
+                icon: Icon(Icons.work_outline),
+                selectedIcon: Icon(Icons.work),
+                label: Text('Work'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.chat_bubble_outline),
@@ -90,9 +90,9 @@ class AppShell extends StatelessWidget {
                 label: Text('Home'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.article_outlined),
-                selectedIcon: Icon(Icons.article),
-                label: Text('Blog'),
+                icon: Icon(Icons.work_outline),
+                selectedIcon: Icon(Icons.work),
+                label: Text('Work'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.chat_bubble_outline),
@@ -131,9 +131,9 @@ class AppShell extends StatelessWidget {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.article_outlined),
-            selectedIcon: Icon(Icons.article),
-            label: 'Blog',
+            icon: Icon(Icons.work_outline),
+            selectedIcon: Icon(Icons.work),
+            label: 'Work',
           ),
           NavigationDestination(
             icon: Icon(Icons.chat_bubble_outline),

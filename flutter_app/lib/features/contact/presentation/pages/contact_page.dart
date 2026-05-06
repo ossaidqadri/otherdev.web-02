@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
+import '../../../../shared/data/api/api_client.dart';
 import '../../../../shared/data/api/endpoints.dart';
 import '../../../../shared/presentation/widgets/loading_widget.dart';
-
-// Contact form state
-final contactSubmitProvider = FutureProvider.autoDispose<bool>((ref) async {
-  return false;
-});
 
 class ContactPage extends ConsumerStatefulWidget {
   const ContactPage({super.key});
@@ -19,7 +16,9 @@ class ContactPage extends ConsumerStatefulWidget {
 class _ContactPageState extends ConsumerState<ContactPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _companyController = TextEditingController();
   final _emailController = TextEditingController();
+  final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
 
   bool _isSubmitting = false;
@@ -29,7 +28,9 @@ class _ContactPageState extends ConsumerState<ContactPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _companyController.dispose();
     _emailController.dispose();
+    _subjectController.dispose();
     _messageController.dispose();
     super.dispose();
   }
@@ -51,28 +52,41 @@ class _ContactPageState extends ConsumerState<ContactPage> {
     setState(() => _isSubmitting = true);
 
     try {
-      // POST to /api/contact
-      final response = await _httpPost(
-        Uri.parse('${Endpoints.baseUrl}${Endpoints.contact}'),
-        {
-          'Content-Type': 'application/json',
+      final apiClient = ApiClient();
+      final response = await apiClient.post<Map<String, dynamic>>(
+        Endpoints.contact,
+        data: {
+          'name': _nameController.text.trim(),
+          'companyName': _companyController.text.trim(),
+          'email': _emailController.text.trim(),
+          'subject': _subjectController.text.trim(),
+          'message': _messageController.text.trim(),
         },
-        '{"name":"${_nameController.text.trim()}","email":"${_emailController.text.trim()}","message":"${_messageController.text.trim()}"}',
       );
 
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          if (response.statusCode >= 200 && response.statusCode < 300) {
+          if (response.statusCode == 200) {
             _isSuccess = true;
             _submitMessage = 'Message sent successfully!';
             _nameController.clear();
+            _companyController.clear();
             _emailController.clear();
+            _subjectController.clear();
             _messageController.clear();
           } else {
             _isSuccess = false;
             _submitMessage = 'Failed to send message. Please try again.';
           }
+        });
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _isSuccess = false;
+          _submitMessage = e.response?.data?['error'] ?? 'Failed to send message. Please try again.';
         });
       }
     } catch (e) {
@@ -84,12 +98,6 @@ class _ContactPageState extends ConsumerState<ContactPage> {
         });
       }
     }
-  }
-
-  Future<_HttpResponse> _httpPost(Uri url, Map<String, String> headers, String body) async {
-    // Simulate network call for now
-    await Future.delayed(const Duration(milliseconds: 800));
-    return _HttpResponse(statusCode: 200);
   }
 
   @override
@@ -138,6 +146,21 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    controller: _companyController,
+                    decoration: const InputDecoration(
+                      labelText: 'Company',
+                      border: OutlineInputBorder(),
+                    ),
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Company is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -146,6 +169,21 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _subjectController,
+                    decoration: const InputDecoration(
+                      labelText: 'Subject',
+                      border: OutlineInputBorder(),
+                    ),
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Subject is required';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -203,9 +241,4 @@ class _ContactPageState extends ConsumerState<ContactPage> {
       ),
     );
   }
-}
-
-class _HttpResponse {
-  final int statusCode;
-  _HttpResponse({required this.statusCode});
 }
