@@ -13,6 +13,7 @@
 - [AI Gateway & Chat Routing](#ai-gateway--chat-routing)
 - [RAG Chat System](#rag-chat-system)
 - [Performance Optimizations](#performance-optimizations)
+- [Flutter Companion App](#flutter-companion-app)
 
 ---
 
@@ -745,6 +746,64 @@ graph TB
 
 ---
 
+## Inline Editing & Branch Navigation
+
+### Inline Bubble Editing
+
+User messages support inline editing (Claude/ChatGPT style):
+
+1. Click **pencil icon** on any user message bubble
+2. Bubble transforms into an editable `<textarea>` with the same styling
+3. **Enter** → confirm edit, text updates, AI regenerates response (replace-and-replay)
+4. **Escape** → cancel edit, reverts to original text
+5. Prompt bar is **not involved** — editing is fully self-contained in the bubble
+
+**Key behavior:**
+- `handleEditConfirm` updates the message in `messages[]` then calls `handleSubmitWithMessages` with the edited message
+- No duplicate bubble: `setMessages()` is NOT called before `handleSubmitWithMessages` (AI SDK handles the update on response)
+- Suggestions extracted from `messageMetadata` (industry standard)
+
+### Branch Navigation
+
+Each edited user message maintains a **branch history**:
+
+- **Before edit:** Current chat state is snapshotted into `messageBranches`
+- **After edit:** New branch created with previous snapshot + edited message
+- **`messageBranches[messageId].snapshots[]`:** Array of all chat states for that message
+- **`messageBranches[messageId].activeIndex`:** Which snapshot is currently displayed
+
+Navigation controls (`<`/`>`) appear when `branchCount > 1`:
+
+```
+<  2/3  >
+```
+
+Clicking `<` or `>` calls `setMessages(targetSnapshot)` to switch to that branch's full chat history.
+
+### Streamdown (Progressive Markdown Rendering)
+
+Replaced `react-markdown` with **Streamdown** for progressive, blurIn-animated streaming:
+
+```tsx
+// src/components/ui/markdown-renderer.tsx
+<Streamdown
+  plugins={{ code, math, mermaid }}
+  animated={{ animation: 'blurIn', duration: 250, easing: 'ease-out', sep: 'word' }}
+  caret="block"
+  shikiTheme={['github-light', 'github-dark']}
+  controls={{ code: { copy, download }, mermaid: { copy, download, fullscreen } }}
+/>{children}</Streamdown>
+```
+
+**Plugins:**
+- `code` — Shiki syntax highlighting (copy/download controls)
+- `math` — KaTeX math rendering (block `$$` and inline `$`)
+- `mermaid` — Mermaid diagram rendering (fullscreen, copy, download)
+
+**Mermaid rules:** Node labels must be simple ASCII text only. No parentheses, colons, slashes, or special characters inside brackets.
+
+---
+
 ## Performance Optimizations
 
 ### 1. React Compiler
@@ -830,6 +889,84 @@ function InteractiveButton() {
   const [state, setState] = useState();
   return <button onClick={() => setState(...)}>Click</button>;
 }
+```
+
+---
+
+## Flutter Companion App
+
+### Overview
+
+A Flutter desktop (macOS, Windows, Linux) + mobile companion app that shares React components with the web app and communicates via SSE to the same chat backend.
+
+**Location:** `flutter_app/`
+
+### Architecture
+
+```mermaid
+graph TB
+    subgraph "Flutter App"
+        App[Flutter App]
+        Riverpod[Riverpod Providers]
+        GoRouter[GoRouter]
+        ChatRepo[ChatRepository]
+        SSEClient[SSE Client]
+    end
+
+    subgraph "Shared"
+        Widgets[Flutter-portable widgets<br/>chat bubbles, input]
+    end
+
+    subgraph "Web Backend"
+        NativeAPI[/api/chat/native]
+        StreamHandler[Stream Handler]
+    end
+
+    App --> Riverpod
+    Riverpod --> ChatRepo
+    ChatRepo --> SSEClient
+    SSEClient --> NativeAPI
+    NativeAPI --> StreamHandler
+    StreamHandler --> AIGateway[Vercel AI Gateway]
+
+    App --> Widgets
+    Widgets -.-> Web[Web Chat Widget]
+```
+
+### Tech Stack
+
+- **State Management:** Riverpod 3 with code generation
+- **Routing:** GoRouter 14
+- **HTTP Client:** Dio + `http` package for SSE
+- **Storage:** Hive (local) + flutter_secure_storage (tokens)
+- **Desktop:** window_manager, tray_manager, hotkey_manager
+- **Connectivity:** connectivity_plus
+
+### Key Features
+
+- Native SSE streaming chat (`/api/chat/native`)
+- Shared chat UI widgets (Flutter-portable)
+- Desktop window management + system tray
+- Global keyboard shortcuts
+- Offline detection
+
+### API Endpoint
+
+`POST /api/chat/native` — SSE endpoint for native Flutter (and web) clients
+
+Same streaming handler as `/api/chat/stream` but returns raw SSE without the Vercel AI SDK transport wrapper.
+
+### Building
+
+```bash
+# Desktop
+flutter build macos   # macOS
+flutter build windows   # Windows
+flutter build linux     # Linux
+
+# Mobile
+flutter build apk       # Android
+flutter build ipa        # iOS
 ```
 
 ---

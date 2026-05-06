@@ -53,11 +53,13 @@ src/components/
 ├── project-card-hover.tsx     # Interactive hover state handler
 ├── contact-dialog.tsx         # Contact form modal
 ├── chat-widget.tsx            # Floating chat button + panel
-├── chat-core.tsx              # Shared chat logic (used by widget + Loom page)
-├── artifact-renderer.tsx      # Renders HTML/CSS/JS artifacts from AI
-├── otherdev-loom-thread.tsx   # Loom page wrapper with artifact panel
-├── providers.tsx              # React Query provider (TRPCProvider legacy naming)
-└── voice-waveform.tsx         # Audio recording waveform display
+│   ├── chat-core.tsx           # Shared chat logic (widget + Loom page)
+│   ├── user-message.tsx        # User message bubble (inline editing, branch nav)
+│   ├── assistant-message.tsx   # Assistant message with Streamdown rendering
+│   ├── artifact-renderer.tsx   # Renders HTML/CSS/JS artifacts from AI
+│   ├── otherdev-loom-thread.tsx # Loom page wrapper with artifact panel
+│   ├── providers.tsx           # React Query provider (formerly TRPCProvider)
+│   └── voice-waveform.tsx      # Audio recording waveform display
 ```
 
 ---
@@ -747,13 +749,15 @@ Floating chat button (bottom-right) that opens a full chat panel. Uses AI SDK `u
 
 - Floating chat button (bottom-right, hidden on `/loom` route)
 - Full-screen responsive modal
-- Message history with chat ID persistence
+- Message history with chat ID persistence (localStorage)
 - Streaming responses via `/api/chat/stream`
 - Voice recording (microphone button)
 - File attachments (up to 50MB)
-- Artifact rendering (HTML/CSS/JS)
-- Markdown rendering with code syntax highlighting (Shiki)
-- Suggested prompts
+- **Streamdown** markdown rendering (progressive blurIn, Shiki code, KaTeX math, Mermaid diagrams)
+- **Inline bubble editing** — click pencil icon → textarea, Enter to regenerate, Escape to cancel
+- **Branch navigation** — `<`/`>` buttons when multiple edits exist on same message
+- **Suggestion pills** — follow-up questions above prompt bar (extracted from `messageMetadata`)
+- Artifact rendering (HTML/CSS/JS via `createArtifact` tool)
 - Auto-scroll behavior
 - Upstash Redis rate limiting (10 req/min)
 
@@ -828,6 +832,29 @@ interface Message {
   createdAt?: string;
 }
 ```
+
+#### MarkdownRenderer (`src/components/ui/markdown-renderer.tsx`)
+
+Streamdown wrapper for progressive, animated markdown streaming. Replaced `react-markdown`.
+
+```tsx
+<Streamdown
+  plugins={{ code, math, mermaid }}
+  animated={{ animation: 'blurIn', duration: 250, easing: 'ease-out', sep: 'word' }}
+  caret="block"
+  shikiTheme={['github-light', 'github-dark']}
+  controls={{ code: { copy, download }, mermaid: { copy, download, fullscreen } }}
+>
+  {markdownContent}
+</Streamdown>
+```
+
+**Plugins:**
+- `code` — Shiki syntax highlighting, copy + download buttons
+- `math` — KaTeX block (`$$`) and inline (`$`) math
+- `mermaid` — Diagram rendering with fullscreen + copy + download
+
+**Mermaid rules:** Node labels must be plain ASCII text. No parentheses `()`, em-dashes `—`, colons `:`, slashes `/` inside brackets.
 
 ---
 

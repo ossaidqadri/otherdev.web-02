@@ -6,6 +6,7 @@
 
 - [Overview](#overview)
 - [Chat API (`/api/chat/stream`)](#chat-api-apichatstream)
+- [Native Chat API (`/api/chat/native`)](#native-chat-api-apichatnative)
 - [Contact API (`/api/contact`)](#contact-api-apicontact)
 - [Transcribe API (`/api/transcribe`)](#transcribe-api-apitranscribe)
 - [Process Document API (`/api/process-document`)](#process-document-api-apiprocess-document)
@@ -20,7 +21,8 @@ The application exposes four API routes, all under `/api/`:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/chat/stream` | Streaming RAG chat with AI Gateway |
+| POST | `/api/chat/stream` | Streaming RAG chat with AI Gateway (web) |
+| POST | `/api/chat/native` | Streaming chat via SSE (Flutter + web) |
 | POST | `/api/contact` | Contact form submission |
 | POST | `/api/transcribe` | Audio transcription via Groq Whisper |
 | POST | `/api/process-document` | PDF/image OCR via Mistral |
@@ -193,6 +195,59 @@ CHAT_HISTORY_TTL_SECONDS=1209600
 RAG_RETRIEVAL_CACHE_TTL_SECONDS=21600
 CHAT_RESPONSE_CACHE_TTL_SECONDS=86400
 ```
+
+---
+
+## Native Chat API (`/api/chat/native`)
+
+**Location:** `src/app/api/chat/native/route.ts`
+
+SSE endpoint for native Flutter and web clients. Same streaming handler as `/api/chat/stream` but returns raw SSE without the Vercel AI SDK `useChat` transport wrapper.
+
+### Request Format
+
+```
+POST /api/chat/native
+```
+
+**Headers:**
+- `Content-Type: application/json`
+
+**Query Parameters:**
+- `key` — Auth key (required; `EventSource` cannot set custom headers)
+
+**Body:**
+```json
+{
+  "id": "chat-id-uuid",
+  "message": { "role": "user", "parts": [{ "type": "text", "text": "Hello" }] },
+  "messages": [],
+  "supportsArtifacts": true,
+  "trigger": "submit-user-message"
+}
+```
+
+### Response Format
+
+Raw SSE stream — each event is `data: {...}` JSON:
+
+```json
+{"content":"Hello"}
+{"content":" world"}
+{"type":"finish","suggestions":["Ask about projects","Try our contact form"]}
+```
+
+On error:
+```json
+{"error":"Too many requests. Please try again later."}
+```
+
+### Key Features
+
+- **Tool-driven routing:** Model decides whether to call `retrieveKnowledge`, `tavilySearch`, or `createArtifact`
+- **`messageMetadata` suggestions:** Follow-up suggestions sent via `finish` event metadata (industry standard)
+- **`trigger: 'edit-message'`:** Causes AI to regenerate response from edited user message (replace-and-replay)
+- Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After`
 
 ---
 
