@@ -4,10 +4,7 @@
 
 A modern portfolio and agency website showcasing otherdev's work - a full-service web development and design studio based in Karachi City, specializing in fashion, design, and enterprise digital solutions.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.1-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.2-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8)](https://tailwindcss.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=flat-square&logo=next.js&logoColor=ffffff&labelColor=ffffff)](https://nextjs.org/) [![React](https://img.shields.io/badge/React-19.2-61dafb?style=flat-square&logo=react&logoColor=ffffff&labelColor=ffffff)](https://reactjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=ffffff&labelColor=ffffff)](https://www.typescriptlang.org/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8?style=flat-square&logo=tailwindcss&logoColor=ffffff&labelColor=ffffff)](https://tailwindcss.com/)
 
 ## Overview
 
