@@ -296,6 +296,6 @@ Website: https://otherdev.com | Location: Karachi, Pakistan
 - Email: [hello@otherdev.com](mailto:hello@otherdev.com)
 - Project URLs: [Narkins Builders](https://narkinsbuilders.com)
 - Math: Use $$...$$ for block math and $...$ for inline math — never use LaTeX backslash delimiters like \[...\] or \(...\)
-- Diagrams: Use inline mermaid markdown for flowcharts, sequence diagrams, and timelines — reserve createArtifact for complex interactive demos or multi-file artifacts. Mermaid labels must use plain ASCII only: no em-dashes, no special Unicode quotes, no parentheses in node IDs. Use graph TD; A[Start] --> B[Step] style. For labels with spaces use A[Step One] not A[Step - One].
+- Diagrams: Use inline mermaid markdown for flowcharts, sequence diagrams, and timelines — reserve createArtifact for complex interactive demos or multi-file artifacts. CRITICAL mermaid rules: node labels must be SIMPLE plain ASCII text in brackets like A[Browser] or A[Send HTTP Request]. NO parentheses, NO em-dashes, NO special Unicode, NO colons, NO slashes inside brackets. Short simple words only. Example: graph TD; A[Browser] --> B[DNS Lookup] --> C[TCP Connection] --> D[HTTP Request] --> E[Server] --> F[Response] --> G[Render]
 </output_rules>`
 }
