@@ -1357,29 +1357,35 @@ definitions:
 
 ### Phase 2: Core Portfolio Features
 
+> **Blog deferred per user request. Work feature complete.**
+
+- [x] **Work list page**: Adaptive grid — use `flutter-build-responsive-layout`
+- [x] **Work detail page**: Manual UI, providers via `flutter-apply-architecture-best-practices`
+- [x] **Work list provider**: `workListProvider` via Riverpod `@riverpod`
+- [x] **Work detail provider**: `workDetailProvider(slug)` family via Riverpod `@riverpod`
+- [x] **WorkItemModel**: Freezed + json_serializable, matches Next.js `/api/work` shape
+- [x] **WorkRepository**: REST access to `/api/work` and `/api/work/:slug`
+- [x] **Endpoints base URL**: Updated to `https://otherdev.com`
 - [ ] **Home page**: Hero + intro (manual UI), providers via `flutter-apply-architecture-best-practices`
-- [ ] **Blog list page**: Use `flutter-apply-architecture-best-practices` for providers + GoRouter routing
-- [ ] **Blog detail page**: Markdown rendering (manual), state via `flutter-apply-architecture-best-practices`
-- [ ] **Work list page**: Adaptive grid — use `flutter-build-responsive-layout`
-- [ ] **Work detail page**: Manual UI, providers via `flutter-apply-architecture-best-practices`
 - [ ] **About page**: Manual (static content)
 - [ ] **Contact form page**: Use `flutter-use-http-package` for REST submission, manual validation
 - [ ] **Offline detection**: Manual (connectivity_plus)
 - [ ] **Loading & error states**: `flutter-fix-layout-issues` pattern for shared error/loading widgets
 - [ ] **Widget tests**: Use `flutter-add-widget-test` for blog cards, work cards, contact form
 - [ ] **Integration tests**: Use `flutter-add-integration-test` for portfolio navigation flow
-- [ ] **Golden tests**: Use `flutter-add-widget-preview` to verify UI across themes/screens
 - [ ] **Responsive layout**: Use `flutter-build-responsive-layout` for mobile/tablet/desktop breakpoints
-- [ ] **JSON models**: Use `flutter-implement-json-serialization` for BlogPost, WorkItem models
 - [ ] **Static analysis**: Run `dart-run-static-analysis` before commits
 - [ ] **Test on real backend**: Verify data loading via `mcp__flutter__run` local dev
 
+**Blog deferred — skipped per user request.**
+
 **Success Metrics:**
-- [ ] All portfolio pages render
-- [ ] Blog/Work data loads from API
+- [x] Work list renders in responsive grid (1/2/3 col at 600/800 breakpoints)
+- [x] Work detail page loads all fields (title, year, description, image, media gallery)
+- [x] API calls hit `https://otherdev.com/api/work` and `https://otherdev.com/api/work/:slug`
+- [x] Images load correctly via `Endpoints.baseUrl` + relative path
 - [ ] Contact form submits
 - [ ] Offline mode detected
-- [ ] Navigation works
 
 ---
 
