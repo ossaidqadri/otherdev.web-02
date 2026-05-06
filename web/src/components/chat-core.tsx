@@ -832,11 +832,10 @@ export function ChatCore({
     const updatedMessages = messages.slice(0, messageIndex + 1)
     updatedMessages[messageIndex] = editedMsg
 
-    setMessages(updatedMessages)
     setEditingMessageId(null)
     setSuggestion('')
 
-    await handleSubmitWithMessages(updatedMessages)
+    await handleSubmitWithMessages(updatedMessages, editedMsg)
   }
 
   const handleRegenerate = async (message: UIMessage) => {
@@ -885,11 +884,18 @@ export function ChatCore({
 
     const lastMsg = editedUserMsg ?? msgs[msgs.length - 1]
 
-    if (fileParts.length > 0 || value) {
+    const messageText =
+      editedUserMsg?.parts
+        ?.filter(p => p.type === 'text')
+        .map(p => p.text)
+        .join(' ')
+        .trim() ?? value
+
+    if (fileParts.length > 0 || messageText) {
       sendMessage(
         {
           role: 'user',
-          parts: [...fileParts, ...(value ? [{ type: 'text' as const, text: value }] : [])],
+          parts: [...fileParts, ...(messageText ? [{ type: 'text' as const, text: messageText }] : [])],
         },
         {
           body: {
