@@ -66,6 +66,10 @@ type ChatDataParts = {
 // Custom UIMessage type with our data parts
 type ChatUIMessage = UIMessage<unknown, ChatDataParts>
 
+type MessageMetadata = {
+  suggestions?: string[]
+}
+
 type MessageBranchState = {
   snapshots: ChatUIMessage[][]
   activeIndex: number
@@ -624,6 +628,7 @@ export function ChatCore({
     null
   )
   const [suggestion, setSuggestion] = useState('')
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([])
   const [inputValue, setInputValue] = useState('')
   const [inputError, setInputError] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
@@ -695,12 +700,7 @@ export function ChatCore({
       }
     },
     onData(dataPart) {
-      if (dataPart.type === 'data-suggestion') {
-        const parsed = suggestionDataSchema.safeParse(dataPart.data)
-        if (parsed.success && parsed.data.suggestion) {
-          setSuggestion(parsed.data.suggestion)
-        }
-      }
+      // Suggestions are now sent via messageMetadata (industry standard) — no data part needed
     },
   })
 
@@ -708,6 +708,7 @@ export function ChatCore({
   const _handleClear = useCallback(() => {
     setMessages([])
     setSuggestion('')
+    setFollowUpSuggestions([])
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
@@ -715,6 +716,15 @@ export function ChatCore({
       _onClear()
     }
   }, [setMessages, setSuggestion, _onClear])
+
+  // Industry standard: read follow-up suggestions from last assistant message metadata
+  useEffect(() => {
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant')
+    const suggestions = (lastAssistant?.metadata as MessageMetadata | undefined)?.suggestions
+    if (suggestions?.length) {
+      setFollowUpSuggestions(suggestions)
+    }
+  }, [messages])
 
   const { showButton, scrollToBottom } = useScrollToBottom(contentRef)
 
@@ -954,10 +964,9 @@ export function ChatCore({
     }
   }
 
-  const applySuggestion = () => {
-    if (!suggestion) return
-    setInputValue(suggestion)
-    setSuggestion('')
+  const applyFollowUp = (text: string) => {
+    setInputValue(text)
+    setFollowUpSuggestions([])
     inputRef.current?.focus()
   }
 
@@ -977,7 +986,7 @@ export function ChatCore({
 
     inputElement.addEventListener('keydown', handleKeyDown)
     return () => inputElement.removeEventListener('keydown', handleKeyDown)
-  }, [suggestion])
+  }, [followUpSuggestions])
 
   useEffect(() => {
     scrollToBottom()
@@ -992,7 +1001,7 @@ export function ChatCore({
 
   const isEditing = editingMessageId !== null
 
-  const placeholder = suggestion || 'Type your message...'
+  const placeholder = 'Type your message...'
 
   return (
     <div className={cn('relative h-full flex flex-col bg-background', className)}>
@@ -1123,13 +1132,32 @@ export function ChatCore({
               </button>
             </div>
           )}
-          {attachments.map((file, index) => (
-            <AttachmentChip
-              key={`${file.name}-${index}`}
-              file={file}
-              onRemove={() => removeAttachment(index)}
-            />
-          ))}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((file, index) => (
+                <AttachmentChip
+                  key={`${file.name}-${index}`}
+                  file={file}
+                  onRemove={() => removeAttachment(index)}
+                />
+              ))}
+            </div>
+          )}
+
+          {followUpSuggestions.length > 0 && (
+            <div className="flex flex-wrap gap-2 animate-in fade-in duration-300">
+              {followUpSuggestions.map(q => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => applyFollowUp(q)}
+                  className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <PromptInput className="relative rounded-2xl border-border shadow-sm pointer-events-auto">
@@ -1151,12 +1179,7 @@ export function ChatCore({
             <PromptInputTextarea
               ref={inputRef}
               placeholder={placeholder}
-              className={cn(
-                'font-sans text-sm sm:text-base',
-                suggestion &&
-                  !inputValue &&
-                  'placeholder:text-transparent placeholder:md:text-muted-foreground'
-              )}
+              className="font-sans text-sm sm:text-base"
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={e => {
@@ -1182,15 +1205,6 @@ export function ChatCore({
                 Submit edit
               </button>
             </div>
-          )}
-          {suggestion && !inputValue && (
-            <button
-              type="button"
-              onClick={applySuggestion}
-              className="absolute inset-2 bottom-auto h-[44px] pl-3 pt-2 font-sans text-sm text-muted-foreground hover:opacity-80 transition-opacity md:hidden overflow-hidden text-left"
-            >
-              {suggestion}
-            </button>
           )}
           <PromptInputActions className="w-full justify-between">
             <div className="flex gap-2">
