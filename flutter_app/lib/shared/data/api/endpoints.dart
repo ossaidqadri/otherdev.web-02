@@ -5,10 +5,10 @@ class Endpoints {
 
   // Base URL — update for local dev vs production
   // Local: 'http://localhost:3000'
-  // Production: 'https://otherdev.co'
+  // Production: 'https://otherdev.com'
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:3000',
+    defaultValue: 'https://otherdev.com',
   );
 
   // Blog
