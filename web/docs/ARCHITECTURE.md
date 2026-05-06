@@ -36,19 +36,21 @@ Other Dev is a modern, full-stack web application built with Next.js 16.2.1, lev
 
 ```mermaid
 graph TB
+    %% ── Client Layer ───────────────────────────────────────────────────────────
     subgraph "Client Layer"
         Browser[Browser/Client]
         RSC[React Server Components]
         RCC[React Client Components]
     end
 
+    %% ── Application Layer ────────────────────────────────────────────────────
     subgraph "Application Layer"
         NextJS[Next.js 16 App Router]
         APIRoutes[API Routes]
-        ChatRouting[Chat Router]
-        RAG[RAG Pipeline]
+        ChatRuntime[Chat Runtime<br/>streamText + tools]
     end
 
+    %% ── Data Layer ───────────────────────────────────────────────────────────
     subgraph "Data Layer"
         Payload[Payload CMS Canvas]
         Qdrant[Qdrant Vector DB]
@@ -57,9 +59,11 @@ graph TB
         Gmail[Gmail SMTP]
     end
 
-    subgraph "External Services"
-        AIGateway[Vercel AI Gateway]
-        Cohere[Cohere (embed/rerank)]
+    %% ── External Services ─────────────────────────────────────────────────────
+    subgraph "AI Services"
+        Gateway[Vercel AI Gateway<br/>Groq + Mistral + Cerebras]
+        CohereEmbed[Cohere embed-v4.0<br/>via AI Gateway]
+        CohereRerank[Cohere rerank-v4-fast<br/>via AI Gateway]
         Tavily[Tavily Search]
     end
 
@@ -67,30 +71,33 @@ graph TB
     Browser --> RSC
     Browser --> RCC
 
-    RSC --> NextJS
     RCC --> APIRoutes
-    RCC --> ChatRouting
+    APIRoutes --> ChatRuntime
 
-    ChatRouting --> RAG
-    RAG --> Qdrant
-    RAG --> AIGateway
-    RAG --> Cohere
+    ChatRuntime --> Gateway
+    ChatRuntime --> CohereEmbed
+    CohereEmbed --> Qdrant
+    Qdrant --> CohereRerank
+    CohereRerank -.->|context to model| Gateway
+
+    ChatRuntime --> Tavily
+    Tavily -.->|web results to model| Gateway
 
     APIRoutes --> Payload
     APIRoutes --> Sheets
     APIRoutes --> Gmail
 
-    ChatRouting --> Tavily
-
-    AIGateway --> GroqGroq[Groq LLM]
-    AIGateway --> Mistral[Mistral LLM]
+    Gateway --> GroqGroq[Groq LLM]
+    Gateway --> Mistral[Mistral LLM]
 
     style Browser fill:#e1f5ff
     style NextJS fill:#fff4e1
     style APIRoutes fill:#ffe1f5
-    style RAG fill:#e1ffe4
+    style ChatRuntime fill:#e1ffe4
     style Qdrant fill:#f5e1ff
-    style AIGateway fill:#ffe8cc
+    style Gateway fill:#ffe8cc
+    style CohereEmbed fill:#e1ffe4
+    style CohereRerank fill:#e1ffe4
 ```
 
 ---
@@ -154,26 +161,39 @@ src/components/
 
 ```mermaid
 graph LR
-    Client[Client Code] -->|POST| Chat[/api/chat/stream]
+    Client[Client] -->|POST| Chat[/api/chat/stream]
+    Client -->|POST| Native[/api/chat/native]
     Client -->|POST| Contact[/api/contact]
     Client -->|POST| Transcribe[/api/transcribe]
     Client -->|POST| Process[/api/process-document]
 
     Chat --> StreamHandler[Stream Handler]
+    Native --> StreamHandler
     Contact --> Sheets[Google Sheets]
     Contact --> Gmail[Gmail SMTP]
     Transcribe --> GroqWhisper[Groq Whisper]
     Process --> MistralOCR[Mistral OCR]
 
-    StreamHandler --> ChatRouting[Chat Router]
-    StreamHandler --> RateLimit[Upstash Rate Limit]
-    ChatRouting --> RAG[RAG Pipeline]
-    ChatRouting --> Tavily[Tavily Search]
+    StreamHandler --> LLM[LLM<br/>toolChoice auto]
+    LLM --> TK[retrieveKnowledge]
+    LLM --> TV[tavilySearch]
+    LLM --> TA[createArtifact]
+
+    TK --> Embed[Cohere embed-v4.0]
+    Embed --> Qdrant[Qdrant]
+    Qdrant --> Rerank[Cohere rerank-v4-fast]
+    Rerank -.->|to model| LLM
+    TV -.->|to model| LLM
 
     style Client fill:#e1f5ff
     style StreamHandler fill:#ffe1f5
-    style RateLimit fill:#fff4e1
-    style ChatRouting fill:#e1ffe4
+    style LLM fill:#ffe8cc
+    style TK fill:#e1ffe4
+    style TV fill:#ffe8cc
+    style TA fill:#f5e1ff
+    style Embed fill:#e1ffe4
+    style Qdrant fill:#f5e1ff
+    style Rerank fill:#e1ffe4
 ```
 
 **Directory Structure:**
@@ -304,53 +324,45 @@ sequenceDiagram
     participant API as /api/chat/stream
     participant RL as Upstash Rate Limit
     participant Cache as Upstash Redis
-    participant Routing as Chat Router
-    participant Embed as Cohere Embeddings
-    participant Qdrant as Qdrant
-    participant Rerank as Cohere Rerank
-    participant Gateway as Vercel AI Gateway
+    participant LLM as LLM<br/>(toolChoice auto)
 
     User->>Widget: Type message & send
-    Widget->>API: POST { messages: [...], chatId }
+    Widget->>API: POST { messages: [...] }
     API->>RL: Check rate limit
     RL-->>API: Allowed
 
     API->>Cache: Load chat history
     Cache-->>API: Previous messages
 
-    API->>Routing: classifyChatRoute(query)
-    Routing-->>API: route: "otherdev_rag"
+    API->>LLM: streamText(model, tools, messages)
 
-    alt RAG Path
-        API->>Embed: generateEmbedding(query)
-        Embed-->>API: queryVector (1536-dim)
+    alt Model calls retrieveKnowledge
+        LLM->>Embed: generateEmbedding(query)
+        Embed-->>LLM: queryVector (1536-dim)
 
-        API->>Qdrant: searchSimilarDocuments(queryVector, topK=3x)
-        Qdrant-->>API: initialResults[]
+        LLM->>Qdrant: searchSimilarDocuments(queryVector, topK=3x)
+        Qdrant-->>LLM: initialResults[]
 
-        API->>Rerank: rerankDocuments(initialResults, topN=5)
-        Rerank-->>API: rerankedResults[]
+        LLM->>Rerank: rerankDocuments(initialResults, topN=5)
+        Rerank-->>LLM: rerankedResults[]
 
-        API->>Cache: setCachedRetrievalContext(query, context)
-    else General Chat
-        API->>Routing: tavilySearchTool(query)
-        Routing-->>API: webResults[]
+        Note over LLM: Tool result passed back to model<br/>with retrieved context
+    else Model calls tavilySearch
+        LLM->>Tavily: tavilySearch(query)
+        Tavily-->>LLM: webResults[]
+
+        Note over LLM: Web results passed back to model
+    else No tool calls
+        Note over LLM: Direct response (conversational, acknowledgments)
     end
 
-    API->>API: Build system prompt with context
-    API->>Gateway: streamText(model, messages)
-    Gateway-->>API: SSE stream
-
-    API->>Cache: saveChatMessages(chatId, updatedMessages)
-
     loop Stream chunks
-        Gateway-->>API: SSE chunk
-        API-->>Widget: data: {"content":"..."}
+        LLM-->>Widget: SSE chunk { content: "..." }
         Widget->>User: Display token
     end
 
-    Gateway-->>API: [DONE]
-    API-->>Widget: data: [DONE]
+    LLM-->>Widget: [DONE]
+    API->>Cache: saveChatMessages(chatId, updatedMessages)
 ```
 
 ### Contact Form Submission Flow
@@ -579,37 +591,35 @@ export function getVisionModel() {
 | Fast | `groq/gpt-oss-120b` | `cerebras/qwen-3-235b-a22b-instruct-2507` | `groq/qwen3-32b` |
 | Vision | `mistral/pixtral-large` | `groq/llama-4-scout-17b-16e-instruct` | — |
 
-### Chat Routing (4-Category Classifier)
+### Tool-Driven Architecture (no pre-classification)
 
-**Location:** `src/server/lib/chat-routing.ts`
-
-```typescript
-export type ChatRoute = 'otherdev_rag' | 'otherdev_no_rag' | 'general_chat' | 'clarify'
-
-// Domain keywords: otherdev, founders, oussaid, kabeer, projects, agency, e-commerce, etc.
-// Non-domain keywords: war, politics, crypto, sports, weather, etc.
-
-export function classifyChatRoute(rawQuery: string, queryQuality: QueryQuality): ChatRouteDecision {
-  // Returns: route, confidence, reason, domainHits, nonDomainHits
-}
-
-// Route decisions:
-// - otherdev_rag: 2+ domain keywords, no non-domain → full RAG context
-// - otherdev_no_rag: 1 domain keyword, no non-domain → base facts only
-// - general_chat: non-domain keywords OR conversational → Tavily web search
-// - clarify: mixed signals (2+ domain + non-domain + has "otherdev" brand)
-```
-
-**Query Quality Detection:**
+The LLM decides at runtime which tool to call via `toolChoice: 'auto'`. There is no pre-flight query classification.
 
 ```typescript
-export function detectQueryQuality(query: string): QueryQuality {
-  // - isLowQuality: < 3 tokens, repeated words, or purely conversational
-  // - isConversational: "ok", "thanks", "hi", "sure", etc.
-  // - hasRepeatedWords: unique tokens < 60% of total
-  // - needsArtifact: "build", "create", "make", "design", etc.
-}
+// src/server/lib/chat/stream-handler.ts
+const result = streamText({
+  model: gateway(selectedModelId),
+  system: getSystemPrompt(),
+  messages: modelMessages,
+  toolChoice: 'auto',   // LLM decides — no pre-classification
+  tools: {
+    retrieveKnowledge: retrieveKnowledgeTool,
+    tavilySearch: tavilySearchTool,
+    ...(supportsArtifacts ? { createArtifact: createArtifactTool } : {}),
+  },
+})
 ```
+
+**Three tool definitions:**
+- `retrieveKnowledgeTool` → Cohere embed-v4.0 → Qdrant → Cohere rerank-v4-fast → context to model
+- `tavilySearchTool` → Tavily web search → results to model
+- `createArtifactTool` → returns HTML artifact data to model (optional, gated by `supportsArtifacts`)
+
+**System prompt** tells the model when to use each tool:
+- Use `retrieveKnowledge` for Other Dev domain questions (projects, services, team)
+- Use `tavilySearch` for general knowledge and current events
+- Use `createArtifact` for building interactive web content
+- No tools for conversational acknowledgments ("ok", "thanks")
 
 ### Rate Limiting (Upstash Redis)
 
@@ -662,49 +672,52 @@ const contactRatelimit = new Ratelimit({
 ```mermaid
 graph TB
     subgraph "Knowledge Base"
-        KB[Knowledge Documents<br/>src/lib/knowledge-base.ts]
-        Ingest[Ingest Script<br/>scripts/ingest-documents.ts]
+        KB[Knowledge Documents]
+        Ingest[Ingest Script]
     end
 
     subgraph "Vector Store"
         Qdrant[Qdrant<br/>otherdev_documents<br/>1536-dim Cosine]
-        Payloads[Payload Indexes<br/>type, category, subtype<br/>project, year]
+        Payloads[Payload Indexes<br/>type category subtype<br/>project year]
     end
 
-    subgraph "Embeddings & Reranking"
+    subgraph "Embeddings and Reranking"
         CohereEmbed[Cohere embed-v4.0<br/>via AI Gateway]
-        CohereRerank[Cohere rerank-v4-fast<br/>via AI Gateway]
         LRUCache[LRU Cache<br/>100 entries]
+        CohereRerank[Cohere rerank-v4-fast<br/>via AI Gateway]
     end
 
     subgraph "Chat Runtime"
-        API[Chat Stream API]
-        Router[Chat Router]
-        Sanitize[Input Sanitizer]
-        Gateway[Vercel AI Gateway]
-        Tavily[Tavily Search]
+        StreamHandler[Stream Handler]
+        LLM[LLM<br/>toolChoice auto]
     end
 
     KB --> Ingest
     Ingest --> Qdrant
 
-    Router --> CohereEmbed
+    LLM -->|calls| TK[retrieveKnowledge]
+    LLM -->|calls| TV[tavilySearch]
+
+    TK --> CohereEmbed
     CohereEmbed --> LRUCache
     LRUCache --> Qdrant
 
     Qdrant --> CohereRerank
-    CohereRerank --> API
+    CohereRerank -.->|context to model| LLM
+    TV -.->|web results to model| LLM
 
-    API --> Gateway
+    LLM --> Gateway[Vercel AI Gateway]
     Gateway --> GroqGroq[Groq LLM]
     Gateway --> Mistral[Mistral LLM]
 
-    Router --> Tavily
-
     style KB fill:#e1ffe4
+    style StreamHandler fill:#ffe1f5
+    style LLM fill:#ffe8cc
+    style TK fill:#e1ffe4
+    style TV fill:#ffe8cc
+    style CohereEmbed fill:#e1ffe4
+    style CohereRerank fill:#e1ffe4
     style Qdrant fill:#f5e1ff
-    style Gateway fill:#ffe8cc
-    style API fill:#fff4e1
 ```
 
 ### Knowledge Base
@@ -916,13 +929,10 @@ graph TB
         SSEClient[SSE Client]
     end
 
-    subgraph "Shared"
-        Widgets[Flutter-portable widgets<br/>chat bubbles, input]
-    end
-
     subgraph "Web Backend"
         NativeAPI[/api/chat/native]
         StreamHandler[Stream Handler]
+        LLM[LLM<br/>toolChoice auto]
     end
 
     App --> Riverpod
@@ -930,10 +940,12 @@ graph TB
     ChatRepo --> SSEClient
     SSEClient --> NativeAPI
     NativeAPI --> StreamHandler
-    StreamHandler --> AIGateway[Vercel AI Gateway]
+    StreamHandler --> LLM
+    LLM --> Gateway[Vercel AI Gateway]
+    Gateway --> GroqGroq[Groq LLM]
 
-    App --> Widgets
-    Widgets -.-> Web[Web Chat Widget]
+    style LLM fill:#ffe8cc
+    style Gateway fill:#ffe8cc
 ```
 
 ### Tech Stack
