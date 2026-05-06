@@ -2,7 +2,9 @@
 
 > Digital platforms for pioneering creatives
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kabeer11000/otherdev.web-02) [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js&logoColor=ffffff&labelColor=ffffff)](https://nextjs.org) [![Flutter](https://img.shields.io/badge/Flutter-Desktop%20%2B%20Mobile-02569B?style=flat-square&logo=flutter&logoColor=ffffff)](https://flutter.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=ffffff)](https://typescriptlang.org)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kabeer11000/otherdev.web-02)
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js&logoColor=000000&labelColor=ffffff)](https://nextjs.org)&nbsp;[![Flutter](https://img.shields.io/badge/Flutter-Desktop%20%2B%20Mobile-02569B?style=flat-square&logo=flutter&logoColor=ffffff)](https://flutter.dev)&nbsp;[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=ffffff)](https://typescriptlang.org)
 
 Monorepo containing multiple web applications built by [otherdev](https://otherdev.com) — a full-service web development and design studio based in Karachi City.
 
