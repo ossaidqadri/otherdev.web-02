@@ -568,6 +568,7 @@ export function ChatCore({
   const contentRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const [animateMessageId, setAnimateMessageId] = useState<string | null>(null)
 
   const _activeArtifact = externalActiveArtifact ?? internalActiveArtifact
   const setActiveArtifact = onArtifactOpen ?? setInternalActiveArtifact
@@ -614,6 +615,12 @@ export function ChatCore({
           setSuggestion(parsed.data.suggestion)
         }
       }
+    },
+    onFinish({ message }) {
+      // Trigger blurIn animation on the complete message after streaming finishes
+      setAnimateMessageId(message.id)
+      // Clear animation state after animation plays (approx 500ms for blurIn)
+      setTimeout(() => setAnimateMessageId(null), 600)
     },
   })
 
@@ -835,12 +842,12 @@ export function ChatCore({
               {messages.map((message, index) =>
                 message.role === 'user' ? (
                   <UserMessage key={message.id} message={message} />
-                ) : status === 'streaming' && index === messages.length - 1 ? null : (
+                ) : (
                   <AssistantMessage
                     key={message.id}
                     message={message}
                     setActiveArtifact={setActiveArtifact}
-                    isAnimating={status === 'streaming' && index === messages.length - 1}
+                    isAnimating={(status === 'streaming' && index === messages.length - 1) || animateMessageId === message.id}
                   />
                 )
               )}
