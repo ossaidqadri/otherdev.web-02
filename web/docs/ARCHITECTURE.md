@@ -135,7 +135,7 @@ src/components/
 ├── chat-core.tsx               # Shared chat logic (widget + Loom page)
 ├── artifact-renderer.tsx        # Renders HTML/CSS/JS artifacts
 ├── otherdev-loom-thread.tsx     # Loom page wrapper with artifact panel
-└── providers.tsx               # React Query provider (TRPCProvider legacy name)
+└── providers.tsx               # React Query provider (QueryProvider)
 ```
 
 **Rendering Strategy:**
@@ -392,19 +392,22 @@ sequenceDiagram
 graph TD
     Root[Root Layout] --> Providers[Providers]
     Providers --> Tenant[TenantProvider]
-    Providers --> TRPC[TRPCProvider<br/>QueryClientProvider]
+    Providers --> Query[QueryProvider<br/>QueryClientProvider]
     Providers --> Suspense[Suspense]
 
-    TRPC --> Nav[Navigation]
-    TRPC --> Footer[Footer]
-    TRPC --> Page[Page Component]
+    %% ── Presentational layer ──────────────────────────────────
+    Query --> Nav[Navigation]
+    Query --> Footer[Footer]
+    Query --> Page[Page Component]
     Page --> ServerContent[Server Components]
     Page --> ClientContent[Client Components]
 
+    %% ── Feature components ───────────────────────────────────
     ClientContent --> ContactDialog[Contact Dialog]
     ClientContent --> ChatWidget[Chat Widget]
     ClientContent --> ProjectCard[Project Card]
 
+    %% ── Chat sub-tree ─────────────────────────────────────────
     ChatWidget --> ChatCore[ChatCore]
     ChatCore --> ArtifactRenderer[ArtifactRenderer]
 
