@@ -1,34 +1,37 @@
 import { QdrantClient } from '@qdrant/js-client-rest'
 import { createHash } from 'node:crypto'
 import { rerankDocuments } from './embeddings'
+import type { MatchedDocument, SearchFilter } from './types'
+export type { MatchedDocument, SearchFilter }
 
 const qdrant = new QdrantClient({
   url: process.env.QDRANT_URL ?? '',
   apiKey: process.env.QDRANT_API_KEY ?? '',
 })
 
-export interface MatchedDocument {
-  id: string
-  content: string
-  metadata: {
-    source: string
-    title: string
-    type: string
-    category?: string
-    subtype?: string
-    project?: string
-    year?: string
+// ─── Timeout Helper ───────────────────────────────────────────────────────────
+
+/**
+ * Wraps a promise with a timeout. Qdrant client doesn't support AbortSignal,
+ * so we use setTimeout + AbortController to enforce a deadline.
+ */
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), ms)
+  try {
+    const result = await promise
+    clearTimeout(timeout)
+    return result
+  } catch (err) {
+    clearTimeout(timeout)
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`Qdrant operation timed out after ${ms}ms`)
+    }
+    throw err
   }
-  similarity: number
 }
 
-export interface SearchFilter {
-  type?: string
-  category?: string
-  subtype?: string
-  project?: string
-  year?: string
-}
+// ─── Deterministic Point ID ───────────────────────────────────────────────────
 
 /**
  * Computes a deterministic SHA-256-based point ID from document content and metadata.
@@ -43,6 +46,8 @@ export function computePointId(
   return createHash('sha256').update(normalized).digest('hex').slice(0, 32)
 }
 
+// ─── Collection Helpers ───────────────────────────────────────────────────────
+
 /**
  * Checks whether the collection exists in Qdrant.
  */
@@ -55,8 +60,16 @@ export async function collectionExists(): Promise<boolean> {
   }
 }
 
-// Cache document search per-request to avoid duplicate Qdrant queries
-// for the same embedding within a single request
+// ─── Search with Timeout ─────────────────────────────────────────────────────
+
+/**
+ * Computes a stable cache key from filter params for query result caching.
+ */
+function filterCacheKey(filter?: SearchFilter): string {
+  if (!filter) return ''
+  return JSON.stringify(filter) ?? ''
+}
+
 export async function searchSimilarDocuments(
   queryText: string,
   queryEmbedding: number[],
@@ -64,6 +77,13 @@ export async function searchSimilarDocuments(
   matchCount: number = 5,
   filter?: SearchFilter
 ): Promise<MatchedDocument[]> {
+  const fKey = filterCacheKey(filter)
+
+  // Check query result cache first
+  const { getCachedQueryResults } = await import('@/server/lib/rag/embeddings')
+  const cached = getCachedQueryResults(queryText, fKey)
+  if (cached) return cached
+
   const qdrantFilter = filter
     ? {
         should: [
@@ -76,13 +96,16 @@ export async function searchSimilarDocuments(
       }
     : undefined
 
-  const results = await qdrant.search('otherdev_documents', {
-    vector: queryEmbedding,
-    limit: matchCount * 3,
-    score_threshold: matchThreshold,
-    filter: qdrantFilter,
-    with_vector: false,
-  })
+  const results = await withTimeout(
+    qdrant.search('otherdev_documents', {
+      vector: queryEmbedding,
+      limit: matchCount * 3,
+      score_threshold: matchThreshold,
+      filter: qdrantFilter,
+      with_vector: false,
+    }),
+    10_000
+  )
 
   const mapped = results
     .map(r => {
@@ -99,11 +122,17 @@ export async function searchSimilarDocuments(
   if (mapped.length === 0) return mapped
 
   // Always-on reranking — re-scores top results using cross-encoder attention
-  return rerankDocuments({
+  const reranked = await rerankDocuments({
     query: queryText,
     documents: mapped,
     topN: matchCount,
   })
+
+  // Cache the final results
+  const { setCachedQueryResults } = await import('@/server/lib/rag/embeddings')
+  setCachedQueryResults(queryText, fKey, reranked)
+
+  return reranked
 }
 
 /**
