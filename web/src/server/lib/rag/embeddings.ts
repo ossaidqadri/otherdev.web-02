@@ -5,7 +5,7 @@ import type { MatchedDocument } from './types'
 
 // Embeddings route through direct Cohere — bypasses Vercel gateway free credits limits.
 // AI SDK docs confirm @ai-sdk/cohere auto-reads COHERE_API_KEY from env.
-const embeddingModel = cohere.textEmbedding('embed-v4.0')
+const embeddingModel = cohere.embedding('embed-v4.0')
 // Reranking uses direct Cohere provider — bypasses Vercel gateway,
 // which does not support BYOK for rerank operations. Cohere auto-reads
 // COHERE_API_KEY from env (confirmed by AI SDK docs).
