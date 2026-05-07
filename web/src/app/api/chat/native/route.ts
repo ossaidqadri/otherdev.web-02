@@ -28,22 +28,22 @@ function toSseChunk(chunk: { type: string; [k: string]: unknown }): Uint8Array {
   const encoder = new TextEncoder()
   switch (chunk.type) {
     case 'text-delta':
-      return encoder.encode(`data: ${JSON.stringify({ type: 'text', content: chunk.text })}\n\n`)
+      return encoder.encode(`data: ${JSON.stringify({ type: 'text', content: chunk.text })}`)
     case 'tool-call':
       return encoder.encode(
-        `data: ${JSON.stringify({ type: 'tool', name: chunk.toolName, args: chunk.args })}\n\n`,
+        `data: ${JSON.stringify({ type: 'tool', name: chunk.toolName, args: chunk.args })}`,
       )
     case 'tool-result':
       return encoder.encode(
-        `data: ${JSON.stringify({ type: 'tool-result', name: chunk.toolName, result: chunk.result })}\n\n`,
+        `data: ${JSON.stringify({ type: 'tool-result', name: chunk.toolName, result: chunk.result })}`,
       )
     case 'reasoning':
       return encoder.encode(
-        `data: ${JSON.stringify({ type: 'reasoning', content: chunk.textDelta })}\n\n`,
+        `data: ${JSON.stringify({ type: 'reasoning', content: chunk.textDelta })}`,
       )
     case 'error':
       return encoder.encode(
-        `data: ${JSON.stringify({ type: 'error', message: chunk.error })}\n\n`,
+        `data: ${JSON.stringify({ type: 'error', message: chunk.error })}`,
       )
     case 'finish': {
       const finishData = {
@@ -51,11 +51,11 @@ function toSseChunk(chunk: { type: string; [k: string]: unknown }): Uint8Array {
         reason: chunk.finishReason,
         usage: chunk.usage,
       }
-      return encoder.encode(`data: ${JSON.stringify(finishData)}\n\n`)
+      return encoder.encode(`data: ${JSON.stringify(finishData)}`)
     }
     default:
       return encoder.encode(
-        `data: ${JSON.stringify({ type: 'unknown', chunkType: chunk.type })}\n\n`,
+        `data: ${JSON.stringify({ type: 'unknown', chunkType: chunk.type })}`,
       )
   }
 }
@@ -177,12 +177,12 @@ export async function POST(request: Request): Promise<Response> {
     return new Response(stream, {
       status: 200,
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-        "X-RateLimit-Limit": REQUESTS_PER_WINDOW.toString(),
-        "X-RateLimit-Remaining": String(rateLimitResult.remaining),
-        "X-RateLimit-Reset": rateLimitResult.resetTime.toString(),
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
+        'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+        'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
       },
     })
   } catch (error) {
