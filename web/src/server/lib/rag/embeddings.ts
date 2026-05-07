@@ -1,11 +1,15 @@
-import { gateway } from '@ai-sdk/gateway'
+import { cohere } from '@ai-sdk/cohere'
 import { embed, embedMany, rerank } from 'ai'
 import pRetry, { AbortError } from 'p-retry'
 import type { MatchedDocument } from './types'
 
-// Both embedding and reranking go through Vercel AI Gateway for unified observability
-const embeddingModel = gateway.textEmbeddingModel('cohere/embed-v4.0')
-const rerankingModel = gateway.rerankingModel('cohere/rerank-v4-fast')
+// Embeddings route through direct Cohere — bypasses Vercel gateway free credits limits.
+// AI SDK docs confirm @ai-sdk/cohere auto-reads COHERE_API_KEY from env.
+const embeddingModel = cohere.textEmbedding('embed-v4.0')
+// Reranking uses direct Cohere provider — bypasses Vercel gateway,
+// which does not support BYOK for rerank operations. Cohere auto-reads
+// COHERE_API_KEY from env (confirmed by AI SDK docs).
+const rerankingModel = cohere.reranking('rerank-v3.5')
 
 // ─── LRU Cache ────────────────────────────────────────────────────────────────
 
