@@ -282,4 +282,24 @@ export const projects: Project[] = [
     ],
     year: 2026,
   },
+  {
+    id: '18',
+    title: 'Car Wala',
+    slug: 'car-wala-2026',
+    image: '/images/projects/car-wala-2026/www.carwala.org_.png',
+    description:
+      'Car Wala is a professional car detailing service offering interior and exterior cleaning, paint correction, and ceramic coating. Developed a clean, conversion-focused web presence that showcases their services and makes booking easy for customers.',
+    url: 'carwala.org',
+    media: [
+      '/images/projects/car-wala-2026/www.carwala.org_.png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (1).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (2).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (3).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (4).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (5).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (6).png',
+      '/images/projects/car-wala-2026/www.carwala.org_ (7).png',
+    ],
+    year: 2026,
+  },
 ]
