@@ -747,7 +747,6 @@ export function ChatCore({
         }
       },
     }),
-    experimental_throttle: 30,
     async onToolCall({ toolCall }) {
       if (toolCall.dynamic) {
         return
