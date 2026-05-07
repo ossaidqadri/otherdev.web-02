@@ -184,7 +184,6 @@ web/
 │   ├── server/
 │   │   └── lib/
 │   │       ├── rate-limit.ts            # Upstash rate limiting
-│   │       ├── chat-cache-store.ts      # Upstash chat cache
 │   │       ├── chat/
 │   │       │   ├── models.ts          # AI Gateway model definitions
 │   │       │   ├── stream-handler.ts  # Tool-driven chat handler

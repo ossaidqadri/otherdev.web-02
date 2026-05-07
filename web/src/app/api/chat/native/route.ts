@@ -1,10 +1,9 @@
-import { consumeStream, type TextStreamPart, type ToolSet, type UIMessage, validateUIMessages } from 'ai'
+import { type TextStreamPart, type ToolSet, type UIMessage, validateUIMessages } from 'ai'
 import { z } from 'zod'
 
 import { createJsonResponse } from '@/server/lib/api-helpers'
 import { handleStreamChat } from '@/server/lib/chat'
 import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from '@/server/lib/chat/tools'
-import { loadChatMessages, saveChatMessages } from '@/server/lib/chat-cache-store'
 import { checkRateLimit, getClientIdentifier, REQUESTS_PER_WINDOW } from '@/server/lib/rate-limit'
 import { replaceMessageAtId } from '@/server/lib/chat/message-utils'
 
@@ -90,12 +89,8 @@ export async function POST(request: Request): Promise<Response> {
       }
       candidateMessages = replaceMessageAtId(body.messages, body.messageId, body.message)
     } else {
-      if (body.message) {
-        const previousMessages = await loadChatMessages(chatId)
-        candidateMessages = [...previousMessages, body.message]
-      } else if (Array.isArray(body.messages)) {
-        candidateMessages = body.messages
-      }
+      // Anthropic pattern: client sends full history — use body.messages directly
+      candidateMessages = Array.isArray(body.messages) ? body.messages : []
     }
 
     if (candidateMessages.length === 0) {
@@ -147,7 +142,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // Save AFTER streaming via onFinish — industry standard pattern
-    // No pre-stream save — history is saved only after AI response is complete
+    // Anthropic pattern: client owns history persistence — no server-side save needed
 
     const { result, response, suggestions } = await handleStreamChat({
       messages: uiMessages,
@@ -164,11 +159,6 @@ export async function POST(request: Request): Promise<Response> {
       return result.toUIMessageStreamResponse({
         originalMessages: uiMessages,
         generateMessageId: () => crypto.randomUUID(),
-        onFinish: ({ messages }) => {
-          saveChatMessages(chatId, messages).catch(err => {
-            console.error('[chat] save failed:', err)
-          })
-        },
         messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
           if (part.type === 'finish') {
             return { suggestions } as Record<string, unknown>

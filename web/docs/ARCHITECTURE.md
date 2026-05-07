@@ -218,7 +218,6 @@ src/server/lib/
 ├── rag/
 │   ├── embeddings.ts           # Cohere embeddings via AI Gateway + LRU cache + reranking
 │   └── vector-search.ts        # Qdrant vector search with reranking
-├── chat-cache-store.ts         # Upstash Redis chat message + response caching
 ├── rate-limit.ts              # Upstash sliding window rate limiting
 └── api-helpers.ts              # JSON response helpers + CORS
 ```
@@ -227,7 +226,7 @@ src/server/lib/
 
 - **Vercel AI Gateway:** Unified model routing with automatic failover chains
 - **Zod Validation:** Runtime schema validation for type safety
-- **Upstash Redis:** Rate limiting + chat message caching
+- **Upstash Redis:** Rate limiting
 - **Adaptive RAG:** Query quality detection adjusts similarity thresholds
 
 ---
@@ -638,27 +637,6 @@ const contactRatelimit = new Ratelimit({
   prefix: 'rl:contact',
 })
 ```
-
-### Chat Message Caching (Upstash Redis)
-
-**Location:** `src/server/lib/chat-cache-store.ts`
-
-**Three cache layers:**
-
-1. **Chat History** — TTL 14 days
-   - Key: `chat:history:v1:{chatId}`
-   - Stores: `UIMessage[]` array
-
-2. **RAG Retrieval Context** — TTL 6 hours
-   - Key: `rag:retrieval:v1:{KB_VERSION}:{queryHash}`
-   - Stores: serialized context string
-   - KB version auto-computed from `knowledge-base.ts` content
-
-3. **Chat Response** — TTL 24 hours
-   - Key: `chat:response:v1:{KB_VERSION}:{model}:{queryHash}`
-   - Stores: `{ text: string, suggestion: string | null }`
-
----
 
 ## RAG Chat System
 
