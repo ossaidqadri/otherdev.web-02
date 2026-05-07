@@ -1,7 +1,7 @@
 import { tavily } from '@tavily/core'
 import { tool } from 'ai'
 import { z } from 'zod'
-import type { MatchedDocument } from '@/server/lib/rag/vector-search'
+import type { MatchedDocument } from '@/server/lib/rag/types'
 
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY })
 
@@ -46,7 +46,7 @@ Returns the most relevant knowledge base entries with relevance scores.`,
         .join('---\n\n')
     } catch (error) {
       console.error('[retrieveKnowledge] execute error:', error instanceof Error ? error.message : String(error))
-      throw error
+      return 'No relevant knowledge base entries found for this query.'
     }
   },
 })
