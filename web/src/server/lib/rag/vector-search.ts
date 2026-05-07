@@ -217,7 +217,7 @@ export async function upsertDocumentBatch(
     embedding: number[]
   }>
 ): Promise<void> {
-  const BATCH_SIZE = 64
+  const BATCH_SIZE = 96
   const batches: typeof docs[] = []
   for (let i = 0; i < docs.length; i += BATCH_SIZE) {
     batches.push(docs.slice(i, i + BATCH_SIZE))
