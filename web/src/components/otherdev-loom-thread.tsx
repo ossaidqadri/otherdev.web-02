@@ -18,10 +18,10 @@ function LoomPageInner({
 
 export function LoomPageClient({ noNavigation }: { noNavigation?: boolean }) {
   const [activeArtifact, setActiveArtifact] = useState<ArtifactToolCall | null>(null)
-  const [_suggestion, setSuggestion] = useState('')
+  const [chatKey, setChatKey] = useState(0)
 
   const handleClear = useCallback(() => {
-    setSuggestion('')
+    setChatKey(k => k + 1)
   }, [])
 
   return (
@@ -33,6 +33,7 @@ export function LoomPageClient({ noNavigation }: { noNavigation?: boolean }) {
         <div className="flex h-full overflow-hidden">
           <div className={`h-full ${activeArtifact ? 'hidden md:block md:w-1/2' : 'w-full'}`}>
             <ChatCore
+              key={chatKey}
               activeArtifact={activeArtifact}
               onArtifactOpen={setActiveArtifact}
               onClear={handleClear}
