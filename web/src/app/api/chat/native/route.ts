@@ -146,75 +146,43 @@ export async function POST(request: Request): Promise<Response> {
       throw error
     }
 
-    if (!isEditMessage) {
-      await saveChatMessages(chatId, uiMessages)
-    }
-
     const { response } = await handleStreamChat({
       messages: uiMessages,
       supportsArtifacts,
       request,
     })
 
-    // For edit-message: consume stream manually to get result.response.messages for Redis
-    // For submit-user-message: use existing pipeThrough (no message tracking needed post-stream)
-    if (isEditMessage) {
-      const chunks: Uint8Array[] = []
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for await (const chunk of (response as any).fullStream) {
-        chunks.push(toSseChunk(chunk))
-      }
-      chunks.push(new TextEncoder().encode('data: [DONE]\n\n'))
+    // After streaming, replace the streamed history with new messages from result.response
+    // result.response is a PromiseLike — accessing it triggers full stream consumption
+    const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
+    const streamedMessages = resultResponse.messages as UIMessage[]
+    await saveChatMessages(chatId, streamedMessages)
 
-      // result.response is a PromiseLike — accessing triggers full stream consumption
-      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
-      const streamedMessages = resultResponse.messages as UIMessage[]
-      await saveChatMessages(chatId, streamedMessages)
-
-      const stream = new ReadableStream({
-        start(controller) {
-          for (const chunk of chunks) {
-            controller.enqueue(chunk)
-          }
-          controller.close()
-        },
-      })
-
-      return new Response(stream, {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
-          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-          'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
-        },
-      })
+    const chunks: Uint8Array[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for await (const chunk of (response as any).fullStream) {
+      chunks.push(toSseChunk(chunk))
     }
+    chunks.push(new TextEncoder().encode("data: [DONE]\n\n"))
 
-    // submit-user-message: use pipeThrough with explicit chunk type coverage
-    const encoder = new TextEncoder()
-
-    const transformer = new TransformStream({
-      transform(chunk, controller) {
-        controller.enqueue(toSseChunk(chunk as { type: string; [k: string]: unknown }))
-      },
-      flush(controller) {
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+    const stream = new ReadableStream({
+      start(controller) {
+        for (const chunk of chunks) {
+          controller.enqueue(chunk)
+        }
         controller.close()
       },
     })
 
-    return new Response(response.body!.pipeThrough(transformer), {
+    return new Response(stream, {
       status: 200,
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
-        'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-RateLimit-Limit": REQUESTS_PER_WINDOW.toString(),
+        "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        "X-RateLimit-Reset": rateLimitResult.resetTime.toString(),
       },
     })
   } catch (error) {

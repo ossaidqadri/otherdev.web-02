@@ -119,9 +119,7 @@ export async function POST(request: Request): Promise<Response> {
 
     // For submit: save BEFORE streaming (existing messages as history)
     // For edit: save AFTER streaming (new AI response messages as history)
-    if (!isEditMessage) {
-      await saveChatMessages(chatId, uiMessages)
-    }
+
 
     const { response } = await handleStreamChat({
       messages: uiMessages,
@@ -129,13 +127,11 @@ export async function POST(request: Request): Promise<Response> {
       request,
     })
 
-    if (isEditMessage) {
-      // After streaming, replace the streamed history with new messages from result.response
-      // result.response is a PromiseLike — accessing it triggers full stream consumption
-      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
-      const streamedMessages = resultResponse.messages as UIMessage[]
-      await saveChatMessages(chatId, streamedMessages)
-    }
+    // After streaming, replace the streamed history with new messages from result.response
+    // result.response is a PromiseLike — accessing it triggers full stream consumption
+    const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
+    const streamedMessages = resultResponse.messages as UIMessage[]
+    await saveChatMessages(chatId, streamedMessages)
 
     return new Response(response.body, {
       status: 200,
