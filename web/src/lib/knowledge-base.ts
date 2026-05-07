@@ -1219,7 +1219,7 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
 
   // Ossaid Qadri - Bio
   {
-    content: `Ossaid Qadri is the Co-Founder, Frontend Architect, and Growth Lead at Other Dev — a Karachi-based full-stack development studio founded in 2021 alongside Kabeer Jaffri. He occupies a dual role bridging technical engineering and commercial strategy. As a frontend-focused developer he specializes in high-performance interfaces using Next.js, React, TypeScript, Tailwind CSS, and Headless CMS architectures. He leads the agency's digital marketing division managing Meta Ads campaigns with 1M+ cumulative reach and handles end-to-end project execution from client acquisition to DevOps on Vercel and GitHub. His track record includes scaling Wish Apparels to Rs 5M+ annual revenue and delivering 3x revenue increases for seasonal e-commerce clients.`,
+    content: `Ossaid Qadri is the Co-Founder, Frontend Architect, and Growth Lead at Other Dev — a Karachi-based full-stack development studio founded in 2021 alongside Kabeer Jaffri. He occupies a dual role bridging technical engineering and commercial strategy. As a frontend-focused developer he specializes in high-performance interfaces using Next.js, React, TypeScript, Tailwind CSS, and Headless CMS architectures. He leads the agency's digital marketing division managing Meta Ads campaigns with over 1,020,155 accounts reached and handles end-to-end project execution from client acquisition to DevOps on Vercel and GitHub. His track record includes scaling Wish Apparels to Rs 5M+ annual revenue and delivering 3x revenue increases for seasonal e-commerce clients. Beyond Other Dev, he worked as Frontend Engineer at Lexa (legal AI startup, Jul 2025–Jan 2026), building the legal document intelligence platform with real-time collaborative editing, e-signature, and a RAG pipeline over Pakistani law including the Constitution of Pakistan 1973, Anti-Rape Act 2021, and Anti-Terrorism Act 1997. Open source contributions include commits to astro/astro (48k+ stars), payloadcms/payload, and QwenLM/qwen-code.`,
     metadata: {
       source: 'about',
       title: 'Ossaid Qadri - Bio',
@@ -1232,7 +1232,7 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
 
   // Ossaid Qadri - Education
   {
-    content: `EDUCATION: BS Accounting and Finance at Institute of Business Management (IoBM), expected graduation May 2027. Coursework: Corporate & Commercial Banking, Retail & Consumer Banking, Financial Derivatives, International Finance. Previous: A-Levels at Cedar College (Business, Accounts, Mathematics), O-Levels at Habib Public School. EXPERIENCE: 4+ years running Other Dev; Frontend Engineer at Lexa (Jul 2025–Jan 2026) building legal AI platform with real-time collaboration and RAG over Pakistani law; Corporate Banking Intern at Faysal Bank (Jun–Jul 2023).`,
+    content: `EDUCATION: BS Accounting and Finance at Institute of Business Management (IoBM), expected graduation May 2027. Coursework: Corporate & Commercial Banking, Retail & Consumer Banking, Financial Derivatives, International Finance. Previous: A-Levels at Cedar College (Business, Accounts, Mathematics), O-Levels at Habib Public School (Biology, Accounts, Mathematics). EXPERIENCE: Co-Founder of Other Dev (Jun 2021–Present); Frontend Engineer at Lexa (Jul 2025–Jan 2026) building legal AI platform with YJS real-time collaborative editing, WebSocket chat via Hocuspocus, TipTap editor with custom extensions, e-signature, and a RAG pipeline over Pakistani constitutional and statutory law using Qdrant vector database, Isaacus Kanon 2 embeddings (1792 dimensions), LlamaParse document parsing, and UUID v5 idempotent ingestion — corpus includes 280+ articles covering the Constitution of Pakistan 1973, Anti-Rape Act 2021, and Anti-Terrorism Act 1997; Corporate Banking Intern at Faysal Bank (Jun–Jul 2023) with client onboarding, B2B lead generation, and market research.`,
     metadata: {
       source: 'about',
       title: 'Ossaid Qadri - Education',
@@ -1258,7 +1258,7 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
 
   // Ossaid Qadri - Marketing & Projects
   {
-    content: `MARKETING METRICS: Cumulative Meta Ads reach exceeding 1,020,155 accounts; average cost per purchase of Rs 190.61 across campaign portfolio; 3x revenue increase during peak seasonal campaigns; over Rs 217,000 in ad spend managed and optimized; client acquisition and revenue scaling of Rs 5 million+. Marketing toolkit: Meta Business Suite, Facebook Pixel with Conversion API tracking (Add to Cart, Initiate Checkout, Purchase events), Custom Audiences and Lookalike Audiences, dynamic budget reallocation, A/B testing of creatives and CTAs.\n\n\nNOTABLE PROJECTS: Wish Apparels (Shopify + PayFast, Rs 5M+ annual revenue); TinyFootprint (subscription migration Recharge to Shopify Payments); Narkins Builders (Next.js 15 + TinaCMS + MySQL PWA with CRM); Bin Yousuf Group (Astro + React + GSAP premium real estate); Carwala (Next.js 16 + tRPC + Cal.com booking); Lexa legal AI platform (Next.js 15, TipTap editor, YJS collaboration, Hocuspocus/WebSocket chat, e-signature, RAG over Pakistani law using Qdrant and LlamaParse); AI Policy Simulation submitted to Anthropic Hackathon April 2026 (policysim.tech).`,
+    content: `MARKETING METRICS: Cumulative Meta Ads reach exceeding 1,020,155 accounts; average cost per purchase of Rs 190.61 across campaign portfolio; 3x revenue increase during peak seasonal campaigns; over Rs 217,000 in ad spend managed and optimized; client acquisition and revenue scaling of over Rs 5 million. Marketing toolkit: Meta Business Suite, Facebook Pixel with Conversion API tracking (Add to Cart, Initiate Checkout, Purchase events), Custom Audiences and Lookalike Audiences, dynamic budget reallocation, A/B testing of creatives and CTAs.\n\nNOTABLE PROJECTS: Wish Apparels (Shopify + PayFast, Rs 5M+ annual revenue — migrated from Instagram DMs to professional storefront); TinyFootprint (US coffee brand, subscription migration Recharge to Shopify Payments, zero subscriber disruption); Narkins Builders (Next.js 15 + TinaCMS + MySQL PWA with CRM, 30% traffic increase in first month); Bin Yousuf Group (Astro + React + GSAP premium real estate with WhatsApp integration and Google Sheets lead tracking); Carwala (Next.js 16 + tRPC + Cal.com car detailing booking platform); Lexa legal AI platform (Next.js 15, TipTap editor with custom extensions for pagination and legal formatting, YJS real-time collaborative editing, Hocuspocus WebSocket server, e-signature, RAG over Pakistani law using Qdrant vector database, Isaacus Kanon 2 embeddings at 1792 dimensions, LlamaParse document parsing, UUID v5 idempotent ingestion — corpus of 280+ articles covering the Constitution of Pakistan 1973, Anti-Rape Act 2021, Anti-Terrorism Act 1997); AI Policy Simulation submitted to Anthropic Hackathon April 2026 — live at policysim.tech, featuring 4 demographically-grounded fiscal policy archetypes, SSE streaming responses, edge-tts voice synthesis; Finlit (financial literacy SaaS for Pakistani youth and aspiring freelancers); Enermation (Next.js 16 + Shopify Storefront API, EV/auto e-commerce); OtherDev Website v2 (Next.js 16 + tRPC + Groq + HuggingFace, AI assistant "Loom" with RAG).`,
     metadata: {
       source: 'about',
       title: 'Ossaid Qadri - Marketing & Projects',
@@ -1278,6 +1278,19 @@ AVERAGE COST PER PURCHASE: Rs 211.30`,
       type: 'about',
       category: 'team',
       subtype: 'facts',
+      year: '2025',
+    },
+  },
+
+  // Ossaid Qadri - Technical Stack
+  {
+    content: `TECHNICAL STACK\n\nFRONTEND: Next.js 15/16, React 18/19, TypeScript 5.x, Tailwind CSS 4, Astro, Eleventy, Framer Motion, GSAP, Radix UI, shadcn/ui, TipTap.\n\nSHOPIFY: Liquid, Theme Development, Hydrogen (React Router 7), Shopify CLI, GraphQL Storefront API.\n\nBACKEND: Go, Node.js, FastAPI (Python), tRPC, REST APIs, WebSocket, SSE, Hocuspocus, YJS.\n\nDATABASES: MySQL, PostgreSQL, MongoDB, Qdrant (vector database).\n\nAI/ML STACK: Anthropic Claude SDK (extended thinking, tool use, prompt caching, streaming), RAG pipelines, Isaacus Kanon 2 embeddings (1792-dim), Voyage AI (1024-dim), LlamaParse, UUID v5 idempotent ingestion, SHA-256 cache versioning.\n\nSTATE MANAGEMENT: Nanostores, Zustand, TanStack Query, React hooks.\n\nCMS: TinaCMS (headless, Git-backed), WordPress (headless), Payload CMS.\n\nDEVOPS/TOOLING: Bun, Vercel, Azure App Service, Vite, Turbopack, GitHub, Biome, PostCSS.\n\nPAYMENT: PayFast gateway integration.\n\nMARKETING/ANALYTICS: Meta Ads, Google Analytics 4, Google Sheets API.`,
+    metadata: {
+      source: 'about',
+      title: 'Ossaid Qadri - Technical Stack',
+      type: 'about',
+      category: 'team',
+      subtype: 'stack',
       year: '2025',
     },
   },
