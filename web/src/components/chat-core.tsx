@@ -52,6 +52,7 @@ import { SUGGESTED_PROMPTS } from '@/lib/constants'
 import { parseSSEStream } from '@/lib/sse'
 import { cleanSuggestionMarkers, cn } from '@/lib/utils'
 import { VoiceRecorder } from '@/lib/voice-recorder'
+import { useLocalStorageMessages } from '@/hooks/use-local-storage-messages'
 
 // Define custom data parts for the chat stream
 const suggestionDataSchema = z.object({
@@ -699,6 +700,15 @@ export function ChatCore({
     localStorage.setItem('chatId', id)
     setChatId(id)
   }, [])
+
+  // sessionStorage-backed message persistence — Anthropic pattern: client sends full history every request
+  const { messages: storedMessages, setMessages: setStoredMessages, clearHistory: clearStoredMessages } =
+    useLocalStorageMessages<UIMessage>({
+      key: 'otherdev-chat-messages',
+      initialValue: [],
+      expirationMinutes: 60 * 24,
+      storage: 'sessionStorage',
+    })
   const [isRecording, setIsRecording] = useState(false)
   const [isRecordingProcessing, setIsRecordingProcessing] = useState(false)
 
@@ -714,6 +724,9 @@ export function ChatCore({
   const greeting = useTimeBasedGreeting()
 
   const { messages, sendMessage, status, setMessages, addToolOutput } = useChat<ChatUIMessage>({
+    id: chatId,
+    initialMessages: storedMessages,
+    experimental_throttle: 50,
     dataPartSchemas: {
       suggestion: suggestionDataSchema,
     },
@@ -747,14 +760,19 @@ export function ChatCore({
         })
       }
     },
-    onData(dataPart) {
-      // Suggestions are now sent via messageMetadata (industry standard) — no data part needed
-    },
   })
+
+  // Sync useChat messages → sessionStorage on every change (Anthropic pattern: client persists history)
+  useEffect(() => {
+    if (messages.length > 0) {
+      setStoredMessages(messages)
+    }
+  }, [messages, setStoredMessages])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: abortControllerRef is a stable ref, accessed via .current
   const _handleClear = useCallback(() => {
     setMessages([])
+    setStoredMessages([])
     setSuggestion('')
     setFollowUpSuggestions([])
     if (abortControllerRef.current) {
@@ -763,7 +781,7 @@ export function ChatCore({
     if (_onClear) {
       _onClear()
     }
-  }, [setMessages, setSuggestion, _onClear])
+  }, [setMessages, setStoredMessages, setSuggestion, _onClear])
 
   // Industry standard: read follow-up suggestions from last assistant message metadata
   useEffect(() => {
