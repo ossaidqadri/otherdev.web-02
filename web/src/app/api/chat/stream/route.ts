@@ -127,28 +127,28 @@ export async function POST(request: Request): Promise<Response> {
       request,
     })
 
-    if (!result || !response) {
+    if (!result) {
       return response as Response
     }
 
-    // consumeStream ensures onFinish fires even if client disconnects
-    result.consumeStream()
-
-    return result.toUIMessageStreamResponse({
-      originalMessages: uiMessages,
-      generateMessageId: () => crypto.randomUUID(),
-      onFinish: ({ messages }) => {
-        saveChatMessages(chatId, messages).catch(err => {
-          console.error('[chat] save failed:', err)
-        })
-      },
-      messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
-        if (part.type === 'finish') {
-          return { suggestions } as Record<string, unknown>
-        }
-        return undefined
-      },
-    })
+    if (!response) {
+      result.consumeStream()
+      return result.toUIMessageStreamResponse({
+        originalMessages: uiMessages,
+        generateMessageId: () => crypto.randomUUID(),
+        onFinish: ({ messages }) => {
+          saveChatMessages(chatId, messages).catch(err => {
+            console.error('[chat] save failed:', err)
+          })
+        },
+        messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
+          if (part.type === 'finish') {
+            return { suggestions } as Record<string, unknown>
+          }
+          return undefined
+        },
+      })
+    }
   } catch (error) {
     console.error('Chat API error:', error)
     return createJsonResponse({ error: 'Internal server error. Please try again.' }, 500)
