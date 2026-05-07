@@ -1,4 +1,4 @@
-import { type UIMessage, validateUIMessages } from 'ai'
+import { consumeStream, type TextStreamPart, type ToolSet, type UIMessage, validateUIMessages } from 'ai'
 import { z } from 'zod'
 
 import { createJsonResponse } from '@/server/lib/api-helpers'
@@ -146,75 +146,35 @@ export async function POST(request: Request): Promise<Response> {
       throw error
     }
 
-    if (!isEditMessage) {
-      await saveChatMessages(chatId, uiMessages)
-    }
+    // Save AFTER streaming via onFinish — industry standard pattern
+    // No pre-stream save — history is saved only after AI response is complete
 
-    const { response } = await handleStreamChat({
+    const { result, response, suggestions } = await handleStreamChat({
       messages: uiMessages,
       supportsArtifacts,
       request,
     })
 
-    // For edit-message: consume stream manually to get result.response.messages for Redis
-    // For submit-user-message: use existing pipeThrough (no message tracking needed post-stream)
-    if (isEditMessage) {
-      const chunks: Uint8Array[] = []
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for await (const chunk of (response as any).fullStream) {
-        chunks.push(toSseChunk(chunk))
-      }
-      chunks.push(new TextEncoder().encode('data: [DONE]\n\n'))
-
-      // result.response is a PromiseLike — accessing triggers full stream consumption
-      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
-      const streamedMessages = resultResponse.messages as UIMessage[]
-      await saveChatMessages(chatId, streamedMessages)
-
-      const stream = new ReadableStream({
-        start(controller) {
-          for (const chunk of chunks) {
-            controller.enqueue(chunk)
-          }
-          controller.close()
-        },
-      })
-
-      return new Response(stream, {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
-          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-          'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
-        },
-      })
+    if (!result || !response) {
+      return response as Response
     }
 
-    // submit-user-message: use pipeThrough with explicit chunk type coverage
-    const encoder = new TextEncoder()
+    // consumeStream ensures onFinish fires even if client disconnects
+    result.consumeStream()
 
-    const transformer = new TransformStream({
-      transform(chunk, controller) {
-        controller.enqueue(toSseChunk(chunk as { type: string; [k: string]: unknown }))
+    return result.toUIMessageStreamResponse({
+      originalMessages: uiMessages,
+      generateMessageId: () => crypto.randomUUID(),
+      onFinish: ({ messages }) => {
+        saveChatMessages(chatId, messages).catch(err => {
+          console.error('[chat] save failed:', err)
+        })
       },
-      flush(controller) {
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-        controller.close()
-      },
-    })
-
-    return new Response(response.body!.pipeThrough(transformer), {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
-        'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
+      messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
+        if (part.type === 'finish') {
+          return { suggestions } as Record<string, unknown>
+        }
+        return undefined
       },
     })
   } catch (error) {

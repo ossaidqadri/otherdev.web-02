@@ -32,7 +32,9 @@ export interface HandleStreamChatOptions {
 }
 
 export interface HandleStreamChatResult {
-  response: Response
+  result: ReturnType<typeof streamText> | null
+  response: Response | null
+  suggestions: string[]
   rateLimit: {
     limit: number
     remaining: number
@@ -148,12 +150,14 @@ export async function handleStreamChat({
   if (!rateLimitResult.allowed) {
     const retryAfter = Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
     return {
+      result: null,
       response: createJsonResponse({ error: 'Too many requests. Please try again later.' }, 429, {
         'Retry-After': retryAfter.toString(),
         'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
         'X-RateLimit-Remaining': '0',
         'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
       }),
+      suggestions: [],
       rateLimit: { limit: REQUESTS_PER_WINDOW, remaining: 0 },
     }
   }
@@ -204,7 +208,9 @@ export async function handleStreamChat({
     if (error instanceof (await import('ai')).TypeValidationError) {
       console.error('[VALIDATION] Invalid chat messages:', error.message)
       return {
+        result: null,
         response: createJsonResponse({ error: 'Invalid message payload' }, 400),
+        suggestions: [],
         rateLimit: { limit: REQUESTS_PER_WINDOW, remaining: rateLimitResult.remaining },
       }
     }
@@ -285,14 +291,9 @@ export async function handleStreamChat({
   })
 
   return {
-    response: result.toUIMessageStreamResponse({
-      messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
-        if (part.type === 'finish') {
-          return { suggestions: resolvedSuggestions } as Record<string, unknown>
-        }
-        return undefined
-      },
-    }),
+    result,
+    response: null,
+    suggestions: resolvedSuggestions,
     rateLimit: { limit: REQUESTS_PER_WINDOW, remaining: rateLimitResult.remaining },
   }
 }

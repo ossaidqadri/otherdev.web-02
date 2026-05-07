@@ -1,4 +1,4 @@
-import { type UIMessage, validateUIMessages } from 'ai'
+import { consumeStream, type TextStreamPart, type ToolSet, type UIMessage, validateUIMessages } from 'ai'
 import { z } from 'zod'
 
 import { createJsonResponse } from '@/server/lib/api-helpers'
@@ -117,33 +117,36 @@ export async function POST(request: Request): Promise<Response> {
       throw error
     }
 
-    // For submit: save BEFORE streaming (existing messages as history)
-    // For edit: save AFTER streaming (new AI response messages as history)
-    if (!isEditMessage) {
-      await saveChatMessages(chatId, uiMessages)
-    }
+    // For submit: save AFTER streaming via onFinish (industry standard)
+    // For edit: save AFTER streaming via onFinish
+    // No pre-stream save — history is saved only after AI response is complete
 
-    const { response } = await handleStreamChat({
+    const { result, response, suggestions } = await handleStreamChat({
       messages: uiMessages,
       supportsArtifacts,
       request,
     })
 
-    if (isEditMessage) {
-      // After streaming, replace the streamed history with new messages from result.response
-      // result.response is a PromiseLike — accessing it triggers full stream consumption
-      const resultResponse = await (response as { response: Promise<{ messages: unknown[] }> }).response
-      const streamedMessages = resultResponse.messages as UIMessage[]
-      await saveChatMessages(chatId, streamedMessages)
+    if (!result || !response) {
+      return response as Response
     }
 
-    return new Response(response.body, {
-      status: 200,
-      headers: {
-        ...Object.fromEntries((response as { headers: Headers }).headers.entries()),
-        'X-RateLimit-Limit': REQUESTS_PER_WINDOW.toString(),
-        'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
+    // consumeStream ensures onFinish fires even if client disconnects
+    result.consumeStream()
+
+    return result.toUIMessageStreamResponse({
+      originalMessages: uiMessages,
+      generateMessageId: () => crypto.randomUUID(),
+      onFinish: ({ messages }) => {
+        saveChatMessages(chatId, messages).catch(err => {
+          console.error('[chat] save failed:', err)
+        })
+      },
+      messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
+        if (part.type === 'finish') {
+          return { suggestions } as Record<string, unknown>
+        }
+        return undefined
       },
     })
   } catch (error) {
