@@ -204,8 +204,14 @@ export interface Media {
 export interface Project {
   id: string;
   title: string;
+  /**
+   * URL-friendly identifier for project pages.
+   */
   slug: string;
   description?: string | null;
+  /**
+   * Live URL of the project (e.g. https://example.com)
+   */
   url?: string | null;
   downloadUrl?: string | null;
   year: number;
@@ -226,6 +232,9 @@ export interface Project {
 export interface Category {
   id: string;
   name: string;
+  /**
+   * URL-friendly identifier used in category page URLs.
+   */
   slug: string;
   description?: string | null;
   updatedAt: string;
@@ -238,6 +247,9 @@ export interface Category {
 export interface Blog {
   id: string;
   title: string;
+  /**
+   * URL-friendly identifier. Auto-generate from title if blank.
+   */
   slug: string;
   content?: {
     root: {
@@ -254,14 +266,24 @@ export interface Blog {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Short summary shown in listings and social previews.
+   */
   excerpt?: string | null;
+  /**
+   * Draft is only visible to editors. Published is live.
+   */
   status?: ('draft' | 'published') | null;
   author?: (string | null) | User;
   featuredImage?: (string | null) | Media;
   categories?: (string | null) | Category;
+  /**
+   * Leave blank to publish immediately on save.
+   */
   publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -533,6 +555,7 @@ export interface BlogSelect<T extends boolean = true> {
   publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

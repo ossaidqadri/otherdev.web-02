@@ -12,16 +12,25 @@ export const Categories: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      admin: {
+        placeholder: 'e.g. Frontend Tools',
+      },
     },
     {
       name: 'slug',
       type: 'text',
       unique: true,
       required: true,
+      admin: {
+        description: 'URL-friendly identifier used in category page URLs.',
+      },
     },
     {
       name: 'description',
       type: 'text',
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 }

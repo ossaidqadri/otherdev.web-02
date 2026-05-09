@@ -2,6 +2,10 @@ import type { CollectionConfig } from 'payload'
 
 export const About: CollectionConfig = {
   slug: 'about',
+  labels: {
+    singular: 'About Page',
+    plural: 'About Page',
+  },
   admin: {
     group: 'Content',
     useAsTitle: 'metaTitle',
