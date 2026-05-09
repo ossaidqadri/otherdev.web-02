@@ -31,7 +31,6 @@
     "@hookform/resolvers": "^5.2.2",
     "@langchain/textsplitters": "^1.0.1",
     "@next/third-parties": "16.2.6",
-    "@od-canvas/sdk": "^1.0.0",
     "@payloadcms/db-mongodb": "^3.84.1",
     "@payloadcms/next": "^3.84.1",
     "@payloadcms/richtext-lexical": "^3.84.1",
