@@ -11,6 +11,7 @@ import { Categories } from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { Users } from "./collections/Users";
+import { adminThemePlugin } from "./src/plugins/index";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,5 +56,6 @@ export default buildConfig({
         forcePathStyle: true,
       },
     }),
+    adminThemePlugin(),
   ],
 })
