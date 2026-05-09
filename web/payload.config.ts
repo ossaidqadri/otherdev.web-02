@@ -1,6 +1,6 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { lexicalEditor, FixedToolbarFeature, EXPERIMENTAL_TableFeature, BlocksFeature, CodeBlock } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
 import nodemailer from "nodemailer";
 import path from "path";
@@ -27,6 +27,9 @@ export default buildConfig({
     importMap: {
       baseDir: __dirname,
     },
+    meta: {
+      title: 'OD-Canvas',
+    },
     components: {
       graphics: {
         Icon: "./src/plugins/Logo#Icon",
@@ -37,7 +40,26 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Projects, Categories, Blog, Clients, About],
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      FixedToolbarFeature(),
+      BlocksFeature({
+        blocks: [
+          CodeBlock({
+            defaultLanguage: 'ts',
+            languages: {
+              plaintext: 'Plain Text',
+              ts: 'TypeScript',
+              js: 'JavaScript',
+              tsx: 'TSX',
+              jsx: 'JSX',
+            },
+          }),
+        ],
+      }),
+    ],
+  }),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {
     outputFile: path.resolve(__dirname, "src/payload-types.ts"),
