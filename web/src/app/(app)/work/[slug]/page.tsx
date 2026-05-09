@@ -8,7 +8,7 @@ import { Footer } from '@/components/footer'
 import { Navigation } from '@/components/navigation'
 import { ProjectCard } from '@/components/project-card'
 import { buildSocialMetadata } from '@/lib/metadata'
-import { projects } from '@/lib/projects'
+import { getProjectBySlug, getProjects } from '@/lib/payload-api'
 
 interface ProjectPageProps {
   params: Promise<{
@@ -16,18 +16,9 @@ interface ProjectPageProps {
   }>
 }
 
-// Enable static generation for all project pages
-// export const dynamic = "error";
-
-export async function generateStaticParams() {
-  return projects.map(project => ({
-    slug: project.slug,
-  }))
-}
-
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params
-  const project = projects.find(p => p.slug === slug)
+  const project = await getProjectBySlug(slug)
 
   if (!project) {
     return {
@@ -43,7 +34,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
       title: `${project.title} | Other Dev Portfolio`,
       description: project.description,
       path: `/work/${slug}`,
-      imagePath: project.image,
+      imagePath: project.image?.url ?? '',
       imageAlt: `${project.title} | Other Dev Portfolio`,
     }),
   }
@@ -51,21 +42,26 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params
-  const project = projects.find(p => p.slug === slug)
+  const project = await getProjectBySlug(slug)
 
   if (!project) {
     notFound()
   }
 
-  const relatedProjects = projects.filter(p => p.id !== project.id).slice(0, 13)
+  const allProjects = await getProjects()
+  const relatedProjects = allProjects
+    .filter(p => p.id !== project.id)
+    .slice(0, 13)
 
-  // JSON-LD Structured Data
+  const mediaUrls = project.media?.map(m => m.image?.url).filter(Boolean) as string[] ?? []
+
+  // JSON-Ld Structured Data
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: project.title,
     description: project.description,
-    image: project.image,
+    image: project.image?.url,
     url: `https://otherdev.com/work/${slug}`,
     creator: {
       '@type': 'Organization',
@@ -115,12 +111,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           )}
         </div>
 
-        {project.media && project.media.length > 0 && (
+        {mediaUrls.length > 0 && (
           <div className="bg-neutral-200 rounded-[5px] mb-[35.37px] md:mr-[15.3%]">
             <div className="flex flex-col gap-[90px] md:px-[145px] md:max-w-none lg:max-w-[803px] lg:mx-auto lg:px-0 py-[78px]">
-              {project.media.map((mediaUrl, index) => (
+              {mediaUrls.map((mediaUrl, index) => (
                 <a
-                  // biome-ignore lint/suspicious/noArrayIndexKey: Media URLs are stable and never reorder
                   key={mediaUrl + index}
                   href={project.url ? `https://${project.url}` : '#'}
                   target="_blank"
@@ -156,7 +151,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <ProjectCard
                   title={relatedProject.title}
                   slug={relatedProject.slug}
-                  image={relatedProject.image}
+                  image={relatedProject.image?.url ?? ''}
                   description={relatedProject.description}
                   variant="work"
                   showText={true}
@@ -182,7 +177,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <Script
         id="project-jsonld"
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is safe, generated from static project data
+        // biome-ignore lint/security/noDangerouslySetInnerHTML: JSON-LD is safe, generated from project data
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </div>

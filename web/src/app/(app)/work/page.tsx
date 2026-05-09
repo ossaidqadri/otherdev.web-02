@@ -4,7 +4,7 @@ import { Footer } from '@/components/footer'
 import { Navigation } from '@/components/navigation'
 import { ProjectCard } from '@/components/project-card'
 import { buildSocialMetadata } from '@/lib/metadata'
-import { projects } from '@/lib/projects'
+import { getProjects } from '@/lib/payload-api'
 
 export const metadata: Metadata = {
   title: 'Work | Other Dev',
@@ -52,7 +52,9 @@ const portfolioSchema = {
   },
 }
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  const projects = await getProjects()
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -71,7 +73,7 @@ export default function WorkPage() {
               if (b.year !== a.year) {
                 return b.year - a.year
               }
-              return parseInt(b.id, 10) - parseInt(a.id, 10)
+              return 0
             })
             .map((project, index) => (
               <div
@@ -82,7 +84,7 @@ export default function WorkPage() {
                 <ProjectCard
                   title={project.title}
                   slug={project.slug}
-                  image={project.image}
+                  image={project.image?.url ?? ''}
                   description={project.description}
                   variant="work"
                   showText={true}
@@ -97,13 +99,13 @@ export default function WorkPage() {
       <Script
         id="organization-jsonld"
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is safe, generated from static schema
+        // biome-ignore lint/security/noDangerouslySetInnerHTML: JSON-LD is safe, generated from static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
       <Script
         id="portfolio-jsonld"
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is safe, generated from static schema
+        // biome-ignore lint/security/noDangerouslySetInnerHTML: JSON-LD is safe, generated from static schema
         dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioSchema) }}
       />
     </div>

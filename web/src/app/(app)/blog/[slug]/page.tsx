@@ -1,28 +1,15 @@
-import { CanvasClient } from '@od-canvas/sdk'
 import Link from 'next/link'
 import sanitizeHtml from 'sanitize-html'
 import { buildSocialMetadata } from '@/lib/metadata'
+import { getBlogPostBySlug } from '@/lib/payload-api'
 
 export const revalidate = 3600
 
 type PageProps = { params: Promise<{ slug: string }> }
 
-async function getBlogPost(id: number) {
-  const canvas = new CanvasClient({
-    baseUrl: process.env.CANVAS_API_URL,
-    apiKey: process.env.CANVAS_API_KEY,
-  })
-
-  try {
-    return await canvas.getPublicDocument(id)
-  } catch {
-    return null
-  }
-}
-
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
-  const post = await getBlogPost(parseInt(slug, 10))
+  const post = await getBlogPostBySlug(slug)
 
   if (!post) {
     return {
@@ -30,7 +17,7 @@ export async function generateMetadata({ params }: PageProps) {
     }
   }
 
-  const description = post.content.replace(/<[^>]*>/g, '').substring(0, 160)
+  const description = post.excerpt ?? ''
 
   return {
     title: `${post.title} | Other Dev Blog`,
@@ -39,7 +26,7 @@ export async function generateMetadata({ params }: PageProps) {
       title: `${post.title} | Other Dev Blog`,
       description,
       path: `/blog/${slug}`,
-      imagePath: '/images/projects/finlit-2025/finlit-desktop-standard-ratio.webp',
+      imagePath: post.featuredImage?.url ?? '',
       imageAlt: `${post.title} | Other Dev Blog`,
       type: 'article',
     }),
@@ -48,7 +35,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
-  const post = await getBlogPost(parseInt(slug, 10))
+  const post = await getBlogPostBySlug(slug)
 
   if (!post) {
     return (
@@ -66,6 +53,10 @@ export default async function BlogPostPage({ params }: PageProps) {
     )
   }
 
+  const displayDate = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+
   return (
     <article className="max-w-2xl mx-auto px-4 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="mb-8">
@@ -73,20 +64,18 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.title}
         </h1>
         <p className="text-sm text-neutral-600 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-          {new Date(post.created_at).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          {displayDate}
         </p>
       </header>
 
-      <div
-        className="prose prose-lg w-full content animate-in fade-in slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '150ms' }}
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with sanitizeHtml
-        dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
-      />
+      {post.content && (
+        <div
+          className="prose prose-lg w-full content animate-in fade-in slide-in-from-bottom-4 duration-500"
+          style={{ animationDelay: '150ms' }}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with sanitizeHtml
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content as unknown as string) }}
+        />
+      )}
 
       <footer className="mt-12 pt-8 border-t border-neutral-200">
         <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">

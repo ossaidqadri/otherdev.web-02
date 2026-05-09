@@ -12,21 +12,21 @@ import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { Users } from "./collections/Users";
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: {
-      baseDir: path.resolve(dirname),
+      baseDir: __dirname,
     },
   },
   collections: [Users, Media, Projects, Categories, Blog],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {
-    outputFile: path.resolve(dirname, "payload-types.ts"),
+    outputFile: path.resolve(__dirname, "src/payload-types.ts"),
   },
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || "",
@@ -56,4 +56,4 @@ export default buildConfig({
       },
     }),
   ],
-});
+})

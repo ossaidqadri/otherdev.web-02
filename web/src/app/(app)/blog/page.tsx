@@ -1,9 +1,10 @@
-import { CanvasClient } from '@od-canvas/sdk'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const revalidate = 3600
 import { buildSocialMetadata } from '@/lib/metadata'
+import { getBlogPosts } from '@/lib/payload-api'
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Blog | Other Dev',
@@ -17,30 +18,6 @@ export const metadata: Metadata = {
     imagePath: '/images/projects/olly-2025/products-page-desktop.webp',
     imageAlt: 'Blog | Other Dev',
   }),
-}
-
-interface CanvasDocument {
-  id: number
-  title: string
-  created_at: string
-  content: string
-}
-
-async function getBlogPosts(): Promise<CanvasDocument[]> {
-  const canvas = new CanvasClient({
-    baseUrl: process.env.CANVAS_API_URL,
-    apiKey: process.env.CANVAS_API_KEY,
-  })
-
-  try {
-    const documents =
-      (await canvas.getPublicDocuments(parseInt(process.env.CANVAS_PROJECT_ID || '4', 10))) ?? []
-    return documents.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-  } catch {
-    return []
-  }
 }
 
 export default async function BlogPage() {
@@ -63,8 +40,7 @@ export default async function BlogPage() {
         </h1>
       </div>
       <p className="text-neutral-600 text-xs mb-8">
-        {posts.length} {posts.length === 1 ? 'post' : 'posts'} • Powered by{' '}
-        <a href="https://canvas.otherdev.com">Canvas</a>
+        {posts.length} {posts.length === 1 ? 'post' : 'posts'} • Powered by Payload CMS
       </p>
 
       <div className="grid gap-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
@@ -75,18 +51,20 @@ export default async function BlogPage() {
             style={{ animationDelay: `${index * 80}ms` }}
           >
             <h2 className="text-sm font-bold mb-2">
-              <Link href={`/blog/${post.id}`} className="text-neutral-900 hover:text-blue-600">
+              <Link href={`/blog/${post.slug}`} className="text-neutral-900 hover:text-blue-600">
                 {post.title}
               </Link>
             </h2>
             <p className="text-sm text-neutral-600 mb-4">
-              {new Date(post.created_at).toLocaleDateString()}
+              {post.publishedAt
+                ? new Date(post.publishedAt).toLocaleDateString()
+                : new Date(post.createdAt).toLocaleDateString()}
             </p>
-            <p className="text-neutral-700 line-clamp-2">
-              {post.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
-            </p>
+            {post.excerpt && (
+              <p className="text-neutral-700 line-clamp-2">{post.excerpt}</p>
+            )}
             <Link
-              href={`/blog/${post.id}`}
+              href={`/blog/${post.slug}`}
               className="inline-block mt-4 text-neutral-600 hover:text-neutral-800 text-xs font-medium"
             >
               Read More →
