@@ -1,6 +1,6 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
-import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
+import { s3Storage } from "@payloadcms/storage-s3";
 import path from "path";
 import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
@@ -33,11 +33,27 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
-    vercelBlobStorage({
+    s3Storage({
+      enabled: Boolean(process.env.R2_BUCKET),
       collections: {
-        media: true,
+        media: {
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename, prefix }) => {
+            const key = prefix ? `${prefix}/${filename}` : filename
+            return `${process.env.R2_PUBLIC_URL}/${key}`
+          },
+        },
       },
-      token: process.env.BLOB_READ_WRITE_TOKEN || "",
+      bucket: process.env.R2_BUCKET || "",
+      config: {
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+        },
+        region: "auto",
+        endpoint: process.env.R2_ENDPOINT || "",
+        forcePathStyle: true,
+      },
     }),
   ],
 });
