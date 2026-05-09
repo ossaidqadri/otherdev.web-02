@@ -5,7 +5,7 @@ import { Navigation } from '@/components/navigation'
 import { ProjectCard } from '@/components/project-card'
 import { buildSocialMetadata, DEFAULT_SITE_DESCRIPTION } from '@/lib/metadata'
 import { playlistsAndImages } from '@/lib/playlists-and-images'
-import { projects } from '@/lib/projects'
+import { getProjects } from '@/lib/payload-api'
 import { shuffle } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -33,32 +33,19 @@ export const metadata: Metadata = {
   }),
 }
 
-// JSON-LD Structured Data
-const _organizationSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Other Dev',
-  url: 'https://otherdev.com',
-  logo: 'https://otherdev.com/TheOtherDevLogo.svg',
-  description: 'Digital platforms for pioneering creatives',
-  sameAs: ['https://otherdev.com'],
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Karachi',
-    addressCountry: 'Pakistan',
-  },
-}
-
 export default async function Home() {
   await connection()
 
+  const projects = await getProjects()
+
   const projectsWithExtraImages = projects.flatMap(project => {
-    const cards = [project]
-    if (project.media && project.media.length >= 2) {
+    const cards = [{ ...project, image: project.image?.url ?? '' }]
+    const mediaUrls = project.media?.map(m => m.image?.url).filter(Boolean) as string[]
+    if (mediaUrls && mediaUrls.length >= 2) {
       cards.push({
         ...project,
         id: `${project.id}-media-2`,
-        image: project.media[1],
+        image: mediaUrls[1],
       })
     }
     return cards

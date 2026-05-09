@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jsdelivr.net unpkg.com esm.sh https://mcp.figma.com",
               "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com",
-              "img-src 'self' data: blob: images.unsplash.com cdn.jsdelivr.net github.com localhost:3845 cdn.shadcnstudio.com media.otherdev.com pub-*.r2.dev",
+              "img-src 'self' data: blob: images.unsplash.com cdn.jsdelivr.net github.com localhost:3845 cdn.shadcnstudio.com media.otherdev.com pub-bb3787984f924b288b4158546c9171fb.r2.dev",
               "font-src 'self' fonts.gstatic.com",
               "connect-src 'self' api.groq.com api.mistral.ai *.googleapis.com *.firebaseio.com https://mcp.figma.com",
               "frame-src 'self'",
