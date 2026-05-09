@@ -133,13 +133,35 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  /**
+   * Shown in the admin sidebar and account page.
+   */
+  avatar?: (string | null) | Media;
+  name?: string | null;
+  /**
+   * Optional. Shown on your author profile if applicable.
+   */
+  bio?: string | null;
+  /**
+   * Optional. Used only for urgent CMS notifications.
+   */
+  phone?: string | null;
+  /**
+   * Viewer = read-only. Editor = create/edit. Admin = full access.
+   */
+  role: 'admin' | 'editor' | 'viewer';
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -438,13 +460,23 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  avatar?: T;
+  name?: T;
+  bio?: T;
+  phone?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

@@ -16,6 +16,7 @@ import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { Users } from "./collections/Users";
 import { adminThemePlugin } from "./src/plugins/index";
+import { payloadAiPlugin } from "@ai-stack/payloadcms";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,9 @@ export default buildConfig({
       graphics: {
         Icon: "./src/plugins/Logo#Icon",
       },
+    },
+    routes: {
+      account: '/my-profile',
     },
   },
   collections: [Users, Media, Projects, Categories, Blog, Clients, About],
@@ -77,5 +81,12 @@ export default buildConfig({
       },
     }),
     adminThemePlugin(),
+    payloadAiPlugin({
+      collections: {
+        [About.slug]: true,
+        [Blog.slug]: true,
+      },
+      uploadCollectionSlug: 'media',
+    }),
   ],
 })

@@ -9,6 +9,11 @@ export const Projects: CollectionConfig = {
     listSearchableFields: ['title', 'slug'],
     preview: (doc) => doc.slug ? `/projects/${doc.slug}` : false,
   },
+  access: {
+    create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    delete: ({ req }) => req.user?.role === 'admin',
+  },
   fields: [
     {
       name: 'title',

@@ -7,6 +7,11 @@ export const Categories: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug'],
   },
+  access: {
+    create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    delete: ({ req }) => req.user?.role === 'admin',
+  },
   fields: [
     {
       name: 'name',

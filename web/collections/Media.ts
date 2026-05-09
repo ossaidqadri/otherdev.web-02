@@ -7,6 +7,9 @@ export const Media: CollectionConfig = {
   },
   access: {
     read: () => true,
+    create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+    delete: ({ req }) => req.user?.role === 'admin',
   },
   fields: [
     {
