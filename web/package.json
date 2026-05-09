@@ -15,7 +15,9 @@
     "check": "biome check --write",
     "ingest": "bun run scripts/ingest-documents.ts",
     "ingest:mastra": "bun run scripts/ingest-documents.mastra.ts",
-    "clear": "bun run scripts/clear-documents.ts"
+    "clear": "bun run scripts/clear-documents.ts",
+    "migrate:media": "bun run scripts/migrate-media.ts",
+    "migrate:projects": "bun run scripts/migrate-projects.ts"
   },
   "dependencies": {
     "@ai-sdk/cohere": "^3.0.34",
@@ -32,6 +34,7 @@
     "@payloadcms/db-mongodb": "^3.84.1",
     "@payloadcms/next": "^3.84.1",
     "@payloadcms/richtext-lexical": "^3.84.1",
+    "@payloadcms/storage-vercel-blob": "^3.84.1",
     "@qdrant/js-client-rest": "^1.17.0",
     "@streamdown/code": "^1.1.1",
     "@streamdown/math": "^1.0.2",
