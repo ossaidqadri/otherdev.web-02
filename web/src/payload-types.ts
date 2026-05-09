@@ -72,6 +72,8 @@ export interface Config {
     projects: Project;
     categories: Category;
     blog: Blog;
+    clients: Client;
+    about: About;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +86,8 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
+    clients: ClientsSelect<false> | ClientsSelect<true>;
+    about: AboutSelect<false> | AboutSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -261,6 +265,60 @@ export interface Blog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: string;
+  name: string;
+  slug: string;
+  url?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: string;
+  heroImage: string | Media;
+  heroImageAlt: string;
+  aboutLabel?: string | null;
+  aboutText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  aboutTextPlain?: string | null;
+  clientsLabel?: string | null;
+  clientsDesktop?: (string | Client)[] | null;
+  clientsMobile?: (string | Client)[] | null;
+  foundingDate?: string | null;
+  foundingYear?: string | null;
+  founders?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -302,6 +360,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blog';
         value: string | Blog;
+      } | null)
+    | ({
+        relationTo: 'clients';
+        value: string | Client;
+      } | null)
+    | ({
+        relationTo: 'about';
+        value: string | About;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -465,6 +531,44 @@ export interface BlogSelect<T extends boolean = true> {
   featuredImage?: T;
   categories?: T;
   publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients_select".
+ */
+export interface ClientsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  url?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  heroImage?: T;
+  heroImageAlt?: T;
+  aboutLabel?: T;
+  aboutText?: T;
+  aboutTextPlain?: T;
+  clientsLabel?: T;
+  clientsDesktop?: T;
+  clientsMobile?: T;
+  foundingDate?: T;
+  foundingYear?: T;
+  founders?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

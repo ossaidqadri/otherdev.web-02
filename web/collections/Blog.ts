@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Blog: CollectionConfig = {
   slug: 'blog',
   admin: {
+    group: 'Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', 'status', 'createdAt'],
   },

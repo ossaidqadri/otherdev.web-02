@@ -17,6 +17,7 @@
         "@langchain/textsplitters": "^1.0.1",
         "@next/third-parties": "16.2.6",
         "@payloadcms/db-mongodb": "^3.84.1",
+        "@payloadcms/email-nodemailer": "^3.84.1",
         "@payloadcms/next": "^3.84.1",
         "@payloadcms/richtext-lexical": "^3.84.1",
         "@payloadcms/storage-s3": "^3.84.1",
@@ -769,6 +770,8 @@
     "@oxc-transform/binding-win32-x64-msvc": ["@oxc-transform/binding-win32-x64-msvc@0.111.0", "", { "os": "win32", "cpu": "x64" }, "sha512-QddKW4kBH0Wof6Y65eYCNHM4iOGmCTWLLcNYY1FGswhzmTYOUVXajNROR+iCXAOFnOF0ldtsR79SyqgyHH1Bgg=="],
 
     "@payloadcms/db-mongodb": ["@payloadcms/db-mongodb@3.84.1", "", { "dependencies": { "mongoose": "8.15.1", "mongoose-paginate-v2": "1.9.4", "prompts": "2.4.2", "uuid": "11.1.0" }, "peerDependencies": { "payload": "3.84.1" } }, "sha512-HTP/Z6iQHFyHhuMImAC/GH0xGhjuvuHZHdB7crJUkXAyD677tp6C3mS8YB04s28bCteDqcXBYjHODZr5xDHBcw=="],
+
+    "@payloadcms/email-nodemailer": ["@payloadcms/email-nodemailer@3.84.1", "", { "dependencies": { "nodemailer": "7.0.12" }, "peerDependencies": { "payload": "3.84.1" } }, "sha512-pTXl9dfIoXLpdI2BbK0h64Y9I3RLGOG1QkWokSdCDWr+qkOiRkbO7W8dOEtK6Nh8eIwNOMJLA7Og3x4EbGMPxg=="],
 
     "@payloadcms/graphql": ["@payloadcms/graphql@3.84.1", "", { "dependencies": { "graphql-scalars": "1.22.2", "pluralize": "8.0.0", "ts-essentials": "10.0.3", "tsx": "4.21.0" }, "peerDependencies": { "graphql": "^16.8.1", "payload": "3.84.1" }, "bin": { "payload-graphql": "bin.js" } }, "sha512-pVJdgihEEexpK+kANSozAMf3PQfd6p51/G3cK+rkPzSjghf7X+cQQ8NFOmAMDTpijM5YaowQYTuEje3KaLVXuQ=="],
 

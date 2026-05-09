@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Clients: CollectionConfig = {
   slug: 'clients',
   admin: {
+    group: 'Content',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug'],
   },

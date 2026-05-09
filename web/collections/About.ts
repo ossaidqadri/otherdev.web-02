@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const About: CollectionConfig = {
   slug: 'about',
   admin: {
+    group: 'Content',
     useAsTitle: 'metaTitle',
     defaultColumns: ['metaTitle', 'updatedAt'],
   },

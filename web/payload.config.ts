@@ -1,6 +1,8 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
+import nodemailer from "nodemailer";
 import path from "path";
 import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
@@ -24,6 +26,12 @@ export default buildConfig({
     importMap: {
       baseDir: __dirname,
     },
+    components: {
+      graphics: {
+        Logo: "./src/plugins/Logo#Logo",
+        Icon: "./src/plugins/Logo#Icon",
+      },
+    },
   },
   collections: [Users, Media, Projects, Categories, Blog, Clients, About],
   editor: lexicalEditor(),
@@ -31,6 +39,17 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, "src/payload-types.ts"),
   },
+  email: nodemailerAdapter({
+    defaultFromName: "Otherdev",
+    defaultFromAddress: process.env.GMAIL_USER || "",
+    transport: nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    }),
+  }),
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || "",
   }),
