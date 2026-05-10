@@ -119,13 +119,13 @@ export default buildConfig({
     redirectsPlugin({
       collections: ['blog', 'projects'],
     }),
-    mcpPlugin({
-      collections: {
-        blog: { enabled: true },
-        projects: { enabled: true },
-        media: { enabled: true },
-      },
-    }),
+    // mcpPlugin({
+    //   collections: {
+    //     blog: { enabled: true },
+    //     projects: { enabled: true },
+    //     media: { enabled: true },
+    //   },
+    // }),
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {
