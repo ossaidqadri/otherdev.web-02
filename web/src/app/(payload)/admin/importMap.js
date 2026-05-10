@@ -29,7 +29,10 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { SelectField as SelectField_c25bd927cd468b8e16d7bdb2cc282659 } from '@ai-stack/payloadcms/fields'
 import { PromptEditorField as PromptEditorField_c25bd927cd468b8e16d7bdb2cc282659 } from '@ai-stack/payloadcms/fields'
+import { UserAvatar as UserAvatar_26cb41c66e777e2b5905acc619ea2506 } from '../../../../src/plugins/UserAvatar'
+import { LogoutButton as LogoutButton_b56c3363597fd409e5e35be5b088a9fe } from '../../../../src/plugins/LogoutButton'
 import { Icon as Icon_860cc545d0fb0aa708c97e7deab40b5c } from '../../../../src/plugins/Logo'
+import { Logo as Logo_860cc545d0fb0aa708c97e7deab40b5c } from '../../../../src/plugins/Logo'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { ThemeProvider as ThemeProvider_4065d8619d444f950438e4387c4841dd } from '../../../../src/plugins/ThemeProvider'
 import { InstructionsProvider as InstructionsProvider_4490b89d4413c1ffaecdacfe72efaf73 } from '@ai-stack/payloadcms/client'
@@ -68,7 +71,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@ai-stack/payloadcms/fields#SelectField": SelectField_c25bd927cd468b8e16d7bdb2cc282659,
   "@ai-stack/payloadcms/fields#PromptEditorField": PromptEditorField_c25bd927cd468b8e16d7bdb2cc282659,
+  "./src/plugins/UserAvatar#UserAvatar": UserAvatar_26cb41c66e777e2b5905acc619ea2506,
+  "./src/plugins/LogoutButton#LogoutButton": LogoutButton_b56c3363597fd409e5e35be5b088a9fe,
   "./src/plugins/Logo#Icon": Icon_860cc545d0fb0aa708c97e7deab40b5c,
+  "./src/plugins/Logo#Logo": Logo_860cc545d0fb0aa708c97e7deab40b5c,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "./src/plugins/ThemeProvider#ThemeProvider": ThemeProvider_4065d8619d444f950438e4387c4841dd,
   "@ai-stack/payloadcms/client#InstructionsProvider": InstructionsProvider_4490b89d4413c1ffaecdacfe72efaf73,

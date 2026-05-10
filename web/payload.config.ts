@@ -29,10 +29,15 @@ export default buildConfig({
     },
     meta: {
       title: 'OD-Canvas',
+      titleSuffix: '',
+    },
+    avatar: {
+      Component: './src/plugins/UserAvatar#UserAvatar',
     },
     components: {
       graphics: {
         Icon: "./src/plugins/Logo#Icon",
+        Logo: "./src/plugins/Logo#Logo",
       },
     },
     routes: {

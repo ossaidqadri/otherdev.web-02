@@ -27,6 +27,9 @@ export const adminThemePlugin = (): Plugin =>
           ...(incomingConfig.admin?.components?.providers ?? []),
           './src/plugins/ThemeProvider#ThemeProvider',
         ],
+        logout: {
+          Button: './src/plugins/LogoutButton#LogoutButton',
+        },
       },
     },
   })
