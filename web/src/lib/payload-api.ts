@@ -52,7 +52,7 @@ export async function getBlogPostBySlug(slug: string) {
 export async function getAboutContent() {
   const payload = await getPayload({ config: configPromise })
   const about = await payload.findGlobal({
-    global: 'about',
+    slug: 'about',
     depth: 2,
   })
   return about ?? null

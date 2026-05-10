@@ -132,33 +132,52 @@ async function main() {
 
   console.log('\n--- Migrating About Content ---\n')
 
-  try {
-    const aboutData = {
-      heroImage: heroMedia.id,
-      heroImageAlt: 'The members of otherdev',
-      aboutLabel: 'About',
-      aboutTextPlain: `Other Dev produces digital platforms for pioneering creatives. Based in Karachi City,
+  const aboutData = {
+    heroImage: heroMedia.id,
+    heroImageAlt: 'The members of otherdev',
+    aboutLabel: 'About',
+    aboutText: {
+      root: {
+        type: 'root',
+        children: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                text: `Other Dev produces digital platforms for pioneering creatives. Based in Karachi City,
 we are a full-service web development and design studio specializing in the fashion
 and design fields, with a focus on bringing ideas to life through thoughtful design.
 Our team consists of Kabeer Jaffri and Ossaid Qadri, who met while studying at Habib
 Public School.`,
-      clientsLabel: 'Clients',
-      clientsDesktop: desktopClientIds,
-      clientsMobile: mobileClientIds,
-      foundingDate: '2021-01-01',
-      foundingYear: '2021',
-      founders: [
-        { name: 'Kabeer Jaffri' },
-        { name: 'Ossaid Qadri' },
-      ],
-      metaTitle: 'About | Other Dev',
-      metaDescription:
-        "Learn about Other Dev, a full-service web development and design studio based in Karachi. Discover our team, mission, and the clients we've worked with.",
-      ogImage: mediaMap['/images/about-page/about-team-og.png']?.id,
-    }
+              },
+            ],
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        version: 1,
+      },
+    },
+    clientsLabel: 'Clients',
+    clientsDesktop: desktopClientIds,
+    clientsMobile: mobileClientIds,
+    foundingDate: '2021-01-01',
+    foundingYear: '2021',
+    founders: [
+      { name: 'Kabeer Jaffri' },
+      { name: 'Ossaid Qadri' },
+    ],
+    metaTitle: 'About | Other Dev',
+    metaDescription:
+      "Learn about Other Dev, a full-service web development and design studio based in Karachi. Discover our team, mission, and the clients we've worked with.",
+    ogImage: mediaMap['/images/about-page/about-team-og.png']?.id,
+  }
 
+  try {
     await payload.updateGlobal({
-      global: 'about',
+      slug: 'about',
       data: aboutData,
     })
     console.log('✓ Updated About global')

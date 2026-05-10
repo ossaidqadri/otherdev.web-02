@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { slugField } from 'payload'
 
 export const Blog: CollectionConfig = {
@@ -41,6 +43,22 @@ export const Blog: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+    },
+    {
+      name: 'contentHtml',
+      type: 'textarea',
+      admin: {
+        hidden: true,
+      },
+      hooks: {
+        afterRead: [
+          ({ siblingData }) => {
+            const data = siblingData.content as SerializedEditorState
+            if (!data) return ''
+            return convertLexicalToHTML({ data })
+          },
+        ],
+      },
     },
     {
       name: 'excerpt',

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import sanitizeHtml from 'sanitize-html'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPostBySlug } from '@/lib/payload-api'
 
@@ -68,12 +67,11 @@ export default async function BlogPostPage({ params }: PageProps) {
         </p>
       </header>
 
-      {post.content && (
+      {post.contentHtml && (
         <div
           className="prose prose-lg w-full content animate-in fade-in slide-in-from-bottom-4 duration-500"
           style={{ animationDelay: '150ms' }}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized with sanitizeHtml
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content as unknown as string) }}
+          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
         />
       )}
 
