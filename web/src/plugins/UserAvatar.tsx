@@ -1,36 +1,40 @@
-import type { Payload } from 'payload'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import type { Media, User } from '../payload-types'
 
 type Props = {
-  payload?: Payload
   user?: User | null
 }
 
-export async function UserAvatar({ payload, user }: Props) {
-  if (!user || !payload) return null
+export async function UserAvatar({ user }: Props) {
+  if (!user) return null
 
   const avatarRef = user.avatar
-  const avatarId =
-    typeof avatarRef === 'string'
-      ? avatarRef
-      : avatarRef && typeof avatarRef === 'object'
-        ? (avatarRef as Media).id
-        : null
+  let url: string | null = null
 
-  if (!avatarId) return null
+  if (avatarRef && typeof avatarRef === 'object' && 'url' in avatarRef) {
+    url = (avatarRef as Media).url ?? null
+  } else if (typeof avatarRef === 'string') {
+    const payload = await getPayload({ config })
+    const media = await payload
+      .findByID({ collection: 'media', id: avatarRef, depth: 0 })
+      .catch(() => null)
+    url = media?.url ?? null
+  }
 
-  const media = await payload
-    .findByID({ collection: 'media', id: avatarId, depth: 0 })
-    .catch(() => null)
-
-  const url = media?.url ?? null
   if (!url) return null
 
   return (
     <img
       src={url}
       alt={user.name ?? user.email ?? ''}
-      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+      style={{
+        width: '2rem',
+        height: '2rem',
+        objectFit: 'cover',
+        borderRadius: '50%',
+        display: 'block',
+      }}
     />
   )
 }
