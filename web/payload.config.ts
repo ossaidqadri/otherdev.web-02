@@ -5,6 +5,7 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import { searchPlugin } from "@payloadcms/plugin-search";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { redirectsPlugin } from "@payloadcms/plugin-redirects";
+import { mcpPlugin } from "@payloadcms/plugin-mcp";
 import nodemailer from "nodemailer";
 import path from "path";
 import { buildConfig } from "payload";
@@ -107,6 +108,8 @@ export default buildConfig({
   plugins: [
     seoPlugin({
       collections: ['blog', 'projects'],
+      uploadsCollection: 'media',
+      fields: ({ defaultFields }) => defaultFields,
       generateDescription: ({ doc }) => doc?.excerpt ?? '',
       generateTitle: ({ doc }) => doc?.title ?? '',
     }),
@@ -115,6 +118,13 @@ export default buildConfig({
     }),
     redirectsPlugin({
       collections: ['blog', 'projects'],
+    }),
+    mcpPlugin({
+      collections: {
+        blog: { enabled: true },
+        projects: { enabled: true },
+        media: { enabled: true },
+      },
     }),
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
