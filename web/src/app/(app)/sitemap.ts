@@ -1,19 +1,12 @@
-import { CanvasClient } from '@od-canvas/sdk'
 import type { MetadataRoute } from 'next'
+import { getBlogPosts } from '@/lib/payload-api'
 import { projects } from '@/lib/projects'
 
 async function getSitemapBlogRoutes(): Promise<MetadataRoute.Sitemap> {
-  const canvas = new CanvasClient({
-    baseUrl: process.env.CANVAS_API_URL,
-    apiKey: process.env.CANVAS_API_KEY,
-  })
-
-  const posts =
-    (await canvas.getPublicDocuments(parseInt(process.env.CANVAS_PROJECT_ID || '4', 10))) ?? []
-
+  const posts = await getBlogPosts()
   return posts.map(post => ({
-    url: `https://otherdev.com/blog/${post.id}`,
-    lastModified: new Date(post.updated_at || post.created_at),
+    url: `https://otherdev.com/blog/${post.slug}`,
+    lastModified: new Date(post.publishedAt || post.createdAt),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
