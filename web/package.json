@@ -34,6 +34,7 @@
     "@payloadcms/db-mongodb": "^3.84.1",
     "@payloadcms/email-nodemailer": "^3.84.1",
     "@payloadcms/next": "^3.84.1",
+    "@payloadcms/plugin-search": "^3.84.1",
     "@payloadcms/richtext-lexical": "^3.84.1",
     "@payloadcms/storage-s3": "^3.84.1",
     "@payloadcms/storage-vercel-blob": "^3.84.1",

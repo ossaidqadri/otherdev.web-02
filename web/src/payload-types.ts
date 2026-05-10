@@ -73,7 +73,7 @@ export interface Config {
     categories: Category;
     blog: Blog;
     clients: Client;
-    about: About;
+    search: Search;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -87,7 +87,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
-    about: AboutSelect<false> | AboutSelect<true>;
+    search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -97,8 +97,12 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    about: About;
+  };
+  globalsSelect: {
+    about: AboutSelect<false> | AboutSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -227,8 +231,9 @@ export interface Project {
   id: string;
   title: string;
   /**
-   * URL-friendly identifier for project pages.
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
+  generateSlug?: boolean | null;
   slug: string;
   description?: string | null;
   /**
@@ -255,8 +260,9 @@ export interface Category {
   id: string;
   name: string;
   /**
-   * URL-friendly identifier used in category page URLs.
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
+  generateSlug?: boolean | null;
   slug: string;
   description?: string | null;
   updatedAt: string;
@@ -270,8 +276,9 @@ export interface Blog {
   id: string;
   title: string;
   /**
-   * URL-friendly identifier. Auto-generate from title if blank.
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
+  generateSlug?: boolean | null;
   slug: string;
   content?: {
     root: {
@@ -288,6 +295,7 @@ export interface Blog {
     };
     [k: string]: unknown;
   } | null;
+  contentHtml?: string | null;
   /**
    * Short summary shown in listings and social previews.
    */
@@ -314,50 +322,38 @@ export interface Blog {
 export interface Client {
   id: string;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
   url?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "about".
+ * via the `definition` "search".
  */
-export interface About {
+export interface Search {
   id: string;
-  heroImage: string | Media;
-  heroImageAlt: string;
-  aboutLabel?: string | null;
-  aboutText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  aboutTextPlain?: string | null;
-  clientsLabel?: string | null;
-  clientsDesktop?: (string | Client)[] | null;
-  clientsMobile?: (string | Client)[] | null;
-  foundingDate?: string | null;
-  foundingYear?: string | null;
-  founders?:
+  title?: string | null;
+  priority?: number | null;
+  doc:
     | {
-        name: string;
-        id?: string | null;
-      }[]
-    | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  ogImage?: (string | null) | Media;
+        relationTo: 'blog';
+        value: string | Blog;
+      }
+    | {
+        relationTo: 'projects';
+        value: string | Project;
+      }
+    | {
+        relationTo: 'media';
+        value: string | Media;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -410,8 +406,8 @@ export interface PayloadLockedDocument {
         value: string | Client;
       } | null)
     | ({
-        relationTo: 'about';
-        value: string | About;
+        relationTo: 'search';
+        value: string | Search;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -545,6 +541,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface ProjectsSelect<T extends boolean = true> {
   title?: T;
+  generateSlug?: T;
   slug?: T;
   description?: T;
   url?: T;
@@ -566,6 +563,7 @@ export interface ProjectsSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
   description?: T;
   updatedAt?: T;
@@ -577,8 +575,10 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface BlogSelect<T extends boolean = true> {
   title?: T;
+  generateSlug?: T;
   slug?: T;
   content?: T;
+  contentHtml?: T;
   excerpt?: T;
   status?: T;
   author?: T;
@@ -595,6 +595,7 @@ export interface BlogSelect<T extends boolean = true> {
  */
 export interface ClientsSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
   url?: T;
   updatedAt?: T;
@@ -602,28 +603,12 @@ export interface ClientsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "about_select".
+ * via the `definition` "search_select".
  */
-export interface AboutSelect<T extends boolean = true> {
-  heroImage?: T;
-  heroImageAlt?: T;
-  aboutLabel?: T;
-  aboutText?: T;
-  aboutTextPlain?: T;
-  clientsLabel?: T;
-  clientsDesktop?: T;
-  clientsMobile?: T;
-  foundingDate?: T;
-  foundingYear?: T;
-  founders?:
-    | T
-    | {
-        name?: T;
-        id?: T;
-      };
-  metaTitle?: T;
-  metaDescription?: T;
-  ogImage?: T;
+export interface SearchSelect<T extends boolean = true> {
+  title?: T;
+  priority?: T;
+  doc?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -666,6 +651,76 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: string;
+  heroImage: string | Media;
+  heroImageAlt: string;
+  aboutLabel?: string | null;
+  aboutText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  aboutTextPlain?: string | null;
+  clientsLabel?: string | null;
+  clientsDesktop?: (string | Client)[] | null;
+  clientsMobile?: (string | Client)[] | null;
+  foundingDate?: string | null;
+  foundingYear?: string | null;
+  founders?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: (string | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  heroImage?: T;
+  heroImageAlt?: T;
+  aboutLabel?: T;
+  aboutText?: T;
+  aboutTextPlain?: T;
+  clientsLabel?: T;
+  clientsDesktop?: T;
+  clientsMobile?: T;
+  foundingDate?: T;
+  foundingYear?: T;
+  founders?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

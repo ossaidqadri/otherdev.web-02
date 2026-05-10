@@ -2,6 +2,7 @@ import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { lexicalEditor, FixedToolbarFeature, EXPERIMENTAL_TableFeature, BlocksFeature, CodeBlock } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
+import { searchPlugin } from "@payloadcms/plugin-search";
 import nodemailer from "nodemailer";
 import path from "path";
 import { buildConfig } from "payload";
@@ -50,6 +51,14 @@ export default buildConfig({
     routes: {
       account: '/my-profile',
     },
+    livePreview: {
+      url: ({ data, collectionConfig }) => {
+        if (collectionConfig.slug === 'blog') return `/blog/${data.slug}`
+        if (collectionConfig.slug === 'projects') return `/projects/${data.slug}`
+        return `/${data.slug}`
+      },
+      collections: ['blog', 'projects'],
+    },
   },
   collections: [Users, Media, Projects, Categories, Blog, Clients],
   globals: [About],
@@ -93,6 +102,9 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
+    searchPlugin({
+      collections: ['blog', 'projects', 'media'],
+    }),
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {

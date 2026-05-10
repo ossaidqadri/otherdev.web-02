@@ -40,6 +40,10 @@ export const Users: CollectionConfig = {
         placeholder: 'A short description about yourself...',
         description: 'Optional. Shown on your author profile if applicable.',
       },
+      access: {
+        read: ({ req, id }) => req.user?.id === id || req.user?.role === 'admin',
+        update: ({ req, id }) => req.user?.id === id || req.user?.role === 'admin',
+      },
     },
     {
       name: 'phone',
@@ -47,6 +51,10 @@ export const Users: CollectionConfig = {
       admin: {
         placeholder: '+1 (555) 000-0000',
         description: 'Optional. Used only for urgent CMS notifications.',
+      },
+      access: {
+        read: ({ req }) => Boolean(req.user),
+        update: ({ req, id }) => req.user?.id === id || req.user?.role === 'admin',
       },
     },
     {

@@ -1,9 +1,29 @@
 import type { GlobalConfig } from 'payload'
 
 import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { GlobalBeforeChangeHook, GlobalBeforeValidateHook } from 'payload'
+
+const syncAboutTextPlain: GlobalBeforeChangeHook = async ({ data }) => {
+  if (data.aboutText) {
+    data.aboutTextPlain = await convertLexicalToPlaintext({ data: data.aboutText as SerializedEditorState })
+  }
+  return data
+}
+
+const deriveFoundingYear: GlobalBeforeValidateHook = async ({ data }) => {
+  if (data.foundingDate && !data.foundingYear) {
+    data.foundingYear = new Date(data.foundingDate).getFullYear().toString()
+  }
+  return data
+}
 
 export const About: GlobalConfig = {
   slug: 'about',
+  hooks: {
+    beforeChange: [syncAboutTextPlain],
+    beforeValidate: [deriveFoundingYear],
+  },
   fields: [
     {
       name: 'heroImage',
@@ -30,15 +50,6 @@ export const About: GlobalConfig = {
       type: 'textarea',
       admin: {
         hidden: true,
-      },
-      hooks: {
-        afterRead: [
-          ({ siblingData }) => {
-            const data = siblingData.aboutText
-            if (!data) return ''
-            return convertLexicalToPlaintext({ data })
-          },
-        ],
       },
     },
     {

@@ -1,8 +1,50 @@
 import type { CollectionConfig } from 'payload'
 
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+import type {
+  HTMLConvertersFunction,
+  DefaultNodeTypes,
+  SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { slugField } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionAfterChangeHook } from 'payload'
+
+const htmlConverters: HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode> =
+  ({ defaultConverters }) => ({
+    ...defaultConverters,
+    blocks: {
+      Code: ({ node, providedCSSString }) => {
+        const code = node.fields.code ?? ''
+        const lang = node.fields.language ?? ''
+        const attrs = providedCSSString ? ` style="${providedCSSString}"` : ''
+        const langAttr = lang ? ` data-lang="${lang}"` : ''
+        return `<pre${attrs}${langAttr}><code class="language-${lang}">${code}</code></pre>`
+      },
+    },
+  })
+
+const syncContentHtml: CollectionBeforeChangeHook = async ({ data }) => {
+  if (data.content) {
+    data.contentHtml = await convertLexicalToHTML({
+      data: data.content as SerializedEditorState,
+      converters: htmlConverters,
+    })
+  }
+  return data
+}
+
+const setPublishedAt: CollectionBeforeChangeHook = async ({ data, originalDoc }) => {
+  if (data.status === 'published' && !data.publishedAt && (!originalDoc || originalDoc.status !== 'published')) {
+    data.publishedAt = new Date().toISOString()
+  }
+  return data
+}
+
+const logChange: CollectionAfterChangeHook = ({ doc, operation }) => {
+  console.log(`Blog ${operation}: ${doc.title} (${doc.slug})`)
+  return doc
+}
 
 export const Blog: CollectionConfig = {
   slug: 'blog',
@@ -19,6 +61,10 @@ export const Blog: CollectionConfig = {
         interval: 2000,
       },
     },
+  },
+  hooks: {
+    beforeChange: [syncContentHtml, setPublishedAt],
+    afterChange: [logChange],
   },
   access: {
     read: ({ req }) =>
@@ -43,21 +89,16 @@ export const Blog: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      access: {
+        read: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+        update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+      },
     },
     {
       name: 'contentHtml',
       type: 'textarea',
       admin: {
         hidden: true,
-      },
-      hooks: {
-        afterRead: [
-          ({ siblingData }) => {
-            const data = siblingData.content as SerializedEditorState
-            if (!data) return ''
-            return convertLexicalToHTML({ data })
-          },
-        ],
       },
     },
     {
@@ -78,6 +119,10 @@ export const Blog: CollectionConfig = {
         description: 'Draft is only visible to editors. Published is live.',
         position: 'sidebar',
       },
+      access: {
+        read: ({ req }) => Boolean(req.user),
+        update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
+      },
     },
     {
       name: 'author',
@@ -85,6 +130,10 @@ export const Blog: CollectionConfig = {
       relationTo: 'users',
       admin: {
         position: 'sidebar',
+      },
+      access: {
+        read: () => true,
+        update: ({ req }) => req.user?.role === 'admin',
       },
     },
     {
