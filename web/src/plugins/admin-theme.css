@@ -410,3 +410,84 @@ section.login form {
 [data-theme='dark'] .login-brand-panel {
   background-color: var(--theme-elevation-50);
 }
+
+/* ==========================================================================
+   Responsive — Tablet (≤1024px)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  section.login .template-minimal__wrap {
+    grid-template-columns: 36% 1fr;
+  }
+
+  .login-brand-panel {
+    padding: 2rem;
+  }
+
+  .login-brand-panel__label {
+    font-size: 2.5rem;
+  }
+
+  section.login form {
+    padding: 2rem 2.5rem;
+  }
+}
+
+/* ==========================================================================
+   Responsive — Mobile (≤768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  section.login .template-minimal__wrap {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Brand panel — top, full width, compact */
+  .login-brand-panel {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 1.5rem 1.5rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--theme-border-color);
+  }
+
+  .login-brand-panel__label {
+    font-size: 2rem;
+  }
+
+  .login-brand-panel__inner {
+    align-items: center;
+  }
+
+  /* Form — full width, centered */
+  section.login form {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 1.5rem;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* ==========================================================================
+   Responsive — Small Mobile (≤480px)
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .login-brand-panel {
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .login-brand-panel__label {
+    font-size: 1.75rem;
+  }
+
+  .login-brand-panel__sub {
+    font-size: 0.75rem;
+  }
+
+  section.login form {
+    padding: 1rem;
+  }
+}
