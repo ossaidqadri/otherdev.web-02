@@ -74,6 +74,7 @@ export interface Config {
     blog: Blog;
     clients: Client;
     search: Search;
+    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     blog: BlogSelect<false> | BlogSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -249,6 +251,10 @@ export interface Project {
         id?: string | null;
       }[]
     | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -311,6 +317,10 @@ export interface Blog {
    * Leave blank to publish immediately on save.
    */
   publishedAt?: string | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -354,6 +364,29 @@ export interface Search {
         relationTo: 'media';
         value: string | Media;
       };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: string;
+  from: string;
+  to?: {
+    type?: ('reference' | 'custom') | null;
+    reference?:
+      | ({
+          relationTo: 'blog';
+          value: string | Blog;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null);
+    url?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -408,6 +441,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: string | Search;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: string | Redirect;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -554,6 +591,12 @@ export interface ProjectsSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -585,6 +628,12 @@ export interface BlogSelect<T extends boolean = true> {
   featuredImage?: T;
   categories?: T;
   publishedAt?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -609,6 +658,22 @@ export interface SearchSelect<T extends boolean = true> {
   title?: T;
   priority?: T;
   doc?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?:
+    | T
+    | {
+        type?: T;
+        reference?: T;
+        url?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

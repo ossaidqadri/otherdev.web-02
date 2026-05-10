@@ -1,20 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
-import type {
-  HTMLConvertersFunction,
-  DefaultNodeTypes,
-  SerializedBlockNode,
-} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { slugField } from 'payload'
 import type { CollectionBeforeChangeHook, CollectionAfterChangeHook } from 'payload'
 
-const htmlConverters: HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode> =
-  ({ defaultConverters }) => ({
+const htmlConverters =
+  ({ defaultConverters }: { defaultConverters: Record<string, unknown> }) => ({
     ...defaultConverters,
     blocks: {
-      Code: ({ node, providedCSSString }) => {
+      Code: ({ node, providedCSSString }: { node: { fields: { code?: string; language?: string } }; providedCSSString?: string }) => {
         const code = node.fields.code ?? ''
         const lang = node.fields.language ?? ''
         const attrs = providedCSSString ? ` style="${providedCSSString}"` : ''
@@ -53,7 +48,7 @@ export const Blog: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', 'status', 'createdAt'],
     listSearchableFields: ['title', 'slug', 'excerpt'],
-    preview: (doc) => doc.slug ? `/blog/${doc.slug}` : false,
+    preview: (doc) => doc.slug ? `/blog/${doc.slug}` : null,
   },
   versions: {
     drafts: {

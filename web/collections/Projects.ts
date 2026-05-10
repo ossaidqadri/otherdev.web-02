@@ -9,7 +9,7 @@ export const Projects: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'year', 'url'],
     listSearchableFields: ['title', 'slug'],
-    preview: (doc) => doc.slug ? `/projects/${doc.slug}` : false,
+    preview: (doc) => doc.slug ? `/projects/${doc.slug}` : null,
   },
   access: {
     create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
