@@ -51,10 +51,9 @@ export async function getBlogPostBySlug(slug: string) {
 
 export async function getAboutContent() {
   const payload = await getPayload({ config: configPromise })
-  const { docs } = await payload.find({
-    collection: 'about',
-    limit: 1,
+  const about = await payload.findGlobal({
+    global: 'about',
     depth: 2,
   })
-  return docs[0] ?? null
+  return about ?? null
 }

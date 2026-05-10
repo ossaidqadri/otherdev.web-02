@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { slugField } from 'payload'
+
 export const Projects: CollectionConfig = {
   slug: 'projects',
   admin: {
@@ -20,15 +22,10 @@ export const Projects: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
+    slugField({
       name: 'slug',
-      type: 'text',
-      unique: true,
-      required: true,
-      admin: {
-        description: 'URL-friendly identifier for project pages.',
-      },
-    },
+      useAsSlug: 'title',
+    }),
     {
       name: 'description',
       type: 'textarea',

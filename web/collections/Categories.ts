@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { slugField } from 'payload'
+
 export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
@@ -21,15 +23,10 @@ export const Categories: CollectionConfig = {
         placeholder: 'e.g. Frontend Tools',
       },
     },
-    {
+    slugField({
       name: 'slug',
-      type: 'text',
-      unique: true,
-      required: true,
-      admin: {
-        description: 'URL-friendly identifier used in category page URLs.',
-      },
-    },
+      useAsSlug: 'name',
+    }),
     {
       name: 'description',
       type: 'text',

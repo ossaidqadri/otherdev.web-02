@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { slugField } from 'payload'
+
 export const Blog: CollectionConfig = {
   slug: 'blog',
   admin: {
@@ -32,15 +34,10 @@ export const Blog: CollectionConfig = {
         placeholder: 'e.g. How to Build a CMS with Payload',
       },
     },
-    {
+    slugField({
       name: 'slug',
-      type: 'text',
-      unique: true,
-      required: true,
-      admin: {
-        description: 'URL-friendly identifier. Auto-generate from title if blank.',
-      },
-    },
+      useAsSlug: 'title',
+    }),
     {
       name: 'content',
       type: 'richText',
@@ -85,9 +82,7 @@ export const Blog: CollectionConfig = {
       type: 'relationship',
       relationTo: 'categories',
       many: true,
-      admin: {
-        position: 'sidebar',
-      },
+      filterOptions: {},
     },
     {
       name: 'publishedAt',

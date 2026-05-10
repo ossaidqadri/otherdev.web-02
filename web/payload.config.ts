@@ -8,7 +8,7 @@ import { buildConfig } from "payload";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
 
-import { About } from "./collections/About";
+import { About } from "./globals/About";
 import { Blog } from "./collections/Blog";
 import { Categories } from "./collections/Categories";
 import { Clients } from "./collections/Clients";
@@ -44,7 +44,8 @@ export default buildConfig({
       account: '/my-profile',
     },
   },
-  collections: [Users, Media, Projects, Categories, Blog, Clients, About],
+  collections: [Users, Media, Projects, Categories, Blog, Clients],
+  globals: [About],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
       ...defaultFeatures,

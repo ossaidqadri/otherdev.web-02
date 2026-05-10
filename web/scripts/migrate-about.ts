@@ -133,11 +133,6 @@ async function main() {
   console.log('\n--- Migrating About Content ---\n')
 
   try {
-    const existingAbout = await payload.find({
-      collection: 'about',
-      limit: 1,
-    })
-
     const aboutData = {
       heroImage: heroMedia.id,
       heroImageAlt: 'The members of otherdev',
@@ -162,20 +157,11 @@ Public School.`,
       ogImage: mediaMap['/images/about-page/about-team-og.png']?.id,
     }
 
-    if (existingAbout.docs.length > 0) {
-      await payload.update({
-        collection: 'about',
-        id: existingAbout.docs[0].id,
-        data: aboutData,
-      })
-      console.log('✓ Updated About document')
-    } else {
-      await payload.create({
-        collection: 'about',
-        data: aboutData,
-      })
-      console.log('✓ Created About document')
-    }
+    await payload.updateGlobal({
+      global: 'about',
+      data: aboutData,
+    })
+    console.log('✓ Updated About global')
   } catch (error) {
     console.error('✗ Failed to migrate About:', error instanceof Error ? error.message : error)
   }
