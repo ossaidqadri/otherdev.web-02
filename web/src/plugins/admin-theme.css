@@ -337,3 +337,76 @@ nav[class*='sidebar'] {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px oklch(0% 0 0 / 0.08), 0 4px 6px -4px oklch(0% 0 0 / 0.05);
 }
+
+/* ==========================================================================
+   Login Page — Split Layout
+   ========================================================================== */
+
+section.login {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+section.login .template-minimal__wrap {
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  grid-template-rows: 1fr;
+  min-height: 100vh;
+  max-width: none;
+  padding: 0;
+}
+
+/* Brand panel spans full left column */
+.login-brand-panel {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--theme-elevation-100);
+  border-right: 1px solid var(--theme-border-color);
+  padding: 3rem;
+}
+
+.login-brand-panel__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login-brand-panel__label {
+  font-family: 'QueensCompressed', serif;
+  font-weight: 300;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--theme-text);
+  letter-spacing: -0.02em;
+}
+
+.login-brand-panel__sub {
+  font-family: 'TWKLausanne', sans-serif;
+  font-size: 0.875rem;
+  color: var(--theme-text-muted);
+  margin: 0;
+}
+
+/* Right column — logo + form centered together */
+section.login .login__brand {
+  display: none;
+}
+
+section.login form {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 4rem;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+[data-theme='dark'] .login-brand-panel {
+  background-color: var(--theme-elevation-50);
+}

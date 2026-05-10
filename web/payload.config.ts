@@ -39,6 +39,7 @@ export default buildConfig({
         Icon: "./src/plugins/Logo#Icon",
         Logo: "./src/plugins/Logo#Logo",
       },
+      beforeLogin: ['./src/plugins/BeforeLogin#BeforeLogin'],
     },
     routes: {
       account: '/my-profile',
