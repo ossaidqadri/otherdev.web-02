@@ -4,8 +4,6 @@ import Link from 'next/link'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPosts } from '@/lib/payload-api'
 
-export const revalidate = 3600
-
 export const metadata: Metadata = {
   title: 'Blog | Other Dev',
   description:

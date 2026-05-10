@@ -1,6 +1,30 @@
 import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
+import { revalidatePath } from 'next/cache'
 import { slugField } from 'payload'
+
+const autoFillDescription: CollectionBeforeChangeHook = async ({ data }) => {
+  if (data.description) return data
+  // Future: derive from other project fields when available
+  return data
+}
+
+const revalidateProject: CollectionAfterChangeHook = ({ doc }) => {
+  revalidatePath('/work')
+  revalidatePath(`/work/${doc.slug}`)
+  revalidatePath('/')
+  revalidatePath('/sitemap')
+  return doc
+}
+
+const revalidateProjectDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  revalidatePath('/work')
+  revalidatePath(`/work/${doc.slug}`)
+  revalidatePath('/')
+  revalidatePath('/sitemap')
+  return doc
+}
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
@@ -15,6 +39,11 @@ export const Projects: CollectionConfig = {
     create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
     update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
     delete: ({ req }) => req.user?.role === 'admin',
+  },
+  hooks: {
+    beforeChange: [autoFillDescription],
+    afterChange: [revalidateProject],
+    afterDelete: [revalidateProjectDelete],
   },
   fields: [
     {

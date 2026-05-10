@@ -1,8 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
+import { revalidatePath } from 'next/cache'
 import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import type { GlobalBeforeChangeHook, GlobalBeforeValidateHook } from 'payload'
+import type { GlobalBeforeChangeHook, GlobalBeforeValidateHook, GlobalAfterChangeHook } from 'payload'
 
 const syncAboutTextPlain: GlobalBeforeChangeHook = async ({ data }) => {
   if (data.aboutText) {
@@ -18,11 +19,17 @@ const deriveFoundingYear: GlobalBeforeValidateHook = async ({ data }) => {
   return data
 }
 
+const revalidateAbout: GlobalAfterChangeHook = ({ doc }) => {
+  revalidatePath('/about')
+  return doc
+}
+
 export const About: GlobalConfig = {
   slug: 'about',
   hooks: {
     beforeChange: [syncAboutTextPlain],
     beforeValidate: [deriveFoundingYear],
+    afterChange: [revalidateAbout],
   },
   fields: [
     {

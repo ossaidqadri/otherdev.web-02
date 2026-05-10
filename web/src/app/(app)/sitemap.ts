@@ -2,8 +2,6 @@ import { CanvasClient } from '@od-canvas/sdk'
 import type { MetadataRoute } from 'next'
 import { projects } from '@/lib/projects'
 
-export const revalidate = 3600
-
 async function getSitemapBlogRoutes(): Promise<MetadataRoute.Sitemap> {
   const canvas = new CanvasClient({
     baseUrl: process.env.CANVAS_API_URL,

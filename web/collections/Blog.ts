@@ -1,9 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
+import { revalidatePath } from 'next/cache'
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { slugField } from 'payload'
-import type { CollectionBeforeChangeHook, CollectionAfterChangeHook } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
 const htmlConverters =
   ({ defaultConverters }: { defaultConverters: Record<string, unknown> }) => ({
@@ -36,8 +37,31 @@ const setPublishedAt: CollectionBeforeChangeHook = async ({ data, originalDoc })
   return data
 }
 
+const autoFillExcerpt: CollectionBeforeChangeHook = async ({ data }) => {
+  if (data.excerpt || !data.contentHtml) return data
+  const text = data.contentHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  data.excerpt = text.slice(0, 160)
+  return data
+}
+
 const logChange: CollectionAfterChangeHook = ({ doc, operation }) => {
   console.log(`Blog ${operation}: ${doc.title} (${doc.slug})`)
+  return doc
+}
+
+const revalidateBlog: CollectionAfterChangeHook = ({ doc, operation }) => {
+  if (doc._status === 'published') {
+    revalidatePath('/blog')
+    revalidatePath(`/blog/${doc.slug}`)
+    revalidatePath('/sitemap')
+  }
+  return doc
+}
+
+const revalidateBlogDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  revalidatePath('/blog')
+  revalidatePath(`/blog/${doc.slug}`)
+  revalidatePath('/sitemap')
   return doc
 }
 
@@ -58,8 +82,9 @@ export const Blog: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [syncContentHtml, setPublishedAt],
-    afterChange: [logChange],
+    beforeChange: [syncContentHtml, setPublishedAt, autoFillExcerpt],
+    afterChange: [logChange, revalidateBlog],
+    afterDelete: [revalidateBlogDelete],
   },
   access: {
     read: ({ req }) =>

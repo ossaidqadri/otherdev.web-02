@@ -2,8 +2,6 @@ import Link from 'next/link'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPostBySlug } from '@/lib/payload-api'
 
-export const revalidate = 3600
-
 type PageProps = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: PageProps) {
