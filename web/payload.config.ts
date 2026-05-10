@@ -29,6 +29,13 @@ export default buildConfig({
     meta: {
       title: 'OD-Canvas',
       titleSuffix: '',
+      icons: [
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          url: '/TheOtherDevLogo.svg',
+        },
+      ],
     },
     avatar: {
       Component: './src/plugins/UserAvatar#UserAvatar',
