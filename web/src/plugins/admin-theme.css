@@ -98,13 +98,13 @@
   --theme-error-500: oklch(52.251% 0.2121 28.056);
   --theme-error-950: oklch(30% 0.15 28);
 
-  /* CTA / Primary button — matches your --primary token */
+  /* CTA / Primary button — warm dark gray family for both themes */
   --theme-cta: oklch(0.216 0.006 56.043);
   --theme-cta-hover: oklch(0.18 0.006 56.043);
   --theme-cta-active: oklch(0.15 0.006 56.043);
   --theme-cta-text: oklch(0.985 0.001 106.423);
 
-  /* Links — purple-blue like your site */
+  /* Links — warm gray to match CTA family */
   --theme-link: oklch(0.488 0.243 264.376);
   --theme-link-hover: oklch(0.4 0.25 264.376);
 
@@ -136,7 +136,8 @@
   --theme-elevation-800: oklch(0.96 0.018 34.298);
   --theme-elevation-850: oklch(0.975 0.0185 34.298);
   --theme-elevation-900: oklch(0.985 0.001 106.423);
-  --theme-elevation-950: oklch(1 0 0 / 3%);
+  --theme-elevation-950: oklch(0.08 0.004 56.043);
+  --theme-elevation-1000: oklch(0.04 0.002 56.043);
 
   --theme-text: oklch(0.985 0.001 106.423);
   --theme-text-soft: oklch(0.709 0.01 56.259);
@@ -157,14 +158,15 @@
   --theme-error-500: oklch(0.704 0.191 22.216);
   --theme-error-950: oklch(95% 0.06 28);
 
-  /* Purple-blue link color in dark mode */
-  --theme-cta: oklch(0.696 0.17 162.48);
-  --theme-cta-hover: oklch(0.6 0.17 162.48);
-  --theme-cta-active: oklch(0.5 0.17 162.48);
+  /* CTA / Primary button — warm dark gray family (dark variant) */
+  --theme-cta: oklch(0.75 0.012 56.043);
+  --theme-cta-hover: oklch(0.82 0.014 56.043);
+  --theme-cta-active: oklch(0.88 0.015 56.043);
   --theme-cta-text: oklch(0.985 0.001 106.423);
 
-  --theme-link: oklch(0.696 0.17 162.48);
-  --theme-link-hover: oklch(0.8 0.18 162.48);
+  /* Links — warm gray family, dark variant */
+  --theme-link: oklch(0.7 0.03 56.043);
+  --theme-link-hover: oklch(0.8 0.035 56.043);
 }
 
 /* ==========================================================================
@@ -252,17 +254,41 @@ h6 {
 }
 
 /* ==========================================================================
-   Interactive Elements — hover lift effect from Card component
+   Collection Table Rows — flat card style
    ========================================================================== */
 
-/* Payload collection row hover */
-[class*='row']:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px oklch(0% 0 0 / 0.07), 0 2px 4px -2px oklch(0% 0 0 / 0.05);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* Row as a card — pointer cursor, no lift, background on hover */
+tbody tr[class*='row'] {
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Button press effect */
+tbody tr[class*='row']:hover {
+  transform: none;
+  background-color: var(--theme-elevation-50);
+  box-shadow: 0 1px 3px oklch(0% 0 0 / 0.06);
+}
+
+/* Kill button lift inside row cards — the row is the card, not the buttons */
+tbody tr[class*='row'] button[class*='btn']:hover {
+  transform: none;
+}
+
+tbody tr[class*='row'] [class*='button']:hover {
+  transform: none;
+}
+
+/* Title cell link fills the row so clicking anywhere on the row works */
+tbody tr[class*='row'] td:first-child a,
+tbody tr[class*='row'] td:first-child span {
+  display: block;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Button press effect
+   ========================================================================== */
+
 button[class*='btn'],
 [class*='button'] {
   transition: background-color 0.2s ease, transform 0.1s ease;

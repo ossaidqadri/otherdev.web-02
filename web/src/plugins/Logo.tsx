@@ -2,8 +2,6 @@ import type { PayloadComponent } from 'payload'
 import React from 'react'
 import { House } from 'lucide-react'
 
-const FILL = 'var(--theme-elevation-1000)'
-
 export const Logo: PayloadComponent = () => (
   <svg
     fill="none"
