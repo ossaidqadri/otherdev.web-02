@@ -254,114 +254,32 @@ h6 {
 }
 
 /* ==========================================================================
-   Collection Table Rows — flat card style
+   Dashboard & Cards — Consistent lift and clean layout
    ========================================================================== */
 
-/* Row as a card — pointer cursor, no lift, background on hover */
-tbody tr[class*='row'] {
-  cursor: pointer;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-tbody tr[class*='row']:hover {
-  transform: none;
-  background-color: var(--theme-elevation-50);
-  box-shadow: 0 1px 3px oklch(0% 0 0 / 0.06);
-}
-
-/* Kill button lift inside row cards — the row is the card, not the buttons */
-tbody tr[class*='row'] button[class*='btn']:hover {
-  transform: none;
-}
-
-tbody tr[class*='row'] [class*='button']:hover {
-  transform: none;
-}
-
-/* Title cell link fills the row so clicking anywhere on the row works */
-tbody tr[class*='row'] td:first-child a,
-tbody tr[class*='row'] td:first-child span {
-  display: block;
-  width: 100%;
-}
-
-/* ==========================================================================
-   Button press effect
-   ========================================================================== */
-
-button[class*='btn'],
-[class*='button'] {
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-button[class*='btn']:active,
-[class*='button']:active {
-  transform: scale(0.98);
-}
-
-/* Input focus ring */
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--theme-elevation-550) !important;
-  box-shadow: 0 0 0 3px oklch(0.709 0.01 56.259 / 0.2) !important;
-}
-
-/* ==========================================================================
-   Dynamic Underline Links — your signature link style
-   ========================================================================== */
-
-a:not([class*='no-underline']) {
-  position: relative;
-  text-decoration: none;
-}
-
-a:not([class*='no-underline']):hover::before {
-  transform: scaleX(1);
-}
-
-a:not([class*='no-underline'])::before {
-  content: '';
-  position: absolute;
-  display: block;
-  width: 100%;
-  height: 1.5px;
-  bottom: -2px;
-  left: 0;
-  background-color: currentColor;
-  transform: scaleX(0);
-  transform-origin: top left;
-  transition: transform 0.3s ease;
-}
-
-/* ==========================================================================
-   Sidebar — warm secondary background
-   ========================================================================== */
-
-[class*='sidebar'],
-nav[class*='sidebar'] {
-  background-color: var(--theme-elevation-100);
-  font-family: 'TWKLausanne', sans-serif;
-}
-
-/* ==========================================================================
-   Card / Popup Overrides — consistent lift on hover
-   ========================================================================== */
-
+/* Main dashboard card styling */
+.dashboard__card,
+[class*='dashboard'] .card,
 [class*='popup'],
 [class*='dropdown'],
-[class*='modal'],
-[class*='card'] {
+[class*='modal'] {
   border-radius: var(--radius-m);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.dashboard__card:hover,
+[class*='dashboard'] .card:hover,
 [class*='popup']:hover,
 [class*='dropdown']:hover,
-[class*='modal']:hover,
-[class*='card']:hover {
+[class*='modal']:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px oklch(0% 0 0 / 0.08), 0 4px 6px -4px oklch(0% 0 0 / 0.05);
+}
+
+/* Hide the "Add New" shortcut buttons to remove visual clutter */
+.dashboard__card .card__actions,
+.card__actions:has(a[href*='create']) {
+  display: none !important;
 }
 
 /* ==========================================================================
