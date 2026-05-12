@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { connection } from 'next/server'
 import { Footer } from '@/components/footer'
 import { Navigation } from '@/components/navigation'
 import { ProjectCard } from '@/components/project-card'
@@ -36,8 +35,6 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  await connection()
-
   const projects = await getProjects()
 
   const projectsWithExtraImages = projects.flatMap(project => {
