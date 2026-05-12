@@ -8,6 +8,8 @@ import { playlistsAndImages } from '@/lib/playlists-and-images'
 import { getProjects } from '@/lib/payload-api'
 import { shuffle } from '@/lib/utils'
 
+export const revalidate = 86400
+
 export const metadata: Metadata = {
   title: 'Other Dev',
   description: DEFAULT_SITE_DESCRIPTION,
@@ -77,7 +79,7 @@ export default async function Home() {
                 image={project.image}
                 description={project.description}
                 variant={'isPlaylistOrImage' in project ? 'broll' : 'home'}
-                priority={index < 8}
+                priority={index === 0}
               />
             </div>
           ))}

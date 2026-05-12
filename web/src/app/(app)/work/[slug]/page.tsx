@@ -10,6 +10,8 @@ import { ProjectCard } from '@/components/project-card'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getProjectBySlug, getProjects } from '@/lib/payload-api'
 
+export const revalidate = 86400
+
 interface ProjectPageProps {
   params: Promise<{
     slug: string

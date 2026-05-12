@@ -1,86 +1,112 @@
-# Qdrant Setup Fixes — Plan
+# Performance Fix Plan — otherdev.com
 
 ## Context
 
-Audit of the Qdrant setup in this project revealed three actionable issues:
+Lighthouse audit of otherdev.com reveals:
+- **TTFB: ~5,000ms** — every request hits MongoDB via Payload, no ISR caching
+- **3 render-blocking CSS chunks** — `/_next/static/chunks/*.css` blocking ~1.5s
+- **LCP image delayed** — `loading=lazy` + no `fetchpriority=high` on LCP image
+- **No R2 preconnect** — extra DNS+TCP+TLS per image
+- **`maximum-scale=1`** — blocks zoom, Lighthouse Best Practices failure
 
-1. **No payload indexes** — `type`, `category`, `subtype`, `project` fields have no indexes, so filtered searches brute-force scan all payload
-2. **`deleteAllDocuments()` drops + recreates collection** — fine for ingest scripts, but bad pattern if this were ever called on a live system
-3. **KB version SHA computed but discarded** — `computeKbVersion()` result (`_kbVersion`) is never stored or used
-
-The project uses Qdrant Cloud (EU-central-1 AWS), `@qdrant/js-client-rest` v1.17.0, collection `otherdev_documents` with 1536-dim Cosine vectors, ~1660 documents from `knowledge-base.ts`.
+**Good news:** On-demand ISR via Payload `afterChange` hooks already exists for Blog and Projects collections.
 
 ---
 
-## Changes
+## Tasks
 
-### Step 1 — Add payload indexes on collection create
-**File:** `src/server/lib/rag/vector-search.ts`
+### Task 1 — Add ISR fallback `revalidate = 60` to all public pages
+**Impact:** Cuts TTFB from ~5,000ms to <200ms (Vercel Edge cache hit)
 
-Add `payload_indexes` to `createCollection` call for fields used in filtered searches:
+| File | Line to add |
+|------|-------------|
+| `src/app/(app)/page.tsx` | `export const revalidate = 60` after imports |
+| `src/app/(app)/work/page.tsx` | `export const revalidate = 60` after imports |
+| `src/app/(app)/work/[slug]/page.tsx` | `export const revalidate = 60` after imports |
+| `src/app/(app)/blog/page.tsx` | `export const revalidate = 60` after imports |
+| `src/app/(app)/blog/[slug]/page.tsx` | `export const revalidate = 60` after imports |
+| `src/app/(app)/about/page.tsx` | `export const revalidate = 60` after imports |
 
-```typescript
-// Fields commonly filtered: type, category, subtype, project
-// Optional but frequently used in RAG flows: source, year
-await qdrant.createCollection('otherdev_documents', {
-  vectors: { size: 1536, distance: 'Cosine' },
-  payload_indexes: [
-    { fields: ['metadata.type'], field_type: 'keyword' },
-    { fields: ['metadata.category'], field_type: 'keyword' },
-    { fields: ['metadata.subtype'], field_type: 'keyword' },
-    { fields: ['metadata.project'], field_type: 'keyword' },
-  ],
-})
+**About page note:** Queries Payload global (`getAboutContent()`). ISR will cache the global query too. 60s staleness is acceptable for a portfolio. Full on-demand invalidation for globals requires a separate hook — low priority.
+
+---
+
+### Task 2 — Add R2 preconnect to root layout
+**Impact:** ~100-300ms saved per R2 image connection setup
+
+**File:** `src/app/(app)/layout.tsx`
+Add inside `<head>` before existing `<link>` tags:
+```tsx
+<link rel="preconnect" href="https://pub-bb3787984f924b288b4158546c9171fb.r2.dev" crossOrigin="anonymous" />
 ```
 
-> **Tradeoff:** Payload indexes increase memory usage. For 1660 docs this is negligible. Indexes are built as data is upserted, so there's no blocking rebuild.
+---
+
+### Task 3 — Fix viewport `maximum-scale=1`
+**Impact:** Fixes Lighthouse Best Practices failure (accessibility)
+
+**File:** `src/app/(app)/layout.tsx`
+In the `viewport` export, remove `maximumScale: 1`:
+```tsx
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // maximumScale: 1,  ← REMOVE
+}
+```
 
 ---
 
-### Step 2 — Replace `deleteAllDocuments()` with `delete_points` + recreate collection only if needed
-**File:** `src/server/lib/rag/vector-search.ts`
+### Task 4 — Fix LCP image priority on home page
+**Impact:** Browser fetches LCP image immediately instead of waiting 2.1s
 
-Current `deleteAllDocuments()`:
-- Deletes the entire collection (drop)
-- Recreates it from scratch (no indexes)
+**File:** `src/app/(app)/page.tsx`
 
-New approach:
-- **Option A (recommended):** Use `delete_points` by filter to remove all points without dropping the collection or losing index configuration. Then re-create indexes if the collection was truly empty.
-- **Option B:** Keep drop/recreate but make it explicit — rename to `resetCollection()` with a comment explaining this destroys indexes and should only be used in ingest scripts.
+Home page uses `shuffle()` which randomizes card order. Current `priority={index < 8}` means the first 8 cards in shuffled order get priority, but the LCP image (`ads-portfolio-detail-3.webp`) may not be in those first 8 positions.
 
-> **Tradeoff:** Option A preserves collection config (including newly added payload indexes) across ingest runs. Option B is simpler and matches current behavior — fine for an ingest-only script. Given this is only called from the ingest script, Option B is cleaner and the naming makes the intent clear.
+**Fix:** Always give `priority={index === 0}` to the first card in the shuffled grid. This ensures the first visible card's image starts downloading immediately.
 
----
-
-### Step 3 — Wire KB version to something or remove it
-**File:** `scripts/ingest-documents.ts`
-
-Current: `computeKbVersion()` computes a SHA-256 hash of the knowledge base content and stores it in `_kbVersion`, which is then discarded.
-
-Options:
-- **Option A (remove):** Delete the unused `computeKbVersion()` function since it has no consumer
-- **Option B (wire up):** Store the version in Redis/Upstash alongside the embedding cache, so on next run you can skip re-ingesting if the KB hasn't changed
-
-> **Tradeoff:** Option A is the minimal correct fix. Option B adds real cache invalidation but introduces a dependency on Upstash being available during ingest. Given ingest is run manually (not on every deploy), Option A is sufficient.
+```tsx
+<ProjectCard
+  priority={index === 0}  // First card always prioritized
+  // ...
+/>
+```
 
 ---
 
-## Files to Modify
+### Task 5 — Investigate render-blocking CSS chunks
+**Impact:** ~500ms estimated FCP savings if CSS can be deferred
 
-| File | Change |
-|------|--------|
-| `src/server/lib/rag/vector-search.ts` | Add payload indexes to `createCollection`, rename `deleteAllDocuments` to `resetCollection` with comment |
-| `scripts/ingest-documents.ts` | Remove `computeKbVersion()` |
+**Problem:** 3 CSS files at `/_next/static/chunks/*.css` (not `/_next/static/css/`). Standard Next.js puts CSS in `/_next/static/css/`. These chunks are `VeryHigh` priority render-blocking and take ~1.5s.
+
+**Likely cause:** Payload admin CSS bundled into frontend build. The `(payload)/` route group is separate but may share the same Next.js build/worker.
+
+**Investigation steps:**
+1. Run `bun next build` and inspect the chunk contents
+2. Search for imports from `@payloadcms/next/css` or admin components in frontend files
+3. Check if Payload components are being imported in Server Components that run on all pages
+
+**Fix options (once identified):**
+- Move admin-only CSS to separate build
+- Ensure Payload admin routes use their own standalone worker
+- Find and remove the cross-contamination of admin CSS into frontend
+
+---
+
+## Implementation Order
+1. Task 1 (ISR) → Task 2 (R2 preconnect) → Task 3 (viewport) → Task 4 (LCP) → Task 5 (CSS investigation)
 
 ## Verification
-
-1. Run `bun run clear && bun run ingest` locally
-2. Query Qdrant collection info to confirm payload indexes exist
-3. Test a filtered search (e.g., `type: 'project'`) and confirm it uses the index
-4. Confirm ingest still completes with same doc count (~1660)
+Run Lighthouse audit after changes:
+- Expected TTFB: <200ms (was ~5,000ms)
+- Expected LCP: <2,000ms (was 2,404ms)
+- Expected Accessibility score: 100 (was 89)
+- Lighthouse failures: 0 (was 4)
 
 ## Success Criteria
-
-- [ ] Payload indexes exist on `metadata.type`, `metadata.category`, `metadata.subtype`, `metadata.project`
-- [ ] Ingest script still runs successfully end-to-end
-- [ ] No functional changes to the actual search behavior (only structural improvements)
+- [ ] All public pages have `export const revalidate = 60`
+- [ ] R2 preconnect present in root layout
+- [ ] `maximumScale` removed from viewport export
+- [ ] First home page card has `priority={index === 0}`
+- [ ] Render-blocking CSS chunks investigated and root cause identified

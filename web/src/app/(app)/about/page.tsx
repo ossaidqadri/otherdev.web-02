@@ -29,6 +29,8 @@ type AboutData = {
   ogImage?: { url: string } | null
 } | null
 
+export const revalidate = 86400
+
 export async function generateMetadata(): Promise<Metadata> {
   const about: AboutData = await getAboutContent()
 

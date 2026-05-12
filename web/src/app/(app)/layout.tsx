@@ -81,7 +81,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
 }
 
 export default function RootLayout({
@@ -96,6 +95,8 @@ export default function RootLayout({
       style={{ colorScheme: 'light dark' }}
     >
       <head>
+        {/* R2 preconnect — saves DNS+TCP+TLS per image */}
+        <link rel="preconnect" href="https://pub-bb3787984f924b288b4158546c9171fb.r2.dev" crossOrigin="anonymous" />
         {/* Favicon - Multiple sizes for optimal display */}
         <link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png" />
         <link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png" />
