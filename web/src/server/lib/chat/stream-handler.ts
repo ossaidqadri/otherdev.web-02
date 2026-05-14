@@ -38,9 +38,12 @@ function isContentArray(arr: unknown): arr is Part[] {
 }
 
 const REQUIRED_API_KEYS = ['GROQ_API_KEY', 'CEREBRAS_API_KEY', 'COHERE_API_KEY', 'MISTRAL_API_KEY'] as const
-for (const key of REQUIRED_API_KEYS) {
-  if (!process.env[key]) {
-    throw new Error(`[chat] Missing required environment variable: ${key}`)
+
+function validateApiKeys(): void {
+  for (const key of REQUIRED_API_KEYS) {
+    if (!process.env[key]) {
+      throw new Error(`[chat] Missing required environment variable: ${key}`)
+    }
   }
 }
 
@@ -159,6 +162,7 @@ export async function handleStreamChat({
   supportsArtifacts,
   request,
 }: HandleStreamChatOptions): Promise<HandleStreamChatResult> {
+  validateApiKeys()
   const clientId = getClientIdentifier(request)
   const rateLimitResult = await checkRateLimit(clientId)
 

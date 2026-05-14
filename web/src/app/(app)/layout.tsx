@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic'
 import localFont from 'next/font/local'
 import { Suspense } from 'react'
 import { QueryProvider } from '@/components/providers'
-import { buildSocialMetadata, DEFAULT_SITE_DESCRIPTION, SITE_URL } from '@/lib/metadata'
+import { buildSocialMetadata, DEFAULT_SITE_DESCRIPTION } from '@/lib/metadata'
+import { SITE_URL } from '@/lib/constants'
 import { TenantProvider } from '@/lib/tenant-context'
 
 // Lazy load ChatWidget - client-only component
