@@ -107,17 +107,30 @@ const AssistantMessage = memo(function AssistantMessage({ message, setActiveArti
 
 ---
 
-## Implementation Order
-1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18
+---
 
-## Verification
-- [ ] No `as any` casts remaining in `stream-handler.ts`, `groq-citations.ts`
-- [ ] `tsc --noEmit` passes with no new errors
-- [ ] `GROQ_API_KEY` missing → clear error at startup, not runtime crash
-- [ ] RAG cache misses throw (not return null), callers use `.catch(() => null)`
-- [ ] DOMPurify wraps CMS content in blog slug page
-- [ ] `suggestionDataSchema` imported from `src/lib/schemas.ts` in all 4 files
-- [ ] `sliceMessagesAtId` deleted from `message-utils.ts`
-- [ ] `artifact-tool.ts` deleted, routes import from `tools.ts`
-- [ ] `AssistantMessage`, `UserMessage`, `SuggestionButton` wrapped in `memo()`
-- [ ] `PromptSuggestions` wrapped in `memo()` + `useCallback` for handler
+## Completed (from prior sessions)
+
+- [x] suggestionDataSchema imported from `src/lib/schemas.ts` in all 4 files
+- [x] artifact-tool.ts deleted, routes import from tools.ts only
+- [x] PromptSuggestions wrapped in `memo()` + `useCallback`
+- [x] SOCIAL_LINK_CLASS extracted to constants.ts
+- [x] metadata.ts imports SITE_URL from constants.ts (not hardcoded)
+- [x] DOMPurify.sanitize() on blog contentHtml
+- [x] Generic error message in transcribe route (no errorMessage leakage)
+- [x] RAG query cache documented (null = miss, never stored failure state)
+
+## Remaining
+
+### HIGH
+- [ ] Env var fail-fast — `process.env.GROQ_API_KEY!` in stream-handler.ts:284
+- [ ] Discriminated union types for ModelMessage.content (eliminates `as any` casts)
+- [ ] groq-citations.ts 4x `as` casts — type-safe response narrowing
+
+### MEDIUM
+- [ ] Silent catch blocks in tools.ts (retrieveKnowledgeTool, tavilySearchTool)
+- [ ] sliceMessagesAtId dead code — delete from message-utils.ts
+
+### LOW
+- [ ] Image style bug — `style={{ width: 'auto', height: 'auto' }}` overrides explicit dims
+- [ ] Missing `sizes` prop on avatar images for handler

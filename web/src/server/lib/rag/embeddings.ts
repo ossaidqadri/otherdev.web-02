@@ -210,6 +210,12 @@ export async function rerankDocuments({
 
 // ─── Query Result Cache ────────────────────────────────────────────────────────
 
+/**
+ * Query result cache.
+ * - Returns `null` → cache miss or expired; caller should recompute
+ * - Returns `MatchedDocument[]` → valid cache hit (may be empty `[]`)
+ * Never stores a failure state in the cache.
+ */
 export function getCachedQueryResults(queryText: string, filterKey?: string): MatchedDocument[] | null {
   const cacheKey = `q:${queryText}:${filterKey ?? ''}`
   const cached = queryCache.get(cacheKey)
