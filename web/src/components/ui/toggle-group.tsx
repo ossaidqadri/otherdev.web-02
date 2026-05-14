@@ -23,7 +23,10 @@ function ToggleGroupRoot({
   variant,
   size,
   spacing = 0,
-  children,
+  // Filter out Radix-pattern `type` prop — Base uses `multiple` bool instead.
+  // Base single-select: no type prop, defaultValue is always array.
+  // Base multi-select: add `multiple` boolean prop.
+  type: _type,
   ...props
 }: React.ComponentProps<typeof ToggleGroup> &
   VariantProps<typeof toggleVariants> & {
@@ -43,7 +46,7 @@ function ToggleGroupRoot({
       {...props}
     >
       <ToggleGroupContext.Provider value={{ variant, size, spacing }}>
-        {children}
+        {props.children}
       </ToggleGroupContext.Provider>
     </ToggleGroup>
   )
