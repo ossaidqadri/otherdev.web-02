@@ -46,9 +46,7 @@ const RAG_MAX_MESSAGE_LENGTH = Number.parseInt(process.env.RAG_MAX_MESSAGE_LENGT
 const INJECTION_PATTERN =
   /\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>|<\|system\|>|<\|user\|>|<\|assistant\|>/gi
 
-const suggestionDataSchema = z.object({
-  suggestion: z.string(),
-})
+import { suggestionDataSchema } from '@/lib/schemas'
 
 const SUGGESTIONS_SCHEMA = z.object({
   suggestions: z.array(z.string()).min(2).max(3),

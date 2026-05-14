@@ -1,5 +1,4 @@
 import { type TextStreamPart, type ToolSet, type UIMessage, validateUIMessages } from 'ai'
-import { z } from 'zod'
 
 import { createJsonResponse } from '@/server/lib/api-helpers'
 import { handleStreamChat } from '@/server/lib/chat'
@@ -7,12 +6,10 @@ import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from '@/s
 import { checkRateLimit, getClientIdentifier, REQUESTS_PER_WINDOW } from '@/server/lib/rate-limit'
 import { replaceMessageAtId } from '@/server/lib/chat/message-utils'
 
+import { suggestionDataSchema } from '@/lib/schemas'
+
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
-
-const suggestionDataSchema = z.object({
-  suggestion: z.string(),
-})
 
 type RequestBody = {
   id?: string

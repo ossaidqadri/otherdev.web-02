@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
-export const SITE_URL = 'https://otherdev.com'
+import { absoluteUrl } from '@/lib/constants'
+
 export const SITE_NAME = 'Other Dev'
 
 export const DEFAULT_SITE_DESCRIPTION =
@@ -28,10 +29,9 @@ export function buildSocialMetadata({
   type = 'website',
   includeCanonical = true,
 }: BuildSocialMetadataOptions): Pick<Metadata, 'alternates' | 'openGraph' | 'twitter'> {
-  const canonicalPath = path.startsWith('/') ? path : `/${path}`
-  const canonicalUrl = new URL(canonicalPath, SITE_URL).toString()
+  const canonicalUrl = absoluteUrl(path)
   const socialImagePath =
-    imagePath ?? `${canonicalPath === '/' ? '' : canonicalPath}/opengraph-image`
+    imagePath ?? `${path === '/' ? '' : path}/opengraph-image`
 
   return {
     alternates: includeCanonical ? { canonical: canonicalUrl } : undefined,

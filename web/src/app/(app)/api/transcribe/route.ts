@@ -79,11 +79,9 @@ export async function POST(request: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Transcription error:', error)
+    console.error('Transcription error:', error instanceof Error ? error.message : String(error))
 
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-
-    return new Response(JSON.stringify({ error: `Transcription failed: ${errorMessage}` }), {
+    return new Response(JSON.stringify({ error: 'Transcription failed. Please try again.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

@@ -1,10 +1,23 @@
+'use client'
+
+import { memo, useCallback } from 'react'
+
 interface PromptSuggestionsProps {
   label: string
   append: (message: { role: 'user'; content: string }) => void
   suggestions: readonly string[] | readonly { label: string; prompt: string }[]
 }
 
-export function PromptSuggestions({ label, append, suggestions }: PromptSuggestionsProps) {
+export const PromptSuggestions = memo(function PromptSuggestions({
+  label,
+  append,
+  suggestions,
+}: PromptSuggestionsProps) {
+  const handleClick = useCallback(
+    (content: string) => append({ role: 'user', content }),
+    [append]
+  )
+
   return (
     <div className="space-y-6">
       {label && <h2 className="text-center text-2xl font-bold">{label}</h2>}
@@ -19,7 +32,7 @@ export function PromptSuggestions({ label, append, suggestions }: PromptSuggesti
               type="button"
               // biome-ignore lint/suspicious/noArrayIndexKey: stable suggestion order
               key={`${display}-${index}`}
-              onClick={() => append({ role: 'user', content })}
+              onClick={() => handleClick(content)}
               className="w-full rounded-xl border bg-background p-4 text-left transition-colors hover:bg-muted"
             >
               <p>{display}</p>
@@ -29,4 +42,4 @@ export function PromptSuggestions({ label, append, suggestions }: PromptSuggesti
       </div>
     </div>
   )
-}
+})

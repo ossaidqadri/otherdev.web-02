@@ -50,15 +50,12 @@ import { VoiceWaveform } from '@/components/voice-waveform'
 import { processAttachment } from '@/lib/ai-sdk-attachments'
 import { SUGGESTED_PROMPTS } from '@/lib/constants'
 import { parseSSEStream } from '@/lib/sse'
+import { suggestionDataSchema } from '@/lib/schemas'
 import { cleanSuggestionMarkers, cn } from '@/lib/utils'
 import { VoiceRecorder } from '@/lib/voice-recorder'
 import { useLocalStorageMessages } from '@/hooks/use-local-storage-messages'
 
 // Define custom data parts for the chat stream
-const suggestionDataSchema = z.object({
-  suggestion: z.string(),
-})
-
 type ChatDataParts = {
   suggestion: z.infer<typeof suggestionDataSchema>
 }

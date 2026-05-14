@@ -1,112 +1,123 @@
-# Performance Fix Plan — otherdev.com
+# Code Modernization Plan
 
 ## Context
 
-Lighthouse audit of otherdev.com reveals:
-- **TTFB: ~5,000ms** — every request hits MongoDB via Payload, no ISR caching
-- **3 render-blocking CSS chunks** — `/_next/static/chunks/*.css` blocking ~1.5s
-- **LCP image delayed** — `loading=lazy` + no `fetchpriority=high` on LCP image
-- **No R2 preconnect** — extra DNS+TCP+TLS per image
-- **`maximum-scale=1`** — blocks zoom, Lighthouse Best Practices failure
-
-**Good news:** On-demand ISR via Payload `afterChange` hooks already exists for Blog and Projects collections.
+Audit of 20 shadcn/ui components + full codebase scan via 4 parallel subagents + ctx7 research on TypeScript, React, error handling, and Next.js best practices. Committed Base vs Radix fixes in `a56ae207`. Now planning fixes for remaining high/medium severity issues.
 
 ---
 
-## Tasks
+## HIGH Priority
 
-### Task 1 — Add ISR fallback `revalidate = 60` to all public pages
-**Impact:** Cuts TTFB from ~5,000ms to <200ms (Vercel Edge cache hit)
-
-| File | Line to add |
-|------|-------------|
-| `src/app/(app)/page.tsx` | `export const revalidate = 60` after imports |
-| `src/app/(app)/work/page.tsx` | `export const revalidate = 60` after imports |
-| `src/app/(app)/work/[slug]/page.tsx` | `export const revalidate = 60` after imports |
-| `src/app/(app)/blog/page.tsx` | `export const revalidate = 60` after imports |
-| `src/app/(app)/blog/[slug]/page.tsx` | `export const revalidate = 60` after imports |
-| `src/app/(app)/about/page.tsx` | `export const revalidate = 60` after imports |
-
-**About page note:** Queries Payload global (`getAboutContent()`). ISR will cache the global query too. 60s staleness is acceptable for a portfolio. Full on-demand invalidation for globals requires a separate hook — low priority.
-
----
-
-### Task 2 — Add R2 preconnect to root layout
-**Impact:** ~100-300ms saved per R2 image connection setup
-
-**File:** `src/app/(app)/layout.tsx`
-Add inside `<head>` before existing `<link>` tags:
-```tsx
-<link rel="preconnect" href="https://pub-bb3787984f924b288b4158546c9171fb.r2.dev" crossOrigin="anonymous" />
+### 1. TypeScript — Discriminated Unions to eliminate `as any` casts
+**Files:** `src/server/lib/chat/stream-handler.ts`, `src/lib/groq-citations.ts`, `src/components/chat-core.tsx`
+**Why:** 12 High severity `as` casts — the root cause is `ModelMessage.content` union being untyped
+**Pattern (from ctx7):**
+```typescript
+type TextPart = { type: 'text'; text: string }
+type ImagePart = { type: 'image'; image: { url: string; mediaType?: string } }
+type FilePart = { type: 'file'; file: { url: string; mediaType: string; filename?: string } }
+type MessageContent = TextPart | ImagePart | FilePart
+// Then: if (part.type === 'image') { part.image.url } // no cast needed
 ```
 
+### 2. Env var crash risk — fail-fast on missing API keys
+**File:** `src/server/lib/chat/stream-handler.ts`
+**Why:** `process.env.GROQ_API_KEY!` — missing env crashes prod cold
+**Pattern:** Validate at module load, throw descriptive error if missing
+
+### 3. RAG cache poisoning — throw on cache failure
+**File:** `src/server/lib/rag/embeddings.ts`
+**Why:** `return null` from cached function poisons persistent cache
+**Pattern:** `throw new Error()` instead; callers use `.catch(() => null)` for graceful degradation
+
+### 4. XSS — DOMPurify on CMS content
+**File:** `src/app/(app)/blog/[slug]/page.tsx`
+**Why:** `dangerouslySetInnerHTML` on Payload `contentHtml` without sanitization
+**Pattern:** `import DOMPurify from 'dompurify'` then `DOMPurify.sanitize(contentHtml)`
+
 ---
 
-### Task 3 — Fix viewport `maximum-scale=1`
-**Impact:** Fixes Lighthouse Best Practices failure (accessibility)
+## MEDIUM Priority
 
-**File:** `src/app/(app)/layout.tsx`
-In the `viewport` export, remove `maximumScale: 1`:
-```tsx
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  // maximumScale: 1,  ← REMOVE
-}
+### 5. DRY — Extract `suggestionDataSchema` to shared module
+**Files:** 4 copies in `stream-handler.ts`, `stream/route.ts`, `native/route.ts`, `chat-core.tsx`
+**Fix:** Create `src/lib/schemas.ts` with shared schema + infer TypeScript type
+
+### 6. DRY — Delete dead `sliceMessagesAtId`
+**File:** `src/server/lib/chat/message-utils.ts`
+**Why:** Zero usages, `replaceMessageAtId` handles the same use case
+
+### 7. DRY — Consolidate `createArtifactTool`
+**Files:** `src/server/lib/artifact-tool.ts` (unused) vs `src/server/lib/chat/tools.ts`
+**Fix:** Delete `artifact-tool.ts`, single import from `tools.ts`
+
+### 8. DRY — Rate limit error string magic
+**Files:** 3 copies in chat routes + `stream-handler.ts`
+**Fix:** Extract to `src/server/lib/rate-limit.ts`
+
+### 9. React perf — `React.memo` on chat subcomponents
+**Files:** `chat-core.tsx` — `AssistantMessage`, `UserMessage`, `SuggestionButton`
+**Pattern (from ctx7):**
+```typescript
+const AssistantMessage = memo(function AssistantMessage({ message, setActiveArtifact, ... }) { ... })
 ```
 
+### 10. React perf — `useCallback` for inline handlers in map
+**File:** `prompt-suggestions.tsx` — `onClick={() => append(...)` in map
+**Fix:** `const handleClick = useCallback((content) => append({ role: 'user', content }), [append])`
+
+### 11. React perf — `React.memo` on `PromptSuggestions`
+**File:** `src/components/ui/prompt-suggestions.tsx`
+**Fix:** Wrap in `memo()` to prevent re-render when parent re-renders
+
+### 12. Error handling — Silent catch blocks in AI tools
+**File:** `src/server/lib/chat/tools.ts`
+**Why:** `retrieveKnowledgeTool.execute` and `tavilySearchTool.execute` silently swallow errors
+**Fix:** Log errors + return structured error result instead of silently catching
+
+### 13. DRY — `SITE_URL` duplicated
+**Files:** `src/lib/constants.ts` vs `src/lib/metadata.ts`
+**Fix:** Import from `constants.ts`, remove hardcoded value from `metadata.ts`
+
+### 14. DRY — Footer social link CSS duplicated 3x
+**File:** `src/components/footer.tsx`
+**Fix:** Extract to constant, apply via `className={SOCIAL_LINK_CLASS}`
+
+### 15. Error handling — Transcribe API error leakage
+**File:** `src/app/(app)/api/transcribe/route.ts:81-90`
+**Why:** `errorMessage` exposed directly to client
+**Fix:** Generic error message + server-side logging
+
 ---
 
-### Task 4 — Fix LCP image priority on home page
-**Impact:** Browser fetches LCP image immediately instead of waiting 2.1s
+## LOW Priority
 
-**File:** `src/app/(app)/page.tsx`
+### 16. Next.js Image — `style={{ width: 'auto', height: 'auto' }}` overrides explicit dimensions
+**File:** `chat-core.tsx:369, 512, 582, 1087`
+**Why:** Avatar images have `width={32} height={32}` but also `style={{ width: 'auto', height: 'auto' }}` — contradictory, likely a bug
+**Fix:** Remove the `style` overrides
 
-Home page uses `shuffle()` which randomizes card order. Current `priority={index < 8}` means the first 8 cards in shuffled order get priority, but the LCP image (`ads-portfolio-detail-3.webp`) may not be in those first 8 positions.
+### 17. Next.js Image — Missing `sizes` prop on avatar images
+**File:** `chat-core.tsx`
+**Fix:** Add `sizes="32px"` to prevent unnecessary full-resolution loads
 
-**Fix:** Always give `priority={index === 0}` to the first card in the shuffled grid. This ensures the first visible card's image starts downloading immediately.
-
-```tsx
-<ProjectCard
-  priority={index === 0}  // First card always prioritized
-  // ...
-/>
-```
-
----
-
-### Task 5 — Investigate render-blocking CSS chunks
-**Impact:** ~500ms estimated FCP savings if CSS can be deferred
-
-**Problem:** 3 CSS files at `/_next/static/chunks/*.css` (not `/_next/static/css/`). Standard Next.js puts CSS in `/_next/static/css/`. These chunks are `VeryHigh` priority render-blocking and take ~1.5s.
-
-**Likely cause:** Payload admin CSS bundled into frontend build. The `(payload)/` route group is separate but may share the same Next.js build/worker.
-
-**Investigation steps:**
-1. Run `bun next build` and inspect the chunk contents
-2. Search for imports from `@payloadcms/next/css` or admin components in frontend files
-3. Check if Payload components are being imported in Server Components that run on all pages
-
-**Fix options (once identified):**
-- Move admin-only CSS to separate build
-- Ensure Payload admin routes use their own standalone worker
-- Find and remove the cross-contamination of admin CSS into frontend
+### 18. Next.js — Missing `generateStaticParams` on dynamic routes
+**Files:** `work/[slug]/page.tsx`, `blog/[slug]/page.tsx`
+**Fix:** Add `generateStaticParams` if collection sizes are reasonable (<1000)
 
 ---
 
 ## Implementation Order
-1. Task 1 (ISR) → Task 2 (R2 preconnect) → Task 3 (viewport) → Task 4 (LCP) → Task 5 (CSS investigation)
+1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18
 
 ## Verification
-Run Lighthouse audit after changes:
-- Expected TTFB: <200ms (was ~5,000ms)
-- Expected LCP: <2,000ms (was 2,404ms)
-- Expected Accessibility score: 100 (was 89)
-- Lighthouse failures: 0 (was 4)
-
-## Success Criteria
-- [ ] All public pages have `export const revalidate = 60`
-- [ ] R2 preconnect present in root layout
-- [ ] `maximumScale` removed from viewport export
-- [ ] First home page card has `priority={index === 0}`
-- [ ] Render-blocking CSS chunks investigated and root cause identified
+- [ ] No `as any` casts remaining in `stream-handler.ts`, `groq-citations.ts`
+- [ ] `tsc --noEmit` passes with no new errors
+- [ ] `GROQ_API_KEY` missing → clear error at startup, not runtime crash
+- [ ] RAG cache misses throw (not return null), callers use `.catch(() => null)`
+- [ ] DOMPurify wraps CMS content in blog slug page
+- [ ] `suggestionDataSchema` imported from `src/lib/schemas.ts` in all 4 files
+- [ ] `sliceMessagesAtId` deleted from `message-utils.ts`
+- [ ] `artifact-tool.ts` deleted, routes import from `tools.ts`
+- [ ] `AssistantMessage`, `UserMessage`, `SuggestionButton` wrapped in `memo()`
+- [ ] `PromptSuggestions` wrapped in `memo()` + `useCallback` for handler

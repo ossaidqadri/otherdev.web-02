@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPostBySlug } from '@/lib/payload-api'
@@ -71,7 +72,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div
           className="prose prose-lg w-full content animate-in fade-in slide-in-from-bottom-4 duration-500"
           style={{ animationDelay: '150ms' }}
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.contentHtml) }}
         />
       )}
 
