@@ -12,6 +12,25 @@ export interface Citation {
 }
 
 /**
+ * Groq raw result from search_results branch
+ */
+export interface GroqRawResult {
+  title?: string
+  url: string
+  snippet?: string
+  content?: string
+  published_date?: string
+}
+
+function isSearchResults(obj: unknown): obj is { results: GroqRawResult[] } {
+  return typeof obj === 'object' && obj !== null && Array.isArray((obj as { results?: unknown }).results)
+}
+
+function isResultsArray(arr: unknown): arr is GroqRawResult[] {
+  return Array.isArray(arr)
+}
+
+/**
  * Groq native API executed_tools format
  */
 export interface GroqExecutedTool {
@@ -19,13 +38,7 @@ export interface GroqExecutedTool {
   name?: string
   output: string | Record<string, unknown>
   search_results?: {
-    results: Array<{
-      title?: string
-      url: string
-      snippet?: string
-      content?: string
-      published_date?: string
-    }>
+    results: GroqRawResult[]
   }
   arguments?: string
 }
@@ -56,13 +69,14 @@ export function extractCitationsFromGroqAPI(executedTools: GroqExecutedTool[] = 
   const rawResults = executedTools
     .filter(tool => tool.type === 'browser_automation' || tool.name === 'web_search')
     .flatMap(tool => {
-      // Try to parse search_results from output
       try {
         const output = typeof tool.output === 'string' ? JSON.parse(tool.output) : tool.output
 
-        return output?.results || output?.search_results?.results || []
+        if (isResultsArray(output?.results)) return output.results
+        if (isSearchResults(output?.search_results)) return output.search_results.results
+        return []
       } catch {
-        return tool.search_results?.results || []
+        return tool.search_results?.results ?? []
       }
     })
 
@@ -92,26 +106,13 @@ export function extractCitationsFromAISDK(args: {
     .flatMap(result => {
       const rawResult = result.result as Record<string, unknown>
 
-      // Handle different response formats
-      if (rawResult?.results && Array.isArray(rawResult.results)) {
-        return rawResult.results as Array<{
-          title?: string
-          url: string
-          snippet?: string
-          content?: string
-          published_date?: string
-        }>
+      if (isResultsArray(rawResult?.results)) {
+        return rawResult.results
       }
 
-      const searchResults = rawResult?.search_results as Record<string, unknown> | undefined
-      if (searchResults?.results && Array.isArray(searchResults.results)) {
-        return searchResults.results as Array<{
-          title?: string
-          url: string
-          snippet?: string
-          content?: string
-          published_date?: string
-        }>
+      const searchResults = rawResult?.search_results as { results?: unknown } | undefined
+      if (isResultsArray(searchResults?.results)) {
+        return searchResults.results
       }
 
       return []

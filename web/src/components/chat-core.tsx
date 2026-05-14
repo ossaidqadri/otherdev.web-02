@@ -362,7 +362,6 @@ function UserMessage({
           width={32}
           height={32}
           className="h-7 w-7 flex-shrink-0 rounded-full sm:h-8 sm:w-8"
-          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
       {!isEditing && (
@@ -506,7 +505,6 @@ function AssistantMessage({
           width={32}
           height={32}
           className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8"
-          style={{ width: 'auto', height: 'auto' }}
         />
         <div className="w-full max-w-[85%] sm:gap-3 lg:max-w-5xl mx-auto flex flex-col">
           <div className="flex-1 space-y-3 min-w-0">

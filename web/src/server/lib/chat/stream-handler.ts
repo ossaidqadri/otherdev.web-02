@@ -24,6 +24,26 @@ import {
 } from './models'
 import { createArtifactTool, retrieveKnowledgeTool, tavilySearchTool } from './tools'
 
+/**
+ * Discriminated union for message content parts — eliminates `as any` casts
+ * in resolveDataURIs. ModelMessage.content is a union that resists narrow inference.
+ */
+type TextPart = { type: 'text'; text: string }
+type ImagePart = { type: 'image'; image: string | URL | Uint8Array; mediaType?: string }
+type FilePart = { type: 'file'; data: string | Uint8Array }
+type Part = TextPart | ImagePart | FilePart
+
+function isContentArray(arr: unknown): arr is Part[] {
+  return Array.isArray(arr)
+}
+
+const REQUIRED_API_KEYS = ['GROQ_API_KEY', 'CEREBRAS_API_KEY', 'COHERE_API_KEY', 'MISTRAL_API_KEY'] as const
+for (const key of REQUIRED_API_KEYS) {
+  if (!process.env[key]) {
+    throw new Error(`[chat] Missing required environment variable: ${key}`)
+  }
+}
+
 export interface HandleStreamChatOptions {
   chatId?: string
   messages: UIMessage[]
@@ -95,28 +115,25 @@ function sanitizeModelMessages(messages: ModelMessage[]): ModelMessage[] {
 // calls new URL(data) on strings, which succeeds for data: URIs, then tries to fetch
 // them as HTTP resources and fails. Converting to Buffer bypasses the download path.
 function resolveDataURIs(messages: ModelMessage[]): ModelMessage[] {
-  // biome-ignore lint/suspicious/noExplicitAny: ModelMessage union content arrays resist narrow inference
-  return messages.map((msg): any => {
-    if (!Array.isArray(msg.content)) return msg
-    const content = (msg.content as Array<{ type: string; [k: string]: unknown }>).map(part => {
+  return messages.map(msg => {
+    if (!isContentArray(msg.content)) return msg
+    const content = msg.content.map(part => {
       if (part.type === 'image') {
-        const image = part.image as string | URL | Uint8Array
-        if (typeof image === 'string' && image.startsWith('data:')) {
-          const commaIdx = image.indexOf(',')
-          const header = image.slice(0, commaIdx)
-          const base64 = image.slice(commaIdx + 1)
+        if (typeof part.image === 'string' && part.image.startsWith('data:')) {
+          const commaIdx = part.image.indexOf(',')
+          const header = part.image.slice(0, commaIdx)
+          const base64 = part.image.slice(commaIdx + 1)
           return {
             ...part,
             image: Buffer.from(base64, 'base64'),
-            mediaType: (part.mediaType as string | undefined) ?? header.match(/data:([^;]+)/)?.[1],
+            mediaType: part.mediaType ?? header.match(/data:([^;]+)/)?.[1],
           }
         }
       }
       if (part.type === 'file') {
-        const data = part.data as string | Uint8Array
-        if (typeof data === 'string' && data.startsWith('data:')) {
-          const commaIdx = data.indexOf(',')
-          const base64 = data.slice(commaIdx + 1)
+        if (typeof part.data === 'string' && part.data.startsWith('data:')) {
+          const commaIdx = part.data.indexOf(',')
+          const base64 = part.data.slice(commaIdx + 1)
           return { ...part, data: Buffer.from(base64, 'base64') }
         }
       }
