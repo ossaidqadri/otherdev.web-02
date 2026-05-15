@@ -57,3 +57,18 @@ export async function getAboutContent() {
   })
   return about ?? null
 }
+
+export async function searchContent(query: string) {
+  if (!query?.trim()) return []
+  const payload = await getPayload({ config: configPromise })
+  const { docs } = await payload.find({
+    collection: 'search',
+    where: {
+      title: { like: query },
+    },
+    sort: '-priority',
+    depth: 2,
+    limit: 20,
+  })
+  return docs
+}

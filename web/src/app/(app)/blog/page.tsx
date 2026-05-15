@@ -23,21 +23,18 @@ export const revalidate = 86400
 export default async function BlogPage() {
   const posts = await getBlogPosts()
 
-  if (!posts || posts.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        <p className="text-gray-600">No blog posts found.</p>
-      </div>
-    )
-  }
-
   return (
     <div className="relative px-4 py-4">
-      <div className="flex sticky top-0">
-        <h1 className="text-sm mb-2 bg-neutral-200 rounded-md p-2 cursor-pointer hover:bg-neutral-300 animate-in fade-in">
+      <div className="flex sticky top-0 justify-between items-center mb-2">
+        <h1 className="text-sm bg-neutral-200 rounded-md p-2 cursor-pointer hover:bg-neutral-300 animate-in fade-in">
           <span className="font-bold">OD</span> / Blog
         </h1>
+        <Link
+          href="/blog/search"
+          className="text-xs bg-neutral-100 hover:bg-neutral-200 rounded-md px-3 py-2 transition-colors"
+        >
+          🔍 Search
+        </Link>
       </div>
       <p className="text-neutral-600 text-xs mb-8">
         {posts.length} {posts.length === 1 ? 'post' : 'posts'} • Powered by Payload CMS

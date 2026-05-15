@@ -95,18 +95,5 @@ export const About: GlobalConfig = {
         },
       ],
     },
-    {
-      name: 'metaTitle',
-      type: 'text',
-    },
-    {
-      name: 'metaDescription',
-      type: 'textarea',
-    },
-    {
-      name: 'ogImage',
-      type: 'upload',
-      relationTo: 'media',
-    },
   ],
 }

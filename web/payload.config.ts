@@ -108,10 +108,32 @@ export default buildConfig({
   plugins: [
     seoPlugin({
       collections: ['blog', 'projects'],
+      globals: ['about'],
       uploadsCollection: 'media',
       fields: ({ defaultFields }) => defaultFields,
-      generateDescription: ({ doc }) => doc?.excerpt ?? '',
-      generateTitle: ({ doc }) => doc?.title ?? '',
+      generateTitle: ({ doc, globalConfig }) => {
+        if (globalConfig) return doc?.seo?.meta?.title ?? 'About'
+        return doc?.title ?? ''
+      },
+      generateDescription: ({ doc, globalConfig }) => {
+        if (globalConfig) return doc?.seo?.meta?.description ?? ''
+        return doc?.excerpt ?? ''
+      },
+      generateImage: ({ doc, collectionConfig }) => {
+        if (collectionConfig?.slug === 'blog' && doc?.featuredImage) {
+          return { id: doc.featuredImage }
+        }
+        if (collectionConfig?.slug === 'projects' && doc?.image) {
+          return { id: doc.image }
+        }
+        return undefined
+      },
+      generateURL: ({ doc, collectionConfig, req }) => {
+        const origin = (req.headers.get('origin') ?? process.env.SITE_URL ?? '') as string
+        if (collectionConfig?.slug === 'blog') return `${origin}/blog/${doc?.slug ?? ''}`
+        if (collectionConfig?.slug === 'projects') return `${origin}/projects/${doc?.slug ?? ''}`
+        return `${origin}/about`
+      },
     }),
     searchPlugin({
       collections: ['blog', 'projects', 'media'],
@@ -121,11 +143,22 @@ export default buildConfig({
     }),
     // mcpPlugin({
     //   collections: {
-    //     blog: { enabled: true },
-    //     projects: { enabled: true },
-    //     media: { enabled: true },
+    //     blog: { enabled: { find: true, update: true } },
+    //     projects: { enabled: { find: true, update: true } },
+    //     media: { enabled: { find: true } },
     //   },
     // }),
+    ...(process.env.NODE_ENV === 'development'
+      ? [
+          mcpPlugin({
+            collections: {
+              blog: { enabled: { find: true, update: true } },
+              projects: { enabled: { find: true, update: true } },
+              media: { enabled: { find: true } },
+            },
+          }),
+        ]
+      : []),
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {

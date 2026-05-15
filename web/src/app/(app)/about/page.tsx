@@ -24,9 +24,13 @@ type AboutData = {
   foundingDate: string
   foundingYear: string
   founders: { name: string }[]
-  metaTitle: string
-  metaDescription: string
-  ogImage?: { url: string } | null
+  seo?: {
+    meta?: {
+      title?: string | null
+      description?: string | null
+      image?: { url: string } | null
+    }
+  }
 } | null
 
 export const revalidate = 86400
@@ -38,16 +42,16 @@ export async function generateMetadata(): Promise<Metadata> {
     return { title: 'About | Other Dev' }
   }
 
-  const description = about.metaDescription || about.aboutTextPlain || ''
+  const description = about.seo?.meta?.description || about.aboutTextPlain || ''
 
   return {
-    title: about.metaTitle || 'About | Other Dev',
+    title: about.seo?.meta?.title || 'About | Other Dev',
     description,
     ...buildSocialMetadata({
-      title: about.metaTitle || 'About | Other Dev',
+      title: about.seo?.meta?.title || 'About | Other Dev',
       description,
       path: '/about',
-      imagePath: about.ogImage?.url || '',
+      imagePath: about.seo?.meta?.image?.url || '',
       imageAlt: 'About Other Dev',
     }),
   }

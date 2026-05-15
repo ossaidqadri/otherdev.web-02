@@ -64,7 +64,6 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -76,7 +75,6 @@ export interface Config {
     clients: Client;
     search: Search;
     redirects: Redirect;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,7 +90,6 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -112,31 +109,13 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -420,87 +399,6 @@ export interface Redirect {
   createdAt: string;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  blog?: {
-    /**
-     * Allow clients to find blog.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create blog.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update blog.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete blog.
-     */
-    delete?: boolean | null;
-  };
-  projects?: {
-    /**
-     * Allow clients to find projects.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create projects.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update projects.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete projects.
-     */
-    delete?: boolean | null;
-  };
-  media?: {
-    /**
-     * Allow clients to find media.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create media.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update media.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete media.
-     */
-    delete?: boolean | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -555,21 +453,12 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'redirects';
         value: string | Redirect;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -579,15 +468,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -805,44 +689,6 @@ export interface RedirectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  blog?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  projects?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  media?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -917,9 +763,14 @@ export interface About {
         id?: string | null;
       }[]
     | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  ogImage?: (string | null) | Media;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -944,9 +795,13 @@ export interface AboutSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
-  metaTitle?: T;
-  metaDescription?: T;
-  ogImage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
