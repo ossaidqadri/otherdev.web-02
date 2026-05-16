@@ -28,13 +28,15 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
     }
   }
 
+  const seoDescription = project.meta?.description ?? project.description
+
   return {
     title: `${project.title} | Other Dev Portfolio`,
-    description: project.description,
+    description: seoDescription,
     keywords: ['web design', 'web development', 'project', project.title, 'Other Dev'],
     ...buildSocialMetadata({
       title: `${project.title} | Other Dev Portfolio`,
-      description: project.description,
+      description: seoDescription,
       path: `/work/${slug}`,
       imagePath: project.image?.url ?? '',
       imageAlt: `${project.title} | Other Dev Portfolio`,

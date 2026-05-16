@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-
+import { Footer } from '@/components/footer'
+import { Navigation } from '@/components/navigation'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPosts } from '@/lib/payload-api'
 
@@ -24,51 +25,100 @@ export default async function BlogPage() {
   const posts = await getBlogPosts()
 
   return (
-    <div className="relative px-4 py-4">
-      <div className="flex sticky top-0 justify-between items-center mb-2">
-        <h1 className="text-sm bg-neutral-200 rounded-md p-2 cursor-pointer hover:bg-neutral-300 animate-in fade-in">
-          <span className="font-bold">OD</span> / Blog
-        </h1>
-        <Link
-          href="/blog/search"
-          className="text-xs bg-neutral-100 hover:bg-neutral-200 rounded-md px-3 py-2 transition-colors"
-        >
-          🔍 Search
-        </Link>
-      </div>
-      <p className="text-neutral-600 text-xs mb-8">
-        {posts.length} {posts.length === 1 ? 'post' : 'posts'} • Powered by Payload CMS
-      </p>
+    <div className="min-h-screen">
+      <Navigation />
 
-      <div className="grid gap-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-        {posts.map((post, index) => (
-          <article
-            key={post.id}
-            className="md:border duration-300 rounded-md md:p-4 hover:shadow-lg transition-shadow hover:motion-scale-in-102 hover:motion-shadow-in-6 animate-in fade-in slide-in-from-bottom-4 duration-500 motion-duration-300"
-            style={{ animationDelay: `${index * 80}ms` }}
+      <main className="container -mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">
+        {/* Page label — matches work/page pattern: "OD / Work" */}
+        <div className="grid grid-cols-12 mb-8">
+          <div className="col-span-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <span className="text-[11px] font-twk font-normal leading-[14px] tracking-[-0.24px] text-[#686868]">
+              other dev / blog
+            </span>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="grid grid-cols-12 mb-[30px]">
+          <p className="text-[#686868] text-[11px] leading-[14px] font-normal col-span-12 sm:col-span-8 md:col-span-7 lg:col-span-6 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75">
+            Thoughts, insights, and updates from the Other Dev studio on web development, design,
+            and digital platforms.
+          </p>
+        </div>
+
+        {/* Search + count row */}
+        <div className="flex items-center gap-3 mb-[20px]">
+          <Link
+            href="/blog/search"
+            className="text-[11px] font-twk font-normal leading-[14px] tracking-[-0.24px] text-[#686868] bg-stone-200 hover:bg-stone-300 rounded-md px-3 py-2 transition-colors motion-duration-150"
           >
-            <h2 className="text-sm font-bold mb-2">
-              <Link href={`/blog/${post.slug}`} className="text-neutral-900 hover:text-blue-600">
-                {post.title}
-              </Link>
-            </h2>
-            <p className="text-sm text-neutral-600 mb-4">
-              {post.publishedAt
-                ? new Date(post.publishedAt).toLocaleDateString()
-                : new Date(post.createdAt).toLocaleDateString()}
-            </p>
-            {post.excerpt && (
-              <p className="text-neutral-700 line-clamp-2">{post.excerpt}</p>
-            )}
-            <Link
-              href={`/blog/${post.slug}`}
-              className="inline-block mt-4 text-neutral-600 hover:text-neutral-800 text-xs font-medium"
-            >
-              Read More →
-            </Link>
-          </article>
-        ))}
-      </div>
+            Search
+          </Link>
+          <span className="text-[11px] text-[#686868] font-twk tracking-[-0.24px]">
+            {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+          </span>
+        </div>
+
+        {/* Post list */}
+        <div className="mt-[30px]">
+          {posts
+            .toSorted((a, b) => {
+              const dateA = a.publishedAt ? new Date(a.publishedAt) : new Date(a.createdAt)
+              const dateB = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt)
+              return dateB.getTime() - dateA.getTime()
+            })
+            .map((post, index) => {
+              const displayDate = post.publishedAt
+                ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                : new Date(post.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+
+              return (
+                <article
+                  key={post.id}
+                  className="group border-b border-[var(--border)] first:border-t animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="flex flex-col sm:flex-row sm:items-baseline gap-[6px] sm:gap-[24px] py-[16px] pr-[40px] relative"
+                  >
+                    {/* Title */}
+                    <span className="text-[11.4px] text-black tracking-[-0.24px] group-hover:text-[#686868] transition-colors motion-duration-150 font-twk font-normal leading-[14px] not-italic shrink-0 sm:w-[200px] md:w-[260px] lg:w-[320px]">
+                      {post.title}
+                    </span>
+
+                    {/* Excerpt — only visible on larger screens */}
+                    {post.excerpt && (
+                      <span className="hidden sm:block text-[#686868] text-[11px] tracking-[-0.24px] group-hover:text-[#686868]/70 transition-colors motion-duration-150 font-twk font-normal leading-[14px] not-italic line-clamp-1 flex-1">
+                        {post.excerpt}
+                      </span>
+                    )}
+
+                    {/* Date — right aligned on larger screens */}
+                    <span className="text-[#686868] text-[11px] tracking-[-0.24px] font-twk font-normal leading-[14px] not-italic shrink-0">
+                      {displayDate}
+                    </span>
+
+                    {/* Hover arrow */}
+                    <span className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity motion-duration-150 text-[#686868]">
+                      →
+                    </span>
+                  </Link>
+                </article>
+              )
+            })}
+        </div>
+
+        <Footer />
+      </main>
     </div>
   )
 }

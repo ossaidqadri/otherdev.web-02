@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { Footer } from '@/components/footer'
+import { Navigation } from '@/components/navigation'
 import { buildSocialMetadata } from '@/lib/metadata'
 import { getBlogPostBySlug } from '@/lib/payload-api'
 
@@ -38,48 +40,101 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (!post) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-3xl">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-red-800 font-semibold mb-2">Blog post not found</h2>
-          <p className="text-red-600 mb-4">
-            The blog post you are looking for does not exist or has been removed.
-          </p>
-          <Link href="/blog" className="text-blue-600 hover:underline">
-            ← Back to blog
-          </Link>
-        </div>
+      <div className="min-h-screen">
+        <Navigation />
+        <main className="container -mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">
+          <div className="grid grid-cols-12">
+            <div className="col-span-12 sm:col-span-8 md:col-span-7 lg:col-span-6">
+              <p className="text-[#686868] text-[11px] font-twk tracking-[-0.24px] leading-[14px] mb-4">
+                404 — post not found
+              </p>
+              <Link
+                href="/blog"
+                className="text-[11px] font-twk tracking-[-0.24px] text-[#686868] hover:text-foreground transition-colors"
+              >
+                ← Back to blog
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
       </div>
     )
   }
 
   const displayDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : new Date(post.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
 
   return (
-    <article className="max-w-2xl mx-auto px-4 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold text-neutral-900 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          {post.title}
-        </h1>
-        <p className="text-sm text-neutral-600 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-          {displayDate}
-        </p>
-      </header>
+    <div className="min-h-screen">
+      <Navigation />
 
-      {post.contentHtml && (
-        <div
-          className="prose prose-lg w-full content animate-in fade-in slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: '150ms' }}
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-        />
-      )}
+      <main className="container -mx-auto px-3 pr-3 md:pr-[8%] lg:pr-[15%] pt-[60px] pb-12">
+        <article>
+          {/* Header */}
+          <header className="grid grid-cols-12 mb-12">
+            <div className="col-span-12 lg:col-span-8">
+              <h1
+                className="font-queens font-light text-[36px] sm:text-[48px] lg:text-[56px] leading-[1.05] tracking-[-0.03em] text-foreground mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                style={{ fontFamily: 'var(--queens-compressed), serif' }}
+              >
+                {post.title}
+              </h1>
+              <div
+                className="flex items-center gap-4 text-[#686868] text-[11px] font-twk tracking-[-0.24px] leading-[14px] animate-in fade-in slide-in-from-bottom-2 duration-500"
+                style={{ animationDelay: '80ms' }}
+              >
+                <time dateTime={post.publishedAt ?? post.createdAt}>{displayDate}</time>
+                {post.author && (
+                  <>
+                    <span>·</span>
+                    <span>{typeof post.author === 'object' ? post.author.name : 'Other Dev'}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </header>
 
-      <footer className="mt-12 pt-8 border-t border-neutral-200">
-        <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
-          ← Back to all posts
-        </a>
-      </footer>
-    </article>
+          {/* Content */}
+          {post.contentHtml && (
+            <div
+              className="grid grid-cols-12 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: '160ms' }}
+            >
+              <div className="col-span-12 lg:col-span-8">
+                <div
+                  className="prose-article"
+                  dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Footer nav */}
+          <div
+            className="mt-16 pt-8 border-t border-[var(--border)] animate-in fade-in slide-in-from-bottom-2 duration-500"
+            style={{ animationDelay: '200ms' }}
+          >
+            <Link
+              href="/blog"
+              className="text-[11px] font-twk tracking-[-0.24px] text-[#686868] hover:text-foreground transition-colors"
+            >
+              ← Back to all posts
+            </Link>
+          </div>
+        </article>
+      </main>
+
+      <Footer />
+    </div>
   )
 }
