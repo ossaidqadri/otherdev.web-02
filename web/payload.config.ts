@@ -117,7 +117,7 @@ export default buildConfig({
       },
       generateDescription: ({ doc, globalConfig }) => {
         if (globalConfig) return doc?.seo?.meta?.description ?? ''
-        return doc?.excerpt ?? ''
+        return doc?.description?.slice(0, 157) ?? ''
       },
       generateImage: ({ doc, collectionConfig }) => {
         if (collectionConfig?.slug === 'blog' && doc?.featuredImage) {
