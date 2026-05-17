@@ -15,6 +15,11 @@ const ChatWidget = dynamic(() => import('@/components/chat-widget').then(mod => 
   loading: () => null,
 })
 
+// Lazy load AgentWidget - ElevenLabs sales agent widget
+const AgentWidget = dynamic(() => import('@/components/agent-widget').then(mod => mod.AgentWidget), {
+  loading: () => null,
+})
+
 const twkLausanne = localFont({
   src: [
     {
@@ -111,6 +116,10 @@ export default function RootLayout({
           <QueryProvider>
             <Suspense fallback={null}>{children}</Suspense>
             <ChatWidget />
+            <AgentWidget
+              agentId={process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
+              avatarUrl="/otherdev-chat-logo-32.webp"
+            />
           </QueryProvider>
         </TenantProvider>
         <GoogleAnalytics gaId="G-YXVG798Y18" />

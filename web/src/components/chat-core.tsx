@@ -1,12 +1,7 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import {
-  DefaultChatTransport,
-  getToolName,
-  isToolUIPart,
-  type UIMessage,
-} from 'ai'
+import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from 'ai'
 import {
   ArrowUp,
   AudioLines,
@@ -28,7 +23,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { z } from 'zod'
+import type { z } from 'zod'
 import type { ArtifactToolCall } from '@/components/artifact-renderer'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,13 +42,13 @@ import {
   PromptInputTextarea,
 } from '@/components/ui/prompt-input'
 import { VoiceWaveform } from '@/components/voice-waveform'
+import { useLocalStorageMessages } from '@/hooks/use-local-storage-messages'
 import { processAttachment } from '@/lib/ai-sdk-attachments'
 import { SUGGESTED_PROMPTS } from '@/lib/constants'
-import { parseSSEStream } from '@/lib/sse'
 import { suggestionDataSchema } from '@/lib/schemas'
+import { parseSSEStream } from '@/lib/sse'
 import { cleanSuggestionMarkers, cn } from '@/lib/utils'
 import { VoiceRecorder } from '@/lib/voice-recorder'
-import { useLocalStorageMessages } from '@/hooks/use-local-storage-messages'
 
 // Define custom data parts for the chat stream
 type ChatDataParts = {
@@ -330,7 +325,6 @@ function UserMessage({
             {isEditing ? (
               <textarea
                 ref={textareaRef}
-                autoFocus
                 defaultValue={textContent}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -682,9 +676,10 @@ export function ChatCore({
   const [attachments, setAttachments] = useState<File[]>([])
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
-  const [editInputValue, setEditInputValue] = useState('')
+  const [_editInputValue, setEditInputValue] = useState('')
   const [messageBranches, setMessageBranches] = useState<Map<string, MessageBranchState>>(new Map())
-  const pendingBranchRef = useRef<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const _pendingBranchRef = useRef<string | null>(null)
 
   // Persist chatId in localStorage for session continuity
   // Use useEffect to ensure crypto.randomUUID runs only in browser, not during SSR
@@ -697,7 +692,7 @@ export function ChatCore({
   }, [])
 
   // sessionStorage-backed message persistence — Anthropic pattern: client sends full history every request
-  const { messages: storedMessages, setMessages: setStoredMessages, clearHistory: clearStoredMessages } =
+  const { messages: storedMessages, setMessages: setStoredMessages } =
     useLocalStorageMessages<UIMessage>({
       key: 'otherdev-chat-messages',
       initialValue: [],
@@ -787,11 +782,67 @@ export function ChatCore({
   }, [messages])
 
   const { showButton, scrollToBottom } = useScrollToBottom(contentRef)
+  const [newMessageCount, setNewMessageCount] = useState(0)
+
+  // Track new messages while scrolled up during streaming
+  useEffect(() => {
+    if (status === 'streaming' && showButton) {
+      setNewMessageCount(prev => prev + 1)
+    } else if (!showButton) {
+      setNewMessageCount(0)
+    }
+  }, [status, showButton])
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
       setAttachments(prev => [...prev, ...Array.from(files)])
+    }
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX
+    const y = e.clientY
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDragging(false)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      const acceptedTypes = ['image/', '.pdf', '.txt', '.md', '.js', '.ts', '.json', '.py']
+      const validFiles: File[] = []
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const isAccepted = acceptedTypes.some(
+          type => file.type.startsWith(type) || file.name.endsWith(type)
+        )
+        if (isAccepted) {
+          validFiles.push(file)
+        }
+      }
+      if (validFiles.length > 0) {
+        setAttachments(prev => [...prev, ...validFiles])
+      }
     }
   }
 
@@ -804,7 +855,7 @@ export function ChatCore({
     inputRef.current?.focus()
   }
 
-  const handleStartEditInline = (_messageId: string) => {
+  const _handleStartEditInline = (_messageId: string) => {
     // No-op: editing is initiated directly via isEditing prop from parent
     // This is kept for backward compatibility but actual editing is controlled inline
   }
@@ -878,15 +929,13 @@ export function ChatCore({
     })
   }
 
-  const handleSubmitWithMessages = async (
-    msgs: ChatUIMessage[],
-    editedUserMsg?: ChatUIMessage,
-  ) => {
+  const handleSubmitWithMessages = async (msgs: ChatUIMessage[], editedUserMsg?: ChatUIMessage) => {
     if (isRecording || isRecordingProcessing) return
     const value = inputValue.trim()
     if (!value && attachments.length === 0 && !editedUserMsg) return
 
-    const attachmentsToSend = attachments.length > 0 ? await Promise.all(attachments.map(processAttachment)) : []
+    const attachmentsToSend =
+      attachments.length > 0 ? await Promise.all(attachments.map(processAttachment)) : []
     const fileParts = attachmentsToSend.map(a => ({
       type: 'file' as const,
       mediaType: a.contentType,
@@ -907,7 +956,10 @@ export function ChatCore({
       sendMessage(
         {
           role: 'user',
-          parts: [...fileParts, ...(messageText ? [{ type: 'text' as const, text: messageText }] : [])],
+          parts: [
+            ...fileParts,
+            ...(messageText ? [{ type: 'text' as const, text: messageText }] : []),
+          ],
         },
         {
           body: {
@@ -918,7 +970,7 @@ export function ChatCore({
             messageId: lastMsg.id,
             supportsArtifacts: true,
           },
-        },
+        }
       )
     }
 
@@ -1039,11 +1091,27 @@ export function ChatCore({
         setInputValue(suggestion)
         setSuggestion('')
       }
+
+      // Arrow Up to edit last user message when input is empty
+      if (e.key === 'ArrowUp' && !inputElement.value && messages.length > 0) {
+        const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')
+        if (lastUserMessage) {
+          const textContent =
+            lastUserMessage.parts
+              ?.filter(p => p.type === 'text')
+              .map(p => p.text)
+              .join('') || ''
+          if (textContent) {
+            e.preventDefault()
+            setInputValue(textContent)
+          }
+        }
+      }
     }
 
     inputElement.addEventListener('keydown', handleKeyDown)
     return () => inputElement.removeEventListener('keydown', handleKeyDown)
-  }, [followUpSuggestions])
+  }, [suggestion, messages])
 
   useEffect(() => {
     scrollToBottom()
@@ -1056,12 +1124,30 @@ export function ChatCore({
     return (!hasText && !hasValidAttachments) || isBlocked
   }, [inputValue, attachments, isRecording, isRecordingProcessing])
 
-  const isEditing = editingMessageId !== null
+  const _isEditing = editingMessageId !== null
 
   const placeholder = 'Type your message...'
 
   return (
-    <div className={cn('relative h-full flex flex-col bg-background', className)}>
+    <div
+      role="region"
+      aria-label="Chat messages"
+      className={cn('relative h-full flex flex-col bg-background', className)}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDragging && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="border-2 border-dashed border-foreground/30 rounded-2xl p-8 sm:p-12">
+            <div className="flex flex-col items-center gap-3 text-foreground/70">
+              <Paperclip className="h-10 w-10 sm:h-12 sm:w-12" />
+              <span className="text-base sm:text-lg font-medium">Drop files to attach</span>
+            </div>
+          </div>
+        </div>
+      )}
       <ChatContainerRoot className="flex-1 w-full">
         <ChatContainerContent
           className="flex-1 scroll-smooth pb-32 sm:pb-40"
@@ -1169,11 +1255,26 @@ export function ChatCore({
 
       {showButton && (
         <button
+          type="button"
           className="absolute bottom-28 sm:bottom-32 right-4 sm:right-6 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background shadow-lg hover:opacity-90 active:scale-95 transition-all animate-in fade-in zoom-in-95 duration-200"
           onClick={scrollToBottom}
           aria-label="Scroll to bottom"
         >
           <ChevronDown className="h-4 w-4" />
+        </button>
+      )}
+
+      {newMessageCount > 0 && showButton && status === 'streaming' && (
+        <button
+          type="button"
+          onClick={() => {
+            scrollToBottom()
+            setNewMessageCount(0)
+          }}
+          className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all animate-in fade-in zoom-in-95 duration-200"
+        >
+          <ChevronDown className="h-4 w-4" />
+          <span>New message</span>
         </button>
       )}
 

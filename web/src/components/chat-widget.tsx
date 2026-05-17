@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
+import { MoreHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -13,6 +13,30 @@ export function ChatWidget() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = React.useState(false)
   const cardRef = React.useRef<HTMLDivElement>(null)
+
+  // Global Cmd/Ctrl+K to open chat
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Escape to close chat
+  React.useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
 
   const handleWheel = (e: React.WheelEvent) => {
     e.stopPropagation()
@@ -73,7 +97,7 @@ export function ChatWidget() {
           style={{ zIndex: Z_INDEX.chatWidget }}
           onWheel={handleWheel}
         >
-          <div className={cn('flex-shrink-0 flex items-center justify-between border-b p-4')}>
+          <div className={cn('flex-shrink-0 flex items-center justify-between p-4 bg-transparent')}>
             <div className="flex items-center gap-2">
               <Image
                 src="/otherdev-chat-logo-32.webp"
@@ -83,16 +107,27 @@ export function ChatWidget() {
                 className="h-6 w-6 object-contain"
                 style={{ width: 'auto', height: 'auto' }}
               />
-              <h3 className="text-sm font-medium text-foreground">Other Dev Loom</h3>
+              <div className="flex flex-col">
+                <h3 className="text-sm font-medium text-foreground">Other Dev Loom</h3>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="bg-transparent border-none hover:opacity-80 hover:motion-scale-in-95 transition-all cursor-pointer p-0 motion-duration-150"
-              aria-label="Close chat"
-            >
-              <ChevronDown className="h-5 w-5 text-primary" strokeWidth={2} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className="bg-transparent border-none hover:opacity-80 hover:motion-scale-in-95 transition-all cursor-pointer p-0 motion-duration-150"
+                aria-label="Menu"
+              >
+                <MoreHorizontal className="h-5 w-5 text-primary" strokeWidth={2} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="bg-transparent border-none hover:opacity-80 hover:motion-scale-in-95 transition-all cursor-pointer p-0 motion-duration-150"
+                aria-label="Close chat"
+              >
+                <X className="h-5 w-5 text-primary" strokeWidth={2} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 flex relative overflow-hidden">
