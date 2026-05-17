@@ -12,6 +12,7 @@ export async function getProjects() {
     collection: 'projects',
     sort: '-year',
     depth: 1,
+    limit: 100,
   })
   return docs
 }

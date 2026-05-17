@@ -36,6 +36,7 @@ export const Projects: CollectionConfig = {
     preview: (doc) => doc.slug ? `/projects/${doc.slug}` : null,
   },
   access: {
+    read: () => true,
     create: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
     update: ({ req }) => ['admin', 'editor'].includes(req.user?.role),
     delete: ({ req }) => req.user?.role === 'admin',
