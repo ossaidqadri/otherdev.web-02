@@ -11,11 +11,6 @@ class Endpoints {
     defaultValue: 'https://otherdev.com',
   );
 
-  // Blog
-  static const String blogList = '/api/blog';
-
-  static String blogDetail(String slug) => '/api/blog/$slug';
-
   // Portfolio / Work
   static const String workList = '/api/work';
 

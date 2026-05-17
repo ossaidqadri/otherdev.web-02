@@ -27,9 +27,6 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-  # Secure storage for tokens
-  flutter_secure_storage: ^9.2.0
-
   # JSON serialization
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
@@ -49,10 +46,17 @@ dependencies:
   # Path provider for window state storage
   path_provider: ^2.1.0
 
+# MongoDB driver for direct database access
+  mongo_dart: ^0.10.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  test: ^1.25.0
+  checks: ^0.3.0
+  golden_toolkit: ^0.13.0
+  mocktail: ^1.0.0
   build_runner: ^2.4.0
   riverpod_generator: ^3.0.0
   freezed: ^3.0.0

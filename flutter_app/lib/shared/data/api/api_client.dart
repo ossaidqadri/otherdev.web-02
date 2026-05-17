@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 
 import 'endpoints.dart';
-import 'interceptors/auth_interceptor.dart';
 import 'interceptors/error_handling_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 
@@ -20,7 +19,6 @@ class ApiClient {
         },
       ),
     )..interceptors.addAll([
-        AuthInterceptor(),
         ErrorHandlingInterceptor(),
         LoggingInterceptor(),
       ]);

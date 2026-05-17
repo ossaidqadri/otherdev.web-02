@@ -55,13 +55,7 @@ class HomePage extends StatelessWidget {
                       description: 'Our portfolio',
                       onTap: () => context.go('/work'),
                     ),
-                    _NavCard(
-                      icon: Icons.article_outlined,
-                      label: 'Blog',
-                      description: 'Articles & insights',
-                      onTap: () => context.go('/blog'),
-                    ),
-                    _NavCard(
+                                        _NavCard(
                       icon: Icons.info_outline,
                       label: 'About',
                       description: 'Who we are',

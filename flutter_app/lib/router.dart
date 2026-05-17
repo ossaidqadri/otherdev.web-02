@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'features/auth/presentation/pages/splash_page.dart';
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/signup_page.dart';
 import 'features/portfolio/presentation/pages/home_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_detail_page.dart';
@@ -14,39 +11,10 @@ import 'shared/presentation/widgets/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-// Auth disabled for now — always bypasses login redirect
-const _isAuthenticated = true;
-
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
-  redirect: (context, state) {
-    final isAuthRoute = state.matchedLocation == '/login' ||
-        state.matchedLocation == '/signup';
-
-    if (!_isAuthenticated && !isAuthRoute) {
-      return '/login';
-    }
-    if (_isAuthenticated && isAuthRoute) {
-      return '/';
-    }
-    return null;
-  },
+  initialLocation: '/home',
   routes: [
-    // Auth routes (no shell)
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashPage(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginPage(),
-    ),
-    GoRoute(
-      path: '/signup',
-      builder: (context, state) => const SignupPage(),
-    ),
-
     // Authenticated shell with NavigationRail (desktop) / BottomNav (mobile)
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

@@ -20,20 +20,6 @@ final class HttpFailure extends Failure {
   final String? message;
 }
 
-// Auth failures
-final class AuthFailure extends Failure {
-  const AuthFailure(this.message);
-  final String message;
-}
-
-final class UserNotFoundFailure extends AuthFailure {
-  const UserNotFoundFailure() : super('User not found');
-}
-
-final class InvalidCredentialsFailure extends AuthFailure {
-  const InvalidCredentialsFailure() : super('Invalid email or password');
-}
-
 // Generic failures
 final class UnknownFailure extends Failure {
   const UnknownFailure([this.message]);
