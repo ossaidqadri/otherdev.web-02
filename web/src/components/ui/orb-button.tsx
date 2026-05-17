@@ -56,7 +56,7 @@ function Scene({ agentState }: { agentState: AgentState }) {
       return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v)
     }
 
-    const data = new Uint8Array(size * size)
+    const data = new Uint8Array(size * size * 4)
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         const xi = x & 255
@@ -74,28 +74,21 @@ function Scene({ agentState }: { agentState: AgentState }) {
           lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u),
           v
         )
-        // Map from [-1, 1] to [0, 1]
-        data[y * size + x] = Math.floor(((value + 1) * 0.5) * 255)
+        const idx = (y * size + x) * 4
+        const normalized = Math.floor(((value + 1) * 0.5) * 255)
+        data[idx] = normalized
+        data[idx + 1] = normalized
+        data[idx + 2] = normalized
+        data[idx + 3] = 255
       }
     }
 
-    // Create texture via canvas for better compatibility
-    const canvas = document.createElement('canvas')
-    canvas.width = size
-    canvas.height = size
-    const ctx = canvas.getContext('2d')!
-    const imageData = ctx.createImageData(size, size)
-    for (let i = 0; i < size * size; i++) {
-      imageData.data[i * 4] = data[i]
-      imageData.data[i * 4 + 1] = data[i]
-      imageData.data[i * 4 + 2] = data[i]
-      imageData.data[i * 4 + 3] = 255
-    }
-    ctx.putImageData(imageData, 0, 0)
-
-    const tex = new THREE.CanvasTexture(canvas)
+    const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat)
     tex.wrapS = THREE.RepeatWrapping
     tex.wrapT = THREE.RepeatWrapping
+    tex.minFilter = THREE.LinearFilter
+    tex.magFilter = THREE.LinearFilter
+    tex.needsUpdate = true
     return tex
   }, [])
 
