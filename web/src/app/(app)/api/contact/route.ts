@@ -2,6 +2,8 @@ import { google } from 'googleapis'
 import nodemailer from 'nodemailer'
 import { z } from 'zod'
 import { checkRateLimit, getClientIdentifier } from '@/server/lib/rate-limit'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -65,6 +67,21 @@ ${data.message}
   })
 }
 
+async function saveToPayload(data: z.infer<typeof contactFormSchema>) {
+  const payload = await getPayload({ config: configPromise })
+  await payload.create({
+    collection: 'contacts',
+    data: {
+      name: data.name,
+      companyName: data.companyName,
+      email: data.email,
+      subject: data.subject,
+      message: data.message,
+      status: 'new',
+    },
+  })
+}
+
 export async function POST(request: Request) {
   try {
     const identifier = getClientIdentifier(request)
@@ -86,13 +103,18 @@ export async function POST(request: Request) {
       return Response.json({ error: result.error.flatten() }, { status: 400 })
     }
 
+    // Save to Payload (MongoDB) - required for success
+    await saveToPayload(result.data)
+
+    // Also notify via email (non-blocking, don't fail if this fails)
     const [sheetResult, emailResult] = await Promise.allSettled([
       appendToSheet(result.data),
       sendEmail(result.data),
     ])
 
     if (sheetResult.status === 'rejected' && emailResult.status === 'rejected') {
-      return Response.json({ error: 'Failed to submit. Please try again.' }, { status: 500 })
+      // Email and sheet failed, but Payload succeeded — still a success for the user
+      console.error('Contact form notification failures:', sheetResult.reason, emailResult.reason)
     }
 
     return Response.json({ message: 'Form submitted successfully' })

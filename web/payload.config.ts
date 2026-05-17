@@ -16,6 +16,7 @@ import { About } from "./globals/About";
 import { Blog } from "./collections/Blog";
 import { Categories } from "./collections/Categories";
 import { Clients } from "./collections/Clients";
+import { Contacts } from "./collections/Contacts";
 import { Media } from "./collections/Media";
 import { Projects } from "./collections/Projects";
 import { Users } from "./collections/Users";
@@ -64,7 +65,7 @@ export default buildConfig({
       collections: ['blog', 'projects'],
     },
   },
-  collections: [Users, Media, Projects, Categories, Blog, Clients],
+  collections: [Users, Media, Projects, Categories, Blog, Clients, Contacts],
   globals: [About],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
