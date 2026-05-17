@@ -1,14 +1,21 @@
 'use client'
 
-import { MessageCircle, X } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import {
   ConversationProvider,
   useConversationStatus,
 } from '@elevenlabs/react'
+import type { AgentState } from '@/components/ui/orb-button'
 import { Z_INDEX } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { ConversationBar } from '@/components/ui/conversation-bar'
+
+const OrbButton = dynamic(
+  () => import('@/components/ui/orb-button').then((mod) => mod.OrbButton),
+  { ssr: false, loading: () => <div className="h-10 w-10" /> }
+)
 
 interface AgentWidgetProps {
   agentId?: string
@@ -27,12 +34,84 @@ export function AgentWidget({ agentId, avatarUrl, className }: AgentWidgetProps)
     setIsOpen(false)
   }, [])
 
+  if (!agentId) {
+    return (
+      <>
+        {!isOpen && (
+          <button
+            type="button"
+            onClick={handleOpen}
+            className={cn(
+              'fixed bottom-20 right-4 sm:bottom-24 sm:right-6 md:bottom-28 md:right-8',
+              'h-14 w-14 md:h-12 md:w-12',
+              'flex items-center justify-center rounded-full shadow-md',
+              'bg-primary text-primary-foreground',
+              'hover:opacity-90 hover:motion-scale-in-110 active:motion-scale-out-95',
+              'transition-all focus:outline-none motion-duration-200',
+              className
+            )}
+            style={{ zIndex: Z_INDEX.chatButton - 1 }}
+            aria-label="Open sales assistant"
+          >
+            <div className="h-10 w-10 md:h-9 md:w-9">
+              <OrbButton
+                agentState={null}
+                className="h-full w-full"
+              />
+            </div>
+          </button>
+        )}
+        {isOpen && <AgentWidgetNoConfig onClose={handleClose} />}
+      </>
+    )
+  }
+
+  return (
+    <ConversationProvider>
+      <AgentWidgetInner
+        agentId={agentId}
+        avatarUrl={avatarUrl}
+        isOpen={isOpen}
+        onOpen={handleOpen}
+        onClose={handleClose}
+        className={className}
+      />
+    </ConversationProvider>
+  )
+}
+
+interface AgentWidgetInnerProps {
+  agentId: string
+  avatarUrl?: string
+  isOpen: boolean
+  onOpen: () => void
+  onClose: () => void
+  className?: string
+}
+
+function AgentWidgetInner({
+  agentId,
+  avatarUrl,
+  isOpen,
+  onOpen,
+  onClose,
+  className,
+}: AgentWidgetInnerProps) {
+  const { status, isSpeaking, isListening } = useConversationStatus()
+
+  const agentState: AgentState = status === 'connected'
+    ? isSpeaking ? 'talking'
+    : isListening ? 'listening'
+    : null
+    : status === 'connecting' ? 'thinking'
+    : null
+
   return (
     <>
       {!isOpen && (
         <button
           type="button"
-          onClick={handleOpen}
+          onClick={onOpen}
           className={cn(
             'fixed bottom-20 right-4 sm:bottom-24 sm:right-6 md:bottom-28 md:right-8',
             'h-14 w-14 md:h-12 md:w-12',
@@ -45,22 +124,21 @@ export function AgentWidget({ agentId, avatarUrl, className }: AgentWidgetProps)
           style={{ zIndex: Z_INDEX.chatButton - 1 }}
           aria-label="Open sales assistant"
         >
-          <MessageCircle className="h-6 w-6" strokeWidth={2} />
+          <div className="h-10 w-10 md:h-9 md:w-9">
+            <OrbButton
+              agentState={agentState}
+              className="h-full w-full"
+            />
+          </div>
         </button>
       )}
 
-      {isOpen && agentId && (
-        <ConversationProvider>
-          <AgentWidgetPanel
-            agentId={agentId}
-            avatarUrl={avatarUrl}
-            onClose={handleClose}
-          />
-        </ConversationProvider>
-      )}
-
-      {isOpen && !agentId && (
-        <AgentWidgetNoConfig onClose={handleClose} />
+      {isOpen && (
+        <AgentWidgetPanel
+          agentId={agentId}
+          avatarUrl={avatarUrl}
+          onClose={onClose}
+        />
       )}
     </>
   )
@@ -85,7 +163,9 @@ function AgentWidgetNoConfig({ onClose }: AgentWidgetNoConfigProps) {
       <div className="flex-shrink-0 flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-            <MessageCircle className="h-5 w-5 text-primary-foreground" />
+            <div className="h-5 w-5">
+              <OrbButton agentState={null} className="h-full w-full" />
+            </div>
           </div>
           <div className="flex flex-col">
             <h3 className="text-sm font-medium text-foreground">Sales Assistant</h3>
@@ -138,7 +218,9 @@ function AgentWidgetPanel({ agentId, avatarUrl, onClose }: AgentWidgetPanelProps
             <img src={avatarUrl} alt="Agent" className="h-10 w-10 rounded-full object-cover" />
           ) : (
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-              <MessageCircle className="h-5 w-5 text-primary-foreground" />
+              <div className="h-5 w-5">
+                <OrbButton agentState={null} className="h-full w-full" />
+              </div>
             </div>
           )}
           <div className="flex flex-col">
@@ -162,12 +244,16 @@ function AgentWidgetPanel({ agentId, avatarUrl, onClose }: AgentWidgetPanelProps
 }
 
 function ConversationStatusIndicator() {
-  const { status } = useConversationStatus()
+  const { status, isSpeaking, isListening } = useConversationStatus()
 
   const statusConfig = {
     idle: { label: 'Ready', color: 'bg-muted-foreground/30', animate: false },
     connecting: { label: 'Connecting...', color: 'bg-yellow-500', animate: true },
-    connected: { label: 'Online', color: 'bg-green-500', animate: false },
+    connected: {
+      label: isSpeaking ? 'Speaking' : isListening ? 'Listening...' : 'Online',
+      color: isSpeaking ? 'bg-green-500' : isListening ? 'bg-yellow-500 animate-pulse' : 'bg-green-400',
+      animate: isListening,
+    },
     error: { label: 'Error', color: 'bg-red-500', animate: false },
   }
 
