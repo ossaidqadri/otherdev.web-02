@@ -232,7 +232,11 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('reasoning_tokens:', d.get\\('usage',{}\\).get\\('completion_tokens_details',{}\\).get\\('reasoning_tokens','N/A'\\)\\); print\\('content preview:', d['choices'][0]['message'].get\\('content',''\\)[:200] if d['choices'][0]['message'].get\\('content'\\) else 'no content'\\); print\\('finish_reason:', d['choices'][0]['finish_reason']\\)\")",
       "Skill(qdrant:qdrant-clients-sdk)",
       "Bash(npm info *)",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Skill(chrome-devtools-mcp:chrome-devtools-cli)",
+      "Bash(chrome-devtools status *)",
+      "Skill(hookify:writing-rules)",
+      "Skill(agents)"
     ],
     "deny": [],
     "ask": []

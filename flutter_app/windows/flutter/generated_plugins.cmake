@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
-  flutter_secure_storage_windows
   hotkey_manager_windows
   screen_retriever_windows
   tray_manager

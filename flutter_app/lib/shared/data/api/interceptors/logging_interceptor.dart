@@ -5,7 +5,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     debugPrint(
-      '➡️  ${options.method} ${options.uri}\n'
+      '=>  ${options.method} ${options.uri}\n'
       '   Headers: ${options.headers}\n'
       '   Body: ${options.data}',
     );
@@ -15,7 +15,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     debugPrint(
-      '⬅️  ${response.statusCode} ${response.requestOptions.uri}\n'
+      '<=  ${response.statusCode} ${response.requestOptions.uri}\n'
       '   Data: ${response.data}',
     );
     handler.next(response);
@@ -24,7 +24,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     debugPrint(
-      '❌  ${err.type} ${err.requestOptions.uri}\n'
+      '!!  ${err.type} ${err.requestOptions.uri}\n'
       '   Message: ${err.message}',
     );
     handler.next(err);
