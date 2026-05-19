@@ -476,7 +476,14 @@ function AssistantMessage({
         text: string
       }
     | undefined
-  const reasoning = reasoningPart?.text
+  // Extract reasoning text progressively — reasoning parts accumulate during streaming
+  const reasoning =
+    reasoningPart?.text ||
+    message.parts
+      ?.filter(p => p.type === 'reasoning')
+      .map(p => (p as { type: 'reasoning'; text: string }).text)
+      .join('') ||
+    ''
   const hasArtifact = Boolean(artifactToolCall)
 
   const cleanedText = cleanSuggestionMarkers(textPart)

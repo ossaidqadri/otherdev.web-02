@@ -126,6 +126,7 @@ export async function POST(request: Request): Promise<Response> {
       return result.toUIMessageStreamResponse({
         originalMessages: uiMessages,
         generateMessageId: () => crypto.randomUUID(),
+        sendReasoning: true,
         messageMetadata({ part }: { part: TextStreamPart<ToolSet> }) {
           if (part.type === 'finish') {
             return { suggestions } as Record<string, unknown>
