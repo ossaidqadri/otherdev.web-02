@@ -28,6 +28,16 @@ export function Markdown({ children, className }: MarkdownProps) {
             {children}
           </code>
         ),
+        a: ({ children, href }) => (
+          <a
+            href={href}
+            className="text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+            target={href?.startsWith('http') ? '_blank' : undefined}
+            rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            {children}
+          </a>
+        ),
       }}
     >
       {children}
