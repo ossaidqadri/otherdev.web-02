@@ -339,7 +339,6 @@ describe('ContactDialog', () => {
             )
           )
       ) as unknown as Promise<Response>
-      )
 
       render(<ContactDialog open={true} onOpenChange={vi.fn()} />)
 

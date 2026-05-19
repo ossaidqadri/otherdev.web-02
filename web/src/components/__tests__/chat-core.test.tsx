@@ -169,7 +169,6 @@ vi.mock('@/components/voice-waveform', () => ({
 // Mock ArtifactRenderer import
 vi.mock('@/components/artifact-renderer', () => ({
   ArtifactRenderer: () => <div>ArtifactRenderer</div>,
-  type ArtifactToolCall: {},
 }))
 
 // Mock z
