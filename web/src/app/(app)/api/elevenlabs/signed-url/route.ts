@@ -1,8 +1,6 @@
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 import { type NextRequest, NextResponse } from 'next/server'
 
-const client = new ElevenLabsClient()
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const agentId = searchParams.get('agent_id')
@@ -10,6 +8,8 @@ export async function GET(request: NextRequest) {
   if (!agentId) {
     return NextResponse.json({ error: 'agent_id is required' }, { status: 400 })
   }
+
+  const client = new ElevenLabsClient()
 
   try {
     const { signed_url } = await client.conversationalAi.conversations.getSignedUrl({
