@@ -61,13 +61,13 @@ const COMPONENTS = {
     </blockquote>
   ),
   a: ({ href, children }: { href?: string; children: React.ReactNode }) => {
-    const isTelLink = href?.startsWith('tel:')
+    const isExternal = href?.startsWith('http') || href?.startsWith('//')
     return (
       <a
         href={href}
-        target={isTelLink ? undefined : '_blank'}
-        rel={isTelLink ? undefined : 'noopener noreferrer'}
-        className={isTelLink ? 'text-foreground hover:underline' : undefined}
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer' : undefined}
+        className="text-[hsl(var(--primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 rounded"
       >
         {children}
       </a>

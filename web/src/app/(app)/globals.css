@@ -328,6 +328,16 @@
   }
 }
 
+/* Streamdown data-attribute theming */
+[data-streamdown="link"] {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+[data-streamdown="link"]:hover {
+  color: var(--link-hover);
+}
+
 /* Custom Prose Typography Styles for Chat Widget */
 .prose {
   --tw-prose-body: var(--foreground);

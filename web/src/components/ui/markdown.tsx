@@ -31,7 +31,7 @@ export function Markdown({ children, className }: MarkdownProps) {
         a: ({ children, href }) => (
           <a
             href={href}
-            className="text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+            className="text-[var(--link)] hover:text-[var(--link-hover)] underline hover:underline-offset-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 rounded transition-colors"
             target={href?.startsWith('http') ? '_blank' : undefined}
             rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
           >
