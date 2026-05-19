@@ -13,8 +13,15 @@ class Endpoints {
 
   // Portfolio / Work
   static const String workList = '/api/work';
-
   static String workDetail(String slug) => '/api/work/$slug';
+
+  // Blog
+  static const String blogList = '/api/blog';
+  static String blogPost(String slug) => '/api/blog/$slug';
+  static const String blogSearch = '/api/blog/search';
+
+  // About
+  static const String about = '/api/about';
 
   // Contact
   static const String contact = '/api/contact';

@@ -1,111 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/about_provider.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends ConsumerWidget {
   const AboutPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final aboutAsync = ref.watch(aboutContentProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('About')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'About otherdev',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+      body: aboutAsync.when(
+        data: (about) => SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hero image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: AspectRatio(
+                  aspectRatio: 9 / 4,
+                  child: Image.network(
+                    about.heroImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Colors.grey.shade200,
+                      child: const Center(child: Icon(Icons.image, size: 48)),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
+              ),
+              const SizedBox(height: 32),
+
+              // About label
+              Text(
+                about.aboutLabel,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+              ),
+              const SizedBox(height: 8),
+
+              // About text
+              Text(
+                about.aboutTextPlain,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 32),
+
+              // Clients
+              if (about.clientsDesktop.isNotEmpty) ...[
                 Text(
-                  'We are a small software team focused on building practical tools '
-                  'for developers and product teams. Our work spans web applications, '
-                  'mobile apps, and developer infrastructure.',
-                  style: theme.textTheme.bodyLarge,
+                  about.clientsLabel,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Colors.grey.shade600,
+                      ),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'What we do',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _SkillRow(skill: 'Web Development', detail: 'React, Next.js, Flutter'),
-                _SkillRow(skill: 'Mobile Apps', detail: 'Flutter, React Native'),
-                _SkillRow(skill: 'Backend & APIs', detail: 'Node.js, Python, Go'),
-                _SkillRow(skill: 'AI & Automation', detail: 'RAG pipelines, LLM integration'),
-                const SizedBox(height: 32),
-                Text(
-                  'Approach',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'We prioritize code clarity over clever tricks. Every project gets '
-                  'thoughtful architecture, good test coverage, and a focus on '
-                  'maintainability. We document as we go.',
-                  style: theme.textTheme.bodyLarge,
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: about.clientsDesktop
+                      .map((client) => Text(
+                            client.name,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ))
+                      .toList(),
                 ),
               ],
-            ),
+              const SizedBox(height: 32),
+
+              // Found
+              Text(
+                'Founded ${about.foundingDate}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SkillRow extends StatelessWidget {
-  const _SkillRow({required this.skill, required this.detail});
-
-  final String skill;
-  final String detail;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 20,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  skill,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  detail,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(
+          child: Text('Error loading about: $err'),
+        ),
       ),
     );
   }

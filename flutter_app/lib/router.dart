@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'features/blog/presentation/pages/blog_page.dart';
+import 'features/blog/presentation/pages/blog_post_page.dart';
+import 'features/blog/presentation/pages/blog_search_page.dart';
 import 'features/portfolio/presentation/pages/home_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_detail_page.dart';
@@ -79,6 +82,27 @@ final router = GoRouter(
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsPage(),
+            ),
+          ],
+        ),
+        // Blog
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/blog',
+              builder: (context, state) => const BlogPage(),
+              routes: [
+                GoRoute(
+                  path: 'search',
+                  builder: (context, state) => const BlogSearchPage(),
+                ),
+                GoRoute(
+                  path: ':slug',
+                  builder: (context, state) => BlogPostPage(
+                    slug: state.pathParameters['slug']!,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
